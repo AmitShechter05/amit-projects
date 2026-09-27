@@ -22,7 +22,7 @@ Rhythm: family / empty / mother / empty / empty.
 | 1 living | בפנים — סלון מרווח ומואר, ומיזוג בכל הבית. |
 | 2 dining | *(מוזיקה)* |
 | 3 kitchen | מטבח מאובזר במלואו, כולל מכונת אספרסו. |
-| 4 open+stairs | חלל פתוח, עם מדרגות לקומה השנייה — עד ארבעה חדרי שינה. |
+| 4 open+stairs | חלל פתוח, עם מדרגות לקומה השנייה — ארבעה חדרי שינה. |
 | 5 living | הכל מעוצב, נקי ומזמין. שקמה, Ella Sun. |
 
 Confirmed facts available for later parts: heated fenced pool (child lock), jacuzzi for 6,

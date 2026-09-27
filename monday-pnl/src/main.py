@@ -24,6 +24,11 @@ from .order_mapper import normalize_all
 from .pnl_engine import compute_all
 from .excel_writer import write_workbook
 
+# Module-level logger. main() and _send_whatsapp_error() reference `logger`
+# outside of run_pipeline(); without this they raise NameError inside the
+# except handler, which silently swallows the real traceback.
+logger = logging.getLogger(__name__)
+
 
 def setup_logging() -> None:
     """Configure console + rotating file logging."""
@@ -93,6 +98,12 @@ def run_pipeline(upload: bool = True) -> None:
             "weekly": fetch_weekly_breakdown(),
             "daily": fetch_daily_breakdown(),
         }
+        # Channels with no API (TikTok and anything else in
+        # manual_spend.json). Without this the workbook counts the revenue
+        # those campaigns produced while ignoring what they cost, which
+        # overstates both profit and ROAS.
+        from .manual_spend import merge_into_ads
+        ads_data = merge_into_ads(ads_data)
         logger.info("Ad spend this month: %.2f", ads_data["monthly"]["spend"])
     except Exception:
         logger.exception("Facebook Ads fetch failed (continuing without ads data)")

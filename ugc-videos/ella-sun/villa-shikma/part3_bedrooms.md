@@ -19,6 +19,6 @@ Kling 3.0 pro, 1080p. 5 shots (bathroom shot s4 dropped per Amit).
 | 2 bedroom | *(מוזיקה)* |
 | 3 bedroom | עד ארבעה חדרי שינה — מקום לכל המשפחה. |
 | 4 bathroom | שלושה חדרי רחצה מעוצבים. |
-| 5 roof | ומלמעלה — נוף פתוח לאילת. שקמה, Ella Sun. |
+| 5 roof | ומלמעלה — מרפסת גג פרטית לשעות של שקט. שקמה, Ella Sun. |
 
 Status: assembled (shikma_part3_bedrooms.mp4, 5 shots). Pending: VO, music, end card.
