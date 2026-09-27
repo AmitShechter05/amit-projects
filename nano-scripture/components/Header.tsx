@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import PromoBar from './PromoBar';
@@ -84,6 +84,19 @@ export default function Header() {
       document.body.style.overflow = prev;
       window.removeEventListener('keydown', esc);
     };
+  }, [menu]);
+
+  // מיקוד נכנס לתפריט כשהוא נפתח וחוזר להמבורגר כשהוא נסגר (ראו CartDrawer)
+  const menuClose = useRef<HTMLButtonElement>(null);
+  const menuOpener = useRef<Element | null>(null);
+  useEffect(() => {
+    if (menu) {
+      menuOpener.current = document.activeElement;
+      menuClose.current?.focus();
+    } else if (menuOpener.current instanceof HTMLElement) {
+      menuOpener.current.focus();
+      menuOpener.current = null;
+    }
   }, [menu]);
 
   // הכותרת נשארת גלויה תמיד. היא רק מתכווצת בגלילה, כדי לפנות גובה
@@ -227,6 +240,10 @@ export default function Header() {
       <div
         id="mobile-menu"
         className="lg:hidden"
+        role="dialog"
+        aria-modal={menu || undefined}
+        aria-label="תפריט"
+        inert={!menu}
         style={{
           position: 'fixed',
           insetBlock: 0,
@@ -244,7 +261,7 @@ export default function Header() {
       >
         <div className="flex items-center justify-between px-7 pb-5 pt-6" style={{ borderBottom: '1px solid var(--line)' }}>
           <Logo size={26} />
-          <button onClick={() => setMenu(false)} aria-label="סגירה" className="tap" style={{ color: 'var(--ink-2)', marginInlineEnd: -10 }}>
+          <button ref={menuClose} onClick={() => setMenu(false)} aria-label="סגירה" className="tap" style={{ color: 'var(--ink-2)', marginInlineEnd: -10 }}>
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
             </svg>

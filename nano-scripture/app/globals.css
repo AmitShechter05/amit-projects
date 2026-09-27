@@ -156,11 +156,6 @@ body::after {
   color: var(--on-accent);
 }
 
-:focus-visible {
-  outline: 1px solid var(--accent);
-  outline-offset: 3px;
-}
-
 ::-webkit-scrollbar {
   width: 9px;
 }
@@ -182,6 +177,13 @@ body::after {
   font-weight: var(--weight-display, 300);
   letter-spacing: var(--track-display);
   line-height: 1.12;
+  /* כותרת בשתי שורות נשברת למחצית ולא למילה אחת יתומה בשורה השנייה */
+  text-wrap: balance;
+}
+
+/* פסקה: השורה האחרונה לא נשארת עם מילה בודדת (כרום; שאר הדפדפנים מתעלמים) */
+p {
+  text-wrap: pretty;
 }
 
 .t-hero {
@@ -444,6 +446,16 @@ section {
   transform: scaleX(1);
   transform-origin: left;
 }
+/* באצבע: 24 פיקסל הוא המינימום החוקי, 44 הוא מה שנוח. הריפוד האנכי
+   של inline לא מזיז שום דבר, אז אפשר לתת אותו בלי מחיר בפריסה */
+@media (pointer: coarse) {
+  .link-u {
+    padding-block: 0.62rem;
+  }
+  .link-u::after {
+    bottom: calc(0.62rem - 3px);
+  }
+}
 
 /* ---------- surfaces ---------- */
 
@@ -561,6 +573,7 @@ section {
     animation-duration: 0.001ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
   .reveal,
   .mask-line > span {
@@ -808,18 +821,6 @@ html[data-a11y-motion='off'] * {
   animation-iteration-count: 1 !important;
   transition-duration: .001ms !important;
   scroll-behavior: auto !important;
-}
-
-/* מי שהגדיר במערכת ההפעלה שהוא לא רוצה תנועה, כבר ענה על השאלה */
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: .001ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: .001ms !important;
-    scroll-behavior: auto !important;
-  }
 }
 
 /* מיקוד גלוי לניווט במקלדת. היה רק ברירת המחדל של הדפדפן, שנעלמת

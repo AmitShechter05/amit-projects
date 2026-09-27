@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals, lineKey } from '@/lib/cart';
@@ -194,6 +194,20 @@ export default function CartDrawer() {
     };
   }, [open]);
 
+  // מיקוד: נכנס למגירה כשהיא נפתחת וחוזר למי שפתח אותה כשהיא נסגרת.
+  // בלי זה הטאב הבא אחרי כפתור העגלה נחת בעמוד שמאחורי המגירה
+  const closeBtn = useRef<HTMLButtonElement>(null);
+  const opener = useRef<Element | null>(null);
+  useEffect(() => {
+    if (open) {
+      opener.current = document.activeElement;
+      closeBtn.current?.focus();
+    } else if (opener.current instanceof HTMLElement) {
+      opener.current.focus();
+      opener.current = null;
+    }
+  }, [open]);
+
   return (
     <>
       <div
@@ -212,8 +226,12 @@ export default function CartDrawer() {
       />
 
       <aside
+        role="dialog"
+        aria-modal={open || undefined}
         aria-label="עגלת קניות"
         aria-hidden={!open}
+        // סגורה = מחוץ למסך, אבל בלי inert הקישורים שבה עדיין במסלול הטאב
+        inert={!open}
         style={{
           position: 'fixed',
           insetBlock: 0,
@@ -238,7 +256,7 @@ export default function CartDrawer() {
               ({items})
             </span>
           </span>
-          <button onClick={() => setOpen(false)} aria-label="סגירה" className="tap" style={{ color: 'var(--ink-2)' }}>
+          <button ref={closeBtn} onClick={() => setOpen(false)} aria-label="סגירה" className="tap" style={{ color: 'var(--ink-2)' }}>
             <svg width="21" height="21" viewBox="0 0 24 24" fill="none" aria-hidden>
               <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
             </svg>
@@ -260,9 +278,11 @@ export default function CartDrawer() {
               <div
                 style={{
                   height: '100%',
-                  width: `${progress * 100}%`,
+                  // scaleX ולא width: מתיחה במרוכב, בלי חישוב פריסה בכל פריים
+                  transform: `scaleX(${progress})`,
+                  transformOrigin: 'right',
                   background: 'linear-gradient(to left, var(--accent), var(--spark))',
-                  transition: 'width .7s var(--ease)',
+                  transition: 'transform .7s var(--ease)',
                 }}
               />
             </div>
