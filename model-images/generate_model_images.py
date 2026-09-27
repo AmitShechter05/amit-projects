@@ -302,6 +302,16 @@ def main():
             skipped += 1
             continue
 
+        # Skip if the product ALREADY has a model image on WC (its WP media
+        # name starts with the product id — the uploader's naming scheme).
+        # progress.json is incomplete, so this live check is the reliable
+        # dedup. Added 2026-06 after a batch put a 2nd model photo on
+        # products an earlier (untracked) run had already done.
+        if not force_mode and any(str(im.get("name", "")).startswith(str(pid)) for im in imgs):
+            print("  ✓ כבר יש תמונת דגמן במוצר, מדלג")
+            skipped += 1
+            continue
+
         # Skip already-done unless --force
         if str(pid) in progress and not force_mode:
             entry = progress[str(pid)]
@@ -310,8 +320,12 @@ def main():
                 skipped += 1
                 continue
 
-        # Skip מיסטרי בוקס / צעיפים always
-        skip_keywords = ["מיסטרי בוקס", "צעיף", "צעיפים"]
+        # Skip products that aren't a wearable shirt — a "model in a shirt"
+        # photo makes no sense for them and Gemini renders them badly.
+        # Pants/shorts/socks (e.g. "מכנסי Just Don") added 2026-06-03 per
+        # merchant: "מכנסיים אתה לא עושה טוב".
+        skip_keywords = ["מיסטרי בוקס", "צעיף", "צעיפים",
+                         "מכנס", "שורט", "Just Don", "גרבי", "גרביים"]
         if any(kw in name for kw in skip_keywords):
             print(f"  ✗ מדלג (מוצר לא מתאים)")
             skipped += 1

@@ -180,6 +180,37 @@ CATEGORIES = [
         "pose": "holding the jersey out toward camera with both hands to present it, surprised delighted expression as if just opening a gift",
         "mood": "mystery reveal, excitement, surprise, premium gift experience",
     },
+    # ── added 2026-09-20: the three slider tiles that had no artwork ──
+    {
+        "id": "onat-2627",
+        "name_he": "עונת 26/27",
+        "wc_category_id": 526,
+        "search": "ריאל מדריד בית עונת 26/27",   # a short-sleeve shirt; the Barcelona search returned the long-sleeve one
+        "is_kids": False,
+        "setting": "brand-new season kick-off, modern stadium at night with LED ribbon boards, fireworks and confetti over the pitch, opening-day atmosphere",
+        "pose": "walking out of the tunnel onto the pitch, looking up at the stands, jersey brand new and crisp",
+        "mood": "new season, fresh start, anticipation, premium launch",
+    },
+    {
+        "id": "fast-shipping",
+        "name_he": "משלוח מהיר",
+        "wc_category_id": 534,
+        "search": None,
+        "is_kids": False,
+        "setting": "sunny Israeli apartment doorstep, a courier's cardboard parcel just opened on the floor, warm afternoon light through the door",
+        "pose": "pulling the jersey out of the parcel and holding it up against his chest with a delighted grin, just delivered",
+        "mood": "instant gratification, it arrived, excitement, unboxing",
+    },
+    {
+        "id": "long-sleeve",
+        "name_he": "שרוול ארוך",
+        "wc_category_id": 550,
+        "search": "ברצלונה בית עונת 26/27 שרוול ארוך",
+        "is_kids": False,
+        "setting": "cold winter evening match, breath visible in the floodlights, light rain, packed stands in scarves and coats, steam rising off the pitch",
+        "pose": "arms crossed against the cold, long sleeves pulled down over the wrists, focused look at the pitch",
+        "mood": "winter football, cosy warmth in the cold, long-sleeve season",
+    },
 ]
 
 # ─── WooCommerce helpers ──────────────────────────────────────────────────────
