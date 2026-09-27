@@ -109,6 +109,10 @@ export default function Header() {
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // הרצועה הרצה רק בבית. בעמוד מוצר בטלפון היא ועוד הכותרת תפסו 139
+  // פיקסל לפני התוכן. עמית (27.9.2026): "4, תסדר הכל"
+  const home = pathname === '/';
+
   return (
     <>
       {/* רקע אטום ולא זכוכית: ההירו מפוצל לבהיר וכהה, וכל שקיפות
@@ -124,7 +128,7 @@ export default function Header() {
           transition: 'background-color .4s, border-color .4s',
         }}
       >
-        <PromoBar />
+        {home && <PromoBar />}
 
         {/*
           לוגו במרכז, וניווט משני צדדיו.
@@ -215,6 +219,8 @@ export default function Header() {
           </div>
         </div>
       </header>
+      {/* השומר-מקום של הרצועה, בזרימה, מיד אחרי הכותרת הקבועה */}
+      {home && <PromoBar spacer />}
 
       {/* ---------- תפריט מובייל ---------- */}
 

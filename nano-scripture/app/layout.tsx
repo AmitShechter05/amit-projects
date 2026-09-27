@@ -8,7 +8,6 @@ import Reveal from '@/components/RevealEngine';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import CartDrawer from '@/components/CartDrawer';
-import PromoBar from '@/components/PromoBar';
 import JsonLd from '@/components/JsonLd';
 import A11yWidget from '@/components/A11yWidget';
 import Analytics from '@/components/Analytics';
@@ -84,7 +83,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           דילוג לתוכן
         </a>
         <Header />
-        <PromoBar spacer />
         <main id="main">{children}</main>
         <Footer />
         <CartDrawer />

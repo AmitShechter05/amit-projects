@@ -50,7 +50,7 @@ export default function Logo({ size = 32, stacked = false }: { size?: number; st
         <span
           className="ltr mt-1"
           style={{
-            fontSize: Math.max(7.5, size * 0.235),
+            fontSize: Math.max(9, size * 0.235),
             letterSpacing: '0.42em',
             color: 'var(--accent)',
             opacity: 0.85,

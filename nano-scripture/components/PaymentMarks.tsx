@@ -47,7 +47,8 @@ function Mark({ id, label, tone, size }: { id: PaymentId; label: string; tone: '
         style={{
           height: size * 0.78,
           padding: '0 .45em',
-          fontSize: size * 0.4,
+          // לא מתחת ל-12px: בפוטר (26px) יצא 10.4 - קריא רק בקושי
+          fontSize: Math.max(12, size * 0.4),
           letterSpacing: id === 'bit' ? '.01em' : '.02em',
           border: '1px solid currentColor',
           borderRadius: 4,

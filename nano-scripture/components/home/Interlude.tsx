@@ -27,13 +27,16 @@ export type InterludeShot = {
 export default function Interlude({
   shot,
   eager = false,
+  className,
 }: {
   shot: InterludeShot;
   /** לרצועה הראשונה, שעלולה להיות בתוך המסך הראשון */
   eager?: boolean;
+  /** "hidden md:block" לרצועות שבטלפון רק מאריכות את העמוד */
+  className?: string;
 }) {
   return (
-    <figure>
+    <figure className={className}>
       <div className="relative w-full overflow-hidden" style={{ height: 'clamp(240px, 38vw, 560px)' }}>
         <Image
           src={shot.src}
