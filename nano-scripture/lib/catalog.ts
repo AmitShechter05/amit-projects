@@ -341,7 +341,7 @@ export const PRODUCTS: Product[] = [
     material: 'steel',
     finish: 'gold',
     audience: 'women',
-    price: 329,
+    price: 469,
     cost: 6.8,
     image: '/products/OYANN001G.webp',
     blessings: ['shmira', 'eshet-chayil', 'bracha'],
