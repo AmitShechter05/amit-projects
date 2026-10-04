@@ -8,6 +8,7 @@ import { BLESSINGS, getBlessing, isBlessingId } from '@/lib/blessings';
 import { PRODUCTS, blessingPhotos } from '@/lib/catalog';
 import ScriptureText from '@/components/ScriptureText';
 import { clampWords } from '@/lib/seo';
+import { syncPrices } from '@/lib/livePrices';
 
 export function generateStaticParams() {
   return BLESSINGS.map((b) => ({ slug: b.id }));
@@ -50,6 +51,7 @@ export async function generateMetadata({
 
 export default async function BlessingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await syncPrices();
   if (!isBlessingId(slug)) notFound();
 
   const b = getBlessing(slug);

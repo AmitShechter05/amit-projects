@@ -50,6 +50,34 @@ async function call<T>(
 
 export const wcGet = <T>(path: string, params?: Record<string, string | number>) =>
   call<T>('GET', path, undefined, params);
+
+/**
+ * קריאה שנשמרת במטמון של Next, לנתונים שמוצגים ולא נכתבים.
+ *
+ * `call` לעולם אינו שומר, כי הוא יוצר הזמנות. מחירים הם ההפך: הם
+ * נקראים בכל רינדור של כל עמוד, ובלי מטמון כל ביקור היה קריאת רשת
+ * לוורדפרס. כשהמטמון מתיישן Next מגיש את הערך הישן ומרענן ברקע, כך
+ * שווקומרס איטי או נפול אינו מפיל עמוד.
+ */
+export async function wcGetCached<T>(
+  path: string,
+  params: Record<string, string | number>,
+  revalidate: number,
+  tags: string[],
+): Promise<T> {
+  if (!wcReady) throw new Error('WooCommerce אינו מוגדר');
+
+  const url = new URL(`${WC_URL}/wp-json/wc/v3${path}`);
+  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, String(v));
+
+  const res = await fetch(url, {
+    headers: { Authorization: auth() },
+    signal: AbortSignal.timeout(10_000),
+    next: { revalidate, tags },
+  });
+  if (!res.ok) throw new Error(`WC GET ${path} → ${res.status}`);
+  return res.json() as Promise<T>;
+}
 export const wcPost = <T>(path: string, body: unknown) => call<T>('POST', path, body);
 export const wcPut = <T>(path: string, body: unknown) => call<T>('PUT', path, body);
 

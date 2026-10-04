@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import JsonLd from '@/components/JsonLd';
-import { GUIDES } from '@/lib/guides';
+import { allGuides } from '@/lib/guides';
+import { syncPrices } from '@/lib/livePrices';
 import { breadcrumbSchema } from '@/lib/schema';
 
 export const metadata: Metadata = {
@@ -11,7 +12,10 @@ export const metadata: Metadata = {
   alternates: { canonical: '/guides' },
 };
 
-export default function GuidesIndex() {
+export default async function GuidesIndex() {
+  await syncPrices();
+  const guides = allGuides();
+
   return (
     <>
       <JsonLd data={breadcrumbSchema([{ name: 'מִקְרָא', path: '/' }, { name: 'מדריכים', path: '/guides' }])} />
@@ -23,7 +27,7 @@ export default function GuidesIndex() {
           </p>
 
           <ul className="mt-12">
-            {GUIDES.map((g) => (
+            {guides.map((g) => (
               <li key={g.slug} style={{ borderTop: '1px solid var(--line)' }}>
                 <Link href={`/guides/${g.slug}`} className="group block py-6">
                   <span className="display block" style={{ fontSize: 'var(--fs-lg)', lineHeight: 1.35 }}>

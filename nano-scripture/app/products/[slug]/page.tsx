@@ -8,6 +8,7 @@ import { productFaq } from '@/lib/faq';
 import JsonLd from '@/components/JsonLd';
 import { productSchema, faqSchema, breadcrumbSchema } from '@/lib/schema';
 import { productTitle, productDescription, distinctName } from '@/lib/seo';
+import { syncPrices } from '@/lib/livePrices';
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -40,6 +41,8 @@ export async function generateMetadata({
 
 export default async function ProductPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // לפני הסכימה והכרטיסים: שניהם מצטטים מחיר
+  await syncPrices();
   const product = getProduct(slug);
   if (!product) notFound();
 

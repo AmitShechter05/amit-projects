@@ -6,6 +6,7 @@ import { BRAND } from '@/lib/brand';
 import { SITE_URL } from '@/lib/site';
 import { POLICY, SHIPPING, shippingCost } from '@/lib/policy';
 import { productTitle } from '@/lib/seo';
+import { syncPrices } from '@/lib/livePrices';
 
 /**
  * פיד מוצרים — /feed.xml
@@ -172,7 +173,10 @@ ${extras}
     </item>`;
 }
 
-export function GET() {
+export async function GET() {
+  // המחיר בפיד חייב להיות המחיר שבעמוד המוצר, אחרת גוגל ומטא דוחים את הפריט
+  await syncPrices();
+
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:g="http://base.google.com/ns/1.0">
   <channel>

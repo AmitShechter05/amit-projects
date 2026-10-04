@@ -19,6 +19,7 @@ import {
 import { BLESSINGS } from '@/lib/blessings';
 import JsonLd from '@/components/JsonLd';
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema';
+import { syncPrices } from '@/lib/livePrices';
 
 export function generateStaticParams() {
   return ACTIVE_CATEGORIES.map((slug) => ({ slug }));
@@ -52,6 +53,7 @@ export async function generateMetadata({
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  await syncPrices();
   const id = slug as CategoryId;
   const cat = CATEGORIES[id];
   if (!cat || !ACTIVE_CATEGORIES.includes(id)) notFound();

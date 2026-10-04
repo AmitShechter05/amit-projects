@@ -184,7 +184,9 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
       const res = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ customer, lines, gift, code }),
+        // expected: הסכום שהכפתור מציג. השרת משווה אותו לסכום שהוא מחשב
+        // ממחירי הרגע, ולא יוצר הזמנה בסכום שהלקוח לא ראה
+        body: JSON.stringify({ customer, lines, gift, code, expected: total }),
       });
       const data = await res.json();
 

@@ -6,6 +6,7 @@ import { paymentReady, createPayment } from '@/lib/grow';
 import { isBlessingId } from '@/lib/blessings';
 import { getProduct } from '@/lib/catalog';
 import { SITE_URL } from '@/lib/site';
+import { syncPrices } from '@/lib/livePrices';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,10 +19,18 @@ export const dynamic = 'force-dynamic';
  * העגלה חיה בדפדפן, ולכן כל מה שמגיע ממנה הוא קלט של המשתמש. אם
  * השרת היה סומך על סכום שנשלח אליו, אפשר היה לשלוח בקשה עם סכום
  * 1 שקל ולקבל תכשיט. מה שמגיע מהלקוח הוא רק *מה* הוא רוצה - כמה
- * זה עולה נקבע כאן, מתוך הקטלוג.
+ * זה עולה נקבע כאן, מתוך הקטלוג - שמחיריו נקראים מווקומרס באותו רגע.
  * ------------------------------------------------------------------
  */
-type Body = { customer: Customer; lines: OrderLine[]; gift?: boolean; code?: string | null; note?: string };
+type Body = {
+  customer: Customer;
+  lines: OrderLine[];
+  gift?: boolean;
+  code?: string | null;
+  note?: string;
+  /** הסכום שהלקוח ראה על כפתור השליחה */
+  expected?: number;
+};
 
 export async function POST(req: NextRequest) {
   if (!wcReady) {
@@ -80,7 +89,25 @@ export async function POST(req: NextRequest) {
 
   const gift = Boolean(body.gift);
   const code = typeof body.code === 'string' ? body.code : null;
+
+  // המחיר של הרגע הזה, בלי מטמון. ווקומרס מחשב את ההזמנה לפי המחיר
+  // שלו, ולכן הסכום שנשלח לתשלום חייב לצאת מאותו מספר ולא ממחיר
+  // שנקרא לפני חמש דקות
+  await syncPrices({ fresh: true });
   const totals = orderTotal({ lines, gift, code, shipping: customer.shipping });
+
+  // מחיר שהשתנה בווקומרס בזמן שהעמוד היה פתוח: הלקוח רואה סכום אחד
+  // והשרת מחשב אחר. לא יוצרים הזמנה בסכום שהוא לא ראה - הוא מרענן,
+  // רואה את הסכום הנכון ומחליט. 409 ולא 400: הקלט תקין, המצב השתנה
+  if (typeof body.expected === 'number' && Math.abs(body.expected - totals.total) > 0.5) {
+    return NextResponse.json(
+      {
+        error:
+          'מחיר של אחד הפריטים התעדכן מאז שהעמוד נטען. רעננו את העמוד כדי לראות את הסכום המעודכן, ואז שלחו שוב.',
+      },
+      { status: 409 },
+    );
+  }
 
   try {
     const order = await createOrder({
@@ -92,6 +119,12 @@ export async function POST(req: NextRequest) {
       // במסלול הידני ההזמנה נולדת on-hold - כך ווקומרס מודיע למנהל
       status: paymentReady ? 'pending' : 'on-hold',
     });
+
+    // שני החישובים אמורים להסכים. אם לא - יש מחיר, משלוח או קופון שהאתר
+    // וווקומרס רואים אחרת, וזה חייב להופיע בלוג ולא להתגלות אצל לקוח
+    if (Math.abs(Number(order.total) - totals.total) > 0.5) {
+      console.error('order total mismatch', { order: order.id, wc: order.total, site: totals.total });
+    }
 
     /**
      * מסלול תשלום ידני.

@@ -8,6 +8,7 @@ import Assurance from '@/components/home/Assurance';
 import Closing from '@/components/home/Closing';
 import Interlude from '@/components/home/Interlude';
 import { INTERLUDES } from '@/lib/interludes';
+import { syncPrices } from '@/lib/livePrices';
 
 /**
  * צילום בין הנושאים. הסדר והבחירה ב-lib/interludes.ts.
@@ -17,7 +18,10 @@ import { INTERLUDES } from '@/lib/interludes';
  */
 const [j2, j3, j4, j5, j6, j7] = INTERLUDES;
 
-export default function HomePage() {
+export default async function HomePage() {
+  // הכרטיסים וטווחי המחירים מרונדרים בשרת, מהמחיר שבווקומרס
+  await syncPrices();
+
   return (
     <>
       <Hero />

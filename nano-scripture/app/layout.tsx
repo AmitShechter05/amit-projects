@@ -15,6 +15,8 @@ import CookieBanner from '@/components/CookieBanner';
 import SignupPopup from '@/components/SignupPopup';
 import WhatsAppFab from '@/components/WhatsAppFab';
 import { organizationSchema, websiteSchema } from '@/lib/schema';
+import LivePrices from '@/components/LivePrices';
+import { syncPrices } from '@/lib/livePrices';
 
 // Heebo לכל האתר - בחירת בעל החנות (14 בספטמבר 2026). לפניו היו
 // Assistant, ואחריו יום אחד של Frank Ruhl Libre לכותרות שהוחזר לבקשתו.
@@ -69,7 +71,11 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // המחירים מווקומרס. המפה עוברת ל-LivePrices, שמחיל אותה על הקטלוג
+  // שבדפדפן - העגלה ועמוד המוצר קוראים ממנו ולא מהשרת
+  const prices = await syncPrices();
+
   return (
     <html
       lang="he"
@@ -84,10 +90,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <a href="#main" className="sr-only focus:not-sr-only">
           דילוג לתוכן
         </a>
-        <Header />
-        <main id="main">{children}</main>
-        <Footer />
-        <CartDrawer />
+        <LivePrices prices={prices}>
+          <Header />
+          <main id="main">{children}</main>
+          <Footer />
+          <CartDrawer />
+        </LivePrices>
         <WhatsAppFab />
         <A11yWidget />
         <CookieBanner />

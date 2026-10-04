@@ -7,6 +7,7 @@ import { GUIDES, getGuide } from '@/lib/guides';
 import { getProduct } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { faqSchema, breadcrumbSchema, articleSchema } from '@/lib/schema';
+import { syncPrices } from '@/lib/livePrices';
 
 export function generateStaticParams() {
   return GUIDES.map((g) => ({ slug: g.slug }));
@@ -18,6 +19,8 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
+  // התיאור מצטט טווח מחירים
+  await syncPrices();
   const g = getGuide(slug);
   if (!g) return {};
   return {
@@ -41,6 +44,8 @@ export async function generateMetadata({
  */
 export default async function GuidePage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
+  // המחירים שבטקסט ובכרטיסים נקראים מהקטלוג, אחרי שעודכן מווקומרס
+  await syncPrices();
   const g = getGuide(slug);
   if (!g) notFound();
 
