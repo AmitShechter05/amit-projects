@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { preload } from 'react-dom';
 import HeroVideo from '@/components/HeroVideo';
 import { BRAND } from '@/lib/brand';
-import { BLESSINGS, LONGEST_BLESSING_CHARS } from '@/lib/blessings';
+import { BLESSINGS } from '@/lib/blessings';
 import { PROMO } from '@/lib/promo';
 
 /**
@@ -43,9 +43,13 @@ const SOURCES = BLESSINGS.map((b) => {
  * עד 4.10.2026 הסרטון היה ריבוע והכול ישב מתחתיו - החלטה מתקופת
  * הצילום, שבו טקסט על התמונה כיסה פנים ותכשיטים. עמית ביקש לחבר את
  * הכותרת לסרטון. כדי שהיא לא תכסה את מה שבאים להראות, הסרטון גבוה
- * יותר (4:5 במקום ריבוע): הכותרת וההכהיה תופסות את הרבע התחתון, ומעליהן
- * נשאר שטח נקי בגודל של הריבוע הקודם. רק הכותרת עולה על הסרטון; הפסקה,
- * הכפתורים והמקורות נשארים על הרקע, שם הם נקראים בלי הכהיה.
+ * יותר (4:5 במקום ריבוע). רק הכותרת עולה על הסרטון; הכפתורים והמקורות
+ * נשארים על הרקע, שם הם נקראים בלי הכהיה.
+ *
+ * מאותו יום הכותרת היא בלוק מעוצב (ראו ליד ה-h1) והפסקה שמתחתיה ירדה.
+ * הבלוק גבוה מהכותרת הקודמת: 28% התחתונים של הסרטון במקום 18%. נמדד על
+ * כל הסרטון, בפריים הבהיר ביותר מאחורי כל שורה: הלבן ב-5:1 לפחות
+ * והזהב ב-3.4:1, מעל הסף של טקסט גדול (3:1). ההכהיה לא השתנתה.
  * ------------------------------------------------------------------
  */
 export default function Hero() {
@@ -90,43 +94,52 @@ export default function Hero() {
         />
       </div>
 
-      {/* בטלפון שתי העטיפות הן display: contents, כך שהכותרת והפסקאות
-          הן פריטים של הרשת של המקטע: הכותרת באותו תא של הסרטון, והשאר
+      {/* בטלפון שתי העטיפות הן display: contents, כך שהכותרת, הכפתורים
+          והמקורות הם פריטים של הרשת של המקטע: הכותרת באותו תא של הסרטון, והשאר
           מתחתיו. כך יש כותרת אחת ב-DOM ולא שתיים שאחת מהן מוסתרת */}
       <div className="shell relative max-md:contents md:flex md:min-h-[inherit] md:items-center">
         <div className="max-md:contents md:w-[46%] md:py-24">
           {/* בלי תווית מעל הכותרת. "כסף 925 · צריבת ננו · הנוסח המלא"
               ישבה כאן באותיות מרווחות, והכותרת אומרת את זה טוב יותר */}
-          {/* 4.10.2026: כותרת המבצע, בנוסח של עמית. היא ארוכה פי שניים
-              וחצי מ"כל הנוסח. לא שורה ממנו.", ולכן אינה בגודל --ds-hero:
-              הגודל נקבע כך שכל משפט נכנס בשורה אחת, בטלפון ובמסך רחב.
+          {/* 4.10.2026: כותרת המבצע, בנוסח של עמית, והיא לבדה - הפסקה
+              שמתחתיה ירדה לבקשתו. המשפט אינו בגודל אחד: ההכרזה דקה,
+              המספר הוא הדבר הגדול ביותר בהירו ובצבע, ו"הנחה / על כל האתר"
+              נערמות לצידו בגובה שלו. הכול ב-Heebo, במשקלים 300 ו-800.
+              כל המידות ב-em מגודל ה-h1, כך שהיחסים זהים בטלפון ובמסך רחב.
               האחוז בא מ-PROMO, כדי שלא יהיו שני מקומות שאומרים מספר */}
           <h1
-            className="display z-10 col-start-1 row-start-1 self-end text-[7.3vw] max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white md:text-[min(3.35vw,3.4rem)]"
-            style={{ fontWeight: 700, lineHeight: 1.14 }}
+            className="display z-10 col-start-1 row-start-1 self-end text-[5.7vw] max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white md:text-[min(2.5vw,2.5rem)]"
+            style={{ fontWeight: 300, lineHeight: 1.25 }}
           >
+            {/* 1.44em: ברוחב של הבלוק שמתחתיה, כך שהכותרת היא מלבן אחד */}
             <span className="mask-line load">
-              <span>מבצעי נובמבר כבר כאן!</span>
-            </span>
+              <span className="text-[1.44em]">מבצעי נובמבר כבר כאן!</span>
+            </span>{' '}
             <span className="mask-line load">
               <span style={{ ['--d' as string]: '120ms' }}>
-                עם <span className="num">{PROMO.percent}%</span> הנחה על כל האתר!
+                {/* last baseline: "עם", המספר ו"על כל האתר" על קו אחד.
+                    דפדפן שאינו מכיר את הערך נשאר עם items-end */}
+                <span className="flex items-end gap-[.3em]" style={{ alignItems: 'last baseline' }}>
+                  <span>עם</span>{' '}
+                  <span
+                    className="num text-[3.4em] [color:var(--spark)] md:[color:var(--accent)]"
+                    style={{ fontWeight: 800, lineHeight: 0.9, letterSpacing: '-.02em' }}
+                  >
+                    {PROMO.percent}%
+                  </span>{' '}
+                  {/* שתי השורות בגובה הספרות: ראש "הנחה" בקו ראש המספר */}
+                  <span className="flex flex-col">
+                    <span className="text-[1.75em]" style={{ fontWeight: 800, lineHeight: 1 }}>
+                      הנחה
+                    </span>{' '}
+                    <span className="mt-[.167em]" style={{ fontWeight: 400 }}>
+                      על כל האתר!
+                    </span>
+                  </span>
+                </span>
               </span>
             </span>
           </h1>
-
-          <p
-            className="reveal load mt-5 max-md:mx-auto max-md:mt-6 max-md:w-[var(--shell)]"
-            style={{
-              ['--d' as string]: '300ms',
-              fontSize: 'var(--ds-3)',
-              fontWeight: 400,
-              color: 'var(--ink-2)',
-            }}
-          >
-            עד <span className="num">{LONGEST_BLESSING_CHARS.toLocaleString('he-IL')}</span> תווים
-            נצרבים באותיות של 0.035 מילימטר. חמישה נוסחים - אחד שלכם.
-          </p>
 
           <div
             className="reveal load mt-8 flex flex-wrap items-center gap-4 max-md:mx-auto max-md:w-[var(--shell)]"
