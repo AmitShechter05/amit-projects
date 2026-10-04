@@ -123,7 +123,7 @@ export const PRODUCTS: Product[] = [
   {
     sku: 'YASNN004W',
     slug: 'toldot',
-    scenes: ['/scene/toldot-wood.jpg', '/scene/toldot-dark.jpg', '/scene/toldot-1.jpg', '/scene/toldot-2.jpg', '/scene/toldot-3.jpg'],
+    scenes: ['/scene/toldot-wood.jpg', '/scene/toldot-dark.jpg', '/scene/toldot-3.jpg'],
     name: 'תּוֹלְדוֹת',
     nameLatin: 'TOLDOT',
     source: { phrase: 'אֵלֶּה תוֹלְדוֹת הַשָּׁמַיִם וְהָאָרֶץ', ref: 'בראשית ב׳, ד׳' },
@@ -205,7 +205,7 @@ export const PRODUCTS: Product[] = [
   {
     sku: 'OYANN012S',
     slug: 'al-kapayim',
-    scenes: ['/scene/al-kapayim-marble.jpg', '/scene/al-kapayim-linen.jpg', '/scene/al-kapayim-1.jpg', '/scene/al-kapayim-2.jpg'],
+    scenes: ['/scene/al-kapayim-linen.jpg'],
     name: 'עַל כַּפַּיִם',
     nameLatin: 'AL KAPAYIM',
     source: { phrase: 'הֵן עַל־כַּפַּיִם חַקֹּתִיךְ', ref: 'ישעיהו מ״ט, ט״ז' },
@@ -232,7 +232,7 @@ export const PRODUCTS: Product[] = [
   {
     sku: 'OYANN003S',
     slug: 'beseter',
-    scenes: ['/scene/beseter-pair.jpg', '/scene/beseter-pair-marble.jpg', '/scene/beseter-1.jpg', '/scene/beseter-2.jpg', '/scene/beseter-3.jpg'],
+    scenes: ['/scene/beseter-pair.jpg', '/scene/beseter-pair-marble.jpg', '/scene/beseter-1.jpg'],
     name: 'בְּסֵתֶר',
     nameLatin: 'BESETER',
     source: { phrase: 'יֹשֵׁב בְּסֵתֶר עֶלְיוֹן', ref: 'תהילים צ״א, א׳' },
@@ -283,7 +283,7 @@ export const PRODUCTS: Product[] = [
   {
     sku: 'OYANN011S',
     slug: 'lo-yanum',
-    scenes: ['/scene/lo-yanum-stone.jpg', '/scene/lo-yanum-hand.jpg', '/scene/lo-yanum-wood.jpg', '/scene/lo-yanum-marble.jpg', '/scene/lo-yanum-1.jpg', '/scene/lo-yanum-2.jpg', '/scene/lo-yanum-3.jpg'],
+    scenes: ['/scene/lo-yanum-stone.jpg', '/scene/lo-yanum-hand.jpg', '/scene/lo-yanum-wood.jpg', '/scene/lo-yanum-marble.jpg', '/scene/lo-yanum-3.jpg'],
     name: 'לֹא יָנוּם',
     nameLatin: 'LO YANUM',
     source: { phrase: 'הִנֵּה לֹא־יָנוּם וְלֹא יִישָׁן שׁוֹמֵר יִשְׂרָאֵל', ref: 'תהילים קכ״א, ד׳' },
@@ -333,7 +333,7 @@ export const PRODUCTS: Product[] = [
   {
     sku: 'OYANN001G',
     slug: 'kachotam',
-    scenes: ['/scene/kachotam-linen.jpg', '/scene/kachotam-stone.jpg', '/scene/kachotam-dark.jpg', '/scene/kachotam-1.jpg', '/scene/kachotam-2.jpg', '/scene/kachotam-3.jpg'],
+    scenes: ['/scene/kachotam-linen.jpg', '/scene/kachotam-stone.jpg', '/scene/kachotam-dark.jpg'],
     name: 'כַּחוֹתָם',
     nameLatin: 'KACHOTAM',
     source: { phrase: 'שִׂימֵנִי כַחוֹתָם עַל־לִבֶּךָ', ref: 'שיר השירים ח׳, ו׳' },
@@ -584,7 +584,7 @@ export type Banner = {
  * ב-34% ו-46%. וההיפוך בשרשראות מזיז את החמסה שמאלה, אל מחוץ לטקסט.
  */
 const CATEGORY_BANNERS: Partial<Record<CategoryId, Banner>> = {
-  necklaces: { src: '/scene/al-kapayim-1.jpg', position: '50% 100%', flip: true },
+  necklaces: { src: '/scene/al-kapayim-linen.jpg', position: '50% 100%', flip: true },
   bracelets: { src: '/scene/libi-er-tray.jpg', position: '50% 90%' },
   pins: { src: '/worn/scene-doorway.jpg', position: '50% 100%', flip: true },
 };
