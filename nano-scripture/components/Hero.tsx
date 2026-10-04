@@ -37,9 +37,14 @@ const SOURCES = BLESSINGS.map((b) => {
  * מעבר לשנייה השלישית לא היה לו חומר. הסרטון הנוכחי הוא חומר אחר:
  * אנשים שעונדים את המוצרים, ארבעה שוטים, 15 שניות בלולאה.
  *
- * בטלפון הסרטון והטקסט לא יושבים זה על זה - אותה החלטה כמו בצילום.
- * הסרטון הוא ריבוע בזרימה (חיתוך מרכזי של הפריים הרחב, שבו נמצאים
- * שני הדוגמנים והתכשיטים בכל ארבעת השוטים), והטקסט מתחתיו על הרקע.
+ * בטלפון הכותרת יושבת על החלק התחתון של הסרטון, ושאר הטקסט מתחתיו.
+ *
+ * עד 4.10.2026 הסרטון היה ריבוע והכול ישב מתחתיו - החלטה מתקופת
+ * הצילום, שבו טקסט על התמונה כיסה פנים ותכשיטים. עמית ביקש לחבר את
+ * הכותרת לסרטון. כדי שהיא לא תכסה את מה שבאים להראות, הסרטון גבוה
+ * יותר (4:5 במקום ריבוע): הכותרת וההכהיה תופסות את הרבע התחתון, ומעליהן
+ * נשאר שטח נקי בגודל של הריבוע הקודם. רק הכותרת עולה על הסרטון; הפסקה,
+ * הכפתורים והמקורות נשארים על הרקע, שם הם נקראים בלי הכהיה.
  * ------------------------------------------------------------------
  */
 export default function Hero() {
@@ -50,14 +55,26 @@ export default function Hero() {
     <section
       // pt-24 בטלפון: הכותרת הקבועה (96px) יושבת מעל התוכן, ובלי הריווח
       // היא מכסה בדיוק את הפנים. במסך רחב הצילום ממלא הכול וזה רצוי
-      className="relative overflow-hidden pt-24 md:min-h-[var(--hero-h)] md:pt-0"
+      className="relative grid overflow-hidden pt-24 md:block md:min-h-[var(--hero-h)] md:pt-0"
       style={{ ['--hero-h' as string]: 'min(88vh, 780px)' }}
     >
-      {/* בטלפון: ריבוע בזרימה. במסך רחב: 62% השמאליים של המקטע */}
-      <div className="relative aspect-square w-full md:absolute md:inset-y-0 md:left-0 md:aspect-auto md:w-[62%]">
+      {/* בטלפון: 4:5 בזרימה, והכותרת יושבת על החלק התחתון שלו.
+          במסך רחב: 62% השמאליים של המקטע */}
+      <div className="relative col-start-1 row-start-1 aspect-[4/5] w-full md:absolute md:inset-y-0 md:left-0 md:aspect-auto md:w-[62%]">
         <HeroVideo
           className="absolute inset-0 h-full w-full object-cover"
           label="דוגמן ודוגמנית ביום צילום, עונדים שרשרת מגן דוד, צמיד קלוע, שרשרת אינסוף וצמיד אינסוף - כולם עם השבב הכחול"
+        />
+
+        {/* בטלפון: הכהיה מתחת לכותרת שיושבת על הסרטון. בלי זה אותיות
+            לבנות על גופייה לבנה אינן נקראות */}
+        <div
+          aria-hidden
+          className="absolute inset-x-0 bottom-0 h-[58%] md:hidden"
+          style={{
+            background:
+              'linear-gradient(to top, rgb(12 10 6 / .82) 0%, rgb(12 10 6 / .5) 42%, transparent 100%)',
+          }}
         />
 
         {/* הקצה הימני של הסרטון נמס אל הרקע, רק במסך רחב. האחוזים הם
@@ -72,12 +89,15 @@ export default function Hero() {
         />
       </div>
 
-      <div className="shell relative md:flex md:min-h-[inherit] md:items-center">
-        <div className="w-full pb-14 pt-7 md:w-[46%] md:py-24">
+      {/* בטלפון שתי העטיפות הן display: contents, כך שהכותרת והפסקאות
+          הן פריטים של הרשת של המקטע: הכותרת באותו תא של הסרטון, והשאר
+          מתחתיו. כך יש כותרת אחת ב-DOM ולא שתיים שאחת מהן מוסתרת */}
+      <div className="shell relative max-md:contents md:flex md:min-h-[inherit] md:items-center">
+        <div className="max-md:contents md:w-[46%] md:py-24">
           {/* בלי תווית מעל הכותרת. "כסף 925 · צריבת ננו · הנוסח המלא"
               ישבה כאן באותיות מרווחות, והכותרת אומרת את זה טוב יותר */}
           <h1
-            className="display"
+            className="display z-10 col-start-1 row-start-1 self-end max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white"
             style={{ fontSize: 'var(--ds-hero)', fontWeight: 700, lineHeight: 1.05 }}
           >
             <span className="mask-line load">
@@ -89,7 +109,7 @@ export default function Hero() {
           </h1>
 
           <p
-            className="reveal load mt-5"
+            className="reveal load mt-5 max-md:mx-auto max-md:mt-6 max-md:w-[var(--shell)]"
             style={{
               ['--d' as string]: '300ms',
               fontSize: 'var(--ds-3)',
@@ -102,7 +122,7 @@ export default function Hero() {
           </p>
 
           <div
-            className="reveal load mt-8 flex flex-wrap items-center gap-4"
+            className="reveal load mt-8 flex flex-wrap items-center gap-4 max-md:mx-auto max-md:w-[var(--shell)]"
             style={{ ['--d' as string]: '440ms' }}
           >
             <Link href="/blessings" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
@@ -117,7 +137,7 @@ export default function Hero() {
               הכוכבית היא סימן היכר של עיצוב מיוצר, ורשימה של חמישה
               פריטים בשתי עמודות תפסה גובה של פסקה כדי לומר משפט אחד */}
           <p
-            className="reveal load mt-6"
+            className="reveal load mt-6 max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-14"
             style={{
               ['--d' as string]: '580ms',
               fontSize: 'var(--fs-xs)',
