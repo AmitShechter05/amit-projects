@@ -16,7 +16,7 @@ import { GIFT_BOX, INSTALLMENTS } from '@/lib/extras';
  * לרצועה הצפה בלי לנחש את גובהה. הוא מוותר על ההכפלה ועל האנימציה.
  */
 const OFFERS = [
-  ...(promoOn ? [`${PROMO.percent}% הנחה על ההזמנה הראשונה · להצטרפות למועדון`] : []),
+  ...(promoOn ? [`${PROMO.percent}% הנחה על כל האתר · להצטרפות למועדון`] : []),
   `עד ${INSTALLMENTS} תשלומים ללא ריבית`,
   `החזרה תוך ${POLICY.returnDays} יום`,
   `משלוח מבוטח · ${deliveryLine}${POLICY.freeShippingOver !== null ? ` · חינם מעל ₪${POLICY.freeShippingOver}` : ''}`,

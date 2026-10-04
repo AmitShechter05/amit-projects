@@ -3,6 +3,7 @@ import { preload } from 'react-dom';
 import HeroVideo from '@/components/HeroVideo';
 import { BRAND } from '@/lib/brand';
 import { BLESSINGS, LONGEST_BLESSING_CHARS } from '@/lib/blessings';
+import { PROMO } from '@/lib/promo';
 
 /**
  * המקורות, ולא המדיניות.
@@ -96,15 +97,21 @@ export default function Hero() {
         <div className="max-md:contents md:w-[46%] md:py-24">
           {/* בלי תווית מעל הכותרת. "כסף 925 · צריבת ננו · הנוסח המלא"
               ישבה כאן באותיות מרווחות, והכותרת אומרת את זה טוב יותר */}
+          {/* 4.10.2026: כותרת המבצע, בנוסח של עמית. היא ארוכה פי שניים
+              וחצי מ"כל הנוסח. לא שורה ממנו.", ולכן אינה בגודל --ds-hero:
+              הגודל נקבע כך שכל משפט נכנס בשורה אחת, בטלפון ובמסך רחב.
+              האחוז בא מ-PROMO, כדי שלא יהיו שני מקומות שאומרים מספר */}
           <h1
-            className="display z-10 col-start-1 row-start-1 self-end max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white"
-            style={{ fontSize: 'var(--ds-hero)', fontWeight: 700, lineHeight: 1.05 }}
+            className="display z-10 col-start-1 row-start-1 self-end text-[7.3vw] max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white md:text-[min(3.35vw,3.4rem)]"
+            style={{ fontWeight: 700, lineHeight: 1.14 }}
           >
             <span className="mask-line load">
-              <span>כל הנוסח.</span>
+              <span>מבצעי נובמבר כבר כאן!</span>
             </span>
             <span className="mask-line load">
-              <span style={{ ['--d' as string]: '120ms' }}>לא שורה ממנו.</span>
+              <span style={{ ['--d' as string]: '120ms' }}>
+                עם <span className="num">{PROMO.percent}%</span> הנחה על כל האתר!
+              </span>
             </span>
           </h1>
 

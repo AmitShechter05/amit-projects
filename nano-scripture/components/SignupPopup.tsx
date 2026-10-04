@@ -316,7 +316,7 @@ export default function SignupPopup() {
         ) : (
           <form onSubmit={submit} noValidate>
             <h2 id="club-title" className="display mt-3" style={{ fontSize: 'var(--ds-3)' }}>
-              {PROMO.percent}% על ההזמנה הראשונה
+              {PROMO.percent}% הנחה על כל האתר
             </h2>
             <p className="mt-3" style={{ fontSize: 'var(--fs-base)', color: 'var(--ink-2)' }}>
               משאירים שם, טלפון ודוא״ל - והקוד נפתח כאן על המסך.
