@@ -172,9 +172,73 @@ export default function ProductView({ product }: { product: Product }) {
     { label: 'הברכה שנבחרה', value: `${b.plain} · ${b.words} מילים · ${b.sources}` },
   ];
 
+  /**
+   * "הטעימה": שורת הפתיחה של הנוסח שנבחר, המקור שלה, והמשפט שמרגיע
+   * את מי שחושש לבחור לא נכון.
+   *
+   * בטלפון היא יושבת מתחת לכפתור ההוספה ולא מעליו (4.10.2026). היא
+   * תפסה כ-170 פיקסלים בין הכרטיסים לכפתור, ואף אחד מהם אינו תנאי
+   * ללחיצה: הבחירה עצמה מסומנת על הכרטיס. במסך רחב היא נשארת מתחת
+   * לכרטיסים, שם יש מקום. אותו JSX מוצג בשני המקומות, ו-CSS מסתיר אחד.
+   */
+  const taste = (
+    <div className="flex flex-col gap-1.5 px-1">
+      <p className="display" style={{ fontSize: 'var(--fs-md)', lineHeight: 1.6, color: 'var(--ink)' }}>
+        {b.opening}
+      </p>
+      <p
+        className="flex flex-wrap items-center gap-x-3 gap-y-1"
+        style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}
+      >
+        <span>{b.openingSource}</span>
+        <span className="num">{b.words} מילים</span>
+        <Link href={`/blessings/${b.id}`} className="link-u" style={{ color: b.accentInk }}>
+          לקריאת הנוסח המלא ←
+        </Link>
+      </p>
+
+      {/* הבחירה הפיכה, ויש למי לשאול.
+
+          מחקר המתנות (Gino & Flynn; Flynn & Adams) מוצא שהחשש הגדול
+          של מי שקונה מתנה הוא לבחור לא נכון - וכאן הבחירה היא מילים.
+          שני הדברים שמורידים את החשש: לדעת שאפשר לשנות, ודרך לשאול
+          את מי שמקבל. שניהם היו קיימים ולא נאמרו כאן. העובדות
+          מ-lib/faq.ts; מוצג רק כשיש באמת מבין מה לבחור */}
+      {!one && (
+        <p className="mt-1" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)', lineHeight: 1.8 }}>
+          אפשר לשנות את הנוסח בוואטסאפ עד שהחבילה יוצאת.{' '}
+          {waHref && (
+            <>
+              לא בטוחים מה מתאים?{' '}
+              <a
+                href={`${waHref}?text=${encodeURIComponent(`שלום, אני מתלבט/ת איזה נוסח לבחור ל${product.name}. המתנה ל…`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-u"
+                style={{ color: 'var(--accent-deep)' }}
+              >
+                כתבו לנו ←
+              </a>
+              {' · '}
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`איזה נוסח היית רוצה על התכשיט? אפשר לקרוא את כולם כאן: ${SITE_URL}/blessings`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="link-u"
+                style={{ color: 'var(--accent-deep)' }}
+              >
+                לשלוח למי שמקבל, שיבחר ←
+              </a>
+            </>
+          )}
+        </p>
+      )}
+    </div>
+  );
+
   return (
     <>
-      <div className="shell grid gap-8 pt-32 sm:gap-14 lg:grid-cols-[1.06fr_.94fr] lg:gap-20 lg:pt-36">
+      <div className="shell grid gap-6 pt-28 sm:gap-14 sm:pt-32 lg:grid-cols-[1.06fr_.94fr] lg:gap-20 lg:pt-36">
       {/* ================= גלריה ================= */}
       {/* מתחת ל־lg הפריסה נערמת, ובלי תקרה התמונה מותחת לכל רוחב ה־shell
           ומגיעה ל־845px על חלון של 918 — ריבוע ענק שבולע את העמוד */}
@@ -231,8 +295,10 @@ export default function ProductView({ product }: { product: Product }) {
             overflow-x-auto ולא visible: לדגם עם שמונה תצוגות הרצועה
             רחבה 812 בתוך טור של 345, וחמש מהן היו מחוץ למסך ובלתי
             נגישות. זה קורה בכל רוחב ולא רק בטלפון - גם ב-1440 הטור
-            צר מדי - ולכן אין תנאי רספונסיבי */}
-        <div className="mt-4 flex gap-3 overflow-x-auto">
+            צר מדי - ולכן אין תנאי רספונסיבי.
+            בטלפון הן 64 ולא 84: עדיין מטרה נוחה לאצבע, ו-24 פיקסלים
+            פחות בדרך אל הכפתור */}
+        <div className="mt-3 flex gap-2.5 overflow-x-auto sm:mt-4 sm:gap-3">
           {VIEWS.map((v) => {
             const on = v.id === view;
             return (
@@ -241,11 +307,11 @@ export default function ProductView({ product }: { product: Product }) {
                 onClick={() => setView(v.id)}
                 aria-label={v.label}
                 aria-pressed={on}
-                className={v.id === 'chip' || v.id === 'worn' || v.id.startsWith('scene-') ? '' : 'tile'}
+                className={`${
+                  v.id === 'chip' || v.id === 'worn' || v.id.startsWith('scene-') ? '' : 'tile '
+                }h-16 w-16 sm:h-[84px] sm:w-[84px]`}
                 style={{
                   position: 'relative',
-                  width: 84,
-                  height: 84,
                   flexShrink: 0,
                   overflow: 'hidden',
                   borderRadius: 'var(--radius)',
@@ -290,8 +356,10 @@ export default function ProductView({ product }: { product: Product }) {
 
         </div>
 
+        {/* לא בטלפון: התמונה שנבחרה מסומנת במסגרת, והשם שלה נשאר
+            ב-aria-label של הכפתור. השורה עלתה 29 פיקסלים מעל הכפתור */}
         <p
-          className="mt-2 ps-1"
+          className="mt-2 hidden ps-1 sm:block"
           style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)', lineHeight: 1.6 }}
         >
           {VIEWS.find((v) => v.id === view)?.label}
@@ -371,7 +439,7 @@ export default function ProductView({ product }: { product: Product }) {
           </p>
         )}
 
-        <div className="mt-6 flex flex-wrap items-baseline gap-x-4 gap-y-2">
+        <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:mt-6">
           <span
             className="num display"
             style={{ fontSize: 'var(--fs-2xl)', fontWeight: sale.discounted ? 500 : undefined, color: sale.discounted ? 'var(--sale)' : undefined }}
@@ -412,8 +480,9 @@ export default function ProductView({ product }: { product: Product }) {
         </p>
 
         {siblings.length > 1 && (
-          <div className="mt-7">
-            <p className="mb-3" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
+          // בטלפון התווית והעיגולים בשורה אחת, ולא זו מעל זו
+          <div className="mt-5 flex items-center justify-between gap-4 sm:mt-7 sm:block">
+            <p className="sm:mb-3" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
               גימור:{' '}
               <span style={{ color: 'var(--ink)' }}>{FINISHES[product.finish]}</span>
             </p>
@@ -446,7 +515,7 @@ export default function ProductView({ product }: { product: Product }) {
 
         {/* my-10 הם 80 פיקסלים של הפרדה במסך שבו הכפתור נאבק על
             כל פיקסל. בדסקטופ יש מקום, במובייל אין */}
-        <hr className="rule my-5 sm:my-10" />
+        <hr className="rule my-4 sm:my-10" />
 
         {/* ---------- בחירת הברכה ---------- */}
         {/*
@@ -545,63 +614,12 @@ export default function ProductView({ product }: { product: Product }) {
           </div>
 
           {/* שורת הפתיחה של הנוסח שנבחר. הטעימה שנשארת, במקום קופסה
-              שלמה עם מקורות, מונים ושלושה קישורים */}
-          <div className="mt-4 flex flex-col gap-1.5 px-1">
-            <p className="display" style={{ fontSize: 'var(--fs-md)', lineHeight: 1.6, color: 'var(--ink)' }}>
-              {b.opening}
-            </p>
-            <p
-              className="flex flex-wrap items-center gap-x-3 gap-y-1"
-              style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}
-            >
-              <span>{b.openingSource}</span>
-              <span className="num">{b.words} מילים</span>
-              <Link href={`/blessings/${b.id}`} className="link-u" style={{ color: b.accentInk }}>
-                לקריאת הנוסח המלא ←
-              </Link>
-            </p>
-
-            {/* הבחירה הפיכה, ויש למי לשאול.
-
-                מחקר המתנות (Gino & Flynn; Flynn & Adams) מוצא שהחשש הגדול
-                של מי שקונה מתנה הוא לבחור לא נכון - וכאן הבחירה היא מילים.
-                שני הדברים שמורידים את החשש: לדעת שאפשר לשנות, ודרך לשאול
-                את מי שמקבל. שניהם היו קיימים ולא נאמרו כאן. העובדות
-                מ-lib/faq.ts; מוצג רק כשיש באמת מבין מה לבחור */}
-            {!one && (
-              <p className="mt-1" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)', lineHeight: 1.8 }}>
-                אפשר לשנות את הנוסח בוואטסאפ עד שהחבילה יוצאת.{' '}
-                {waHref && (
-                  <>
-                    לא בטוחים מה מתאים?{' '}
-                    <a
-                      href={`${waHref}?text=${encodeURIComponent(`שלום, אני מתלבט/ת איזה נוסח לבחור ל${product.name}. המתנה ל…`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-u"
-                      style={{ color: 'var(--accent-deep)' }}
-                    >
-                      כתבו לנו ←
-                    </a>
-                    {' · '}
-                    <a
-                      href={`https://wa.me/?text=${encodeURIComponent(`איזה נוסח היית רוצה על התכשיט? אפשר לקרוא את כולם כאן: ${SITE_URL}/blessings`)}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="link-u"
-                      style={{ color: 'var(--accent-deep)' }}
-                    >
-                      לשלוח למי שמקבל, שיבחר ←
-                    </a>
-                  </>
-                )}
-              </p>
-            )}
-          </div>
+              שלמה עם מקורות, מונים ושלושה קישורים. בטלפון - מתחת לכפתור */}
+          <div className="mt-4 hidden sm:block">{taste}</div>
         </div>
 
         {/* ---------- כמות והוספה ---------- */}
-        <div ref={buyRef} className="mt-8 flex gap-3">
+        <div ref={buyRef} className="mt-5 flex gap-3 sm:mt-8">
           {/* הכפתורים היו תווי טקסט ברוחב 8px. באצבע אי אפשר לפגוע בהם */}
           <div
             className="flex items-center"
@@ -636,6 +654,9 @@ export default function ProductView({ product }: { product: Product }) {
         <p className="mt-1.5 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
           {SHIPPING_LINE}
         </p>
+
+        {/* הטעימה בטלפון: מיד אחרי הכפתור ושורות המשלוח */}
+        <div className="mt-5 sm:hidden">{taste}</div>
 
         {/* ---------- שדרוג אריזה ---------- */}
         <button
