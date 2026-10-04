@@ -2,6 +2,11 @@
  * צילומי הדגמים — תמונות אמיתיות של התכשיטים על אנשים.
  * תמונה אחת יכולה לשרת כמה דגמים (בצילום הזוג נראים שני צמידים),
  * ולכן המפתח הוא הקובץ והדגמים נגזרים ממנו.
+ *
+ * 4.10.2026: שמונה צילומים בתיקיית shoot באים מיום הצילום של עמית
+ * (2.10.2026) - הצילום שלו, עם רקע ואור שנוקו. הגוף, התנוחה והתכשיט
+ * כפי שצולמו; צבע השבב הושווה לכחול של שאר האתר. הם לאורך (3:4),
+ * ולכן לכל אחד מוקד חיתוך: בריבוע של דף המוצר רבע מהגובה נחתך.
  */
 export type WornShot = {
   file: string;
@@ -30,11 +35,12 @@ export const WORN: WornShot[] = [
     products: ['lo-yanum'],
   },
   {
-    file: '/worn/avot.jpg',
-    width: 1254,
-    height: 1254,
+    file: '/worn/shoot/avot.jpg',
+    width: 1400,
+    height: 1875,
     alt: 'צמיד עבות בכסף על יד גבר, השבב הכחול בחוליה המרכזית',
     products: ['avot'],
+    focus: { avot: '48% 74%' },
   },
   {
     file: '/worn/libi-er.jpg',
@@ -44,11 +50,12 @@ export const WORN: WornShot[] = [
     products: ['libi-er'],
   },
   {
-    file: '/worn/libi-er-gold.jpg',
-    width: 1254,
-    height: 1254,
-    alt: 'צמיד לב בזהב על יד אישה, השבב הכחול לצד הלב',
+    file: '/worn/shoot/libi-er-gold.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'צמיד לבי ער בזהב על יד אישה, הלב והשבב הכחול במסגרת הזירקוניה',
     products: ['libi-er-gold'],
+    focus: { 'libi-er-gold': '51% 74%' },
   },
   {
     file: '/worn/ahavat-olam.jpg',
@@ -65,11 +72,12 @@ export const WORN: WornShot[] = [
     products: ['toldot'],
   },
   {
-    file: '/worn/tipat-or.jpg',
-    width: 1050,
-    height: 1400,
-    alt: 'שרשרת טיפת אור - לולאת אינסוף ותליון השבב הכחול היורד ממנה',
+    file: '/worn/shoot/tipat-or.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'שרשרת טיפת אור על הצוואר - לולאת אינסוף ותליון השבב הכחול היורד ממנה',
     products: ['tipat-or'],
+    focus: { 'tipat-or': '45% 82%' },
   },
   {
     file: '/worn/ein-sof.jpg',
@@ -88,19 +96,44 @@ export const WORN: WornShot[] = [
     focus: { 'libi-er': '75% 58%', avot: '28% 57%' },
   },
   {
-    file: '/worn/luach.jpg',
-    width: 1254,
-    height: 1254,
-    alt: 'תליון לוח בכסף עם השבב הכחול, וצמיד עבות על פרק היד',
-    products: ['luach-libecha', 'avot'],
-    focus: { 'luach-libecha': '56% 61%', avot: '8% 67%' },
+    file: '/worn/shoot/luach-libecha.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'תליון לוח לבך בפלדה על חולצה שחורה, השבב הכחול בקצה התחתון',
+    products: ['luach-libecha'],
+    focus: { 'luach-libecha': '55% 89%' },
   },
   {
-    file: '/worn/avot-black.jpg',
-    width: 1338,
-    height: 1176,
-    alt: 'צמיד עבות בגימור שחור מלא, השבב הכחול בחוליה המרכזית',
+    file: '/worn/shoot/avot-black.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'צמיד עבות בגימור שחור מלא על יד גבר, השבב הכחול בחוליה המרכזית',
     products: ['avot-black'],
+    focus: { 'avot-black': '54% 61%' },
+  },
+  {
+    file: '/worn/shoot/beseter.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'שרשרת בסתר - מגן דוד בפלדה על חולצה שחורה, השבב הכחול במרכזו',
+    products: ['beseter'],
+    focus: { beseter: '51% 100%' },
+  },
+  {
+    file: '/worn/shoot/beseter-gold.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'שרשרת בסתר בגימור זהב - מגן דוד על חולצה שחורה, השבב הכחול במרכזו',
+    products: ['beseter-gold'],
+    focus: { 'beseter-gold': '49% 69%' },
+  },
+  {
+    file: '/worn/shoot/chishuk.jpg',
+    width: 1400,
+    height: 1875,
+    alt: 'צמיד חישוק בפלדה על יד גבר, השבב הכחול בקצה הצמיד',
+    products: ['chishuk'],
+    focus: { chishuk: '47% 76%' },
   },
 ];
 
