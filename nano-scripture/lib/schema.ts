@@ -219,6 +219,6 @@ export function articleSchema(g: {
     author: { '@id': ORG_ID },
     publisher: { '@id': ORG_ID },
     mainEntityOfPage: `${SITE_URL}/guides/${g.slug}`,
-    image: abs('/hero/hero-landscape.jpg'),
+    image: abs('/hero/share.jpg'),
   };
 }

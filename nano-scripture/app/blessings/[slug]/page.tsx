@@ -35,7 +35,7 @@ export async function generateMetadata({
       // ואם אין - חזרה לתמונת המותג
       images: [
         {
-          url: blessingPhotos(BLESSINGS.map((x) => x.id))[b.id] ?? '/hero/hero-landscape.jpg',
+          url: blessingPhotos(BLESSINGS.map((x) => x.id))[b.id] ?? '/hero/share.jpg',
           alt: b.plain,
         },
       ],
@@ -43,7 +43,7 @@ export async function generateMetadata({
     twitter: {
       card: 'summary_large_image',
       title: `${b.plain} · מִקְרָא`,
-      images: [blessingPhotos(BLESSINGS.map((x) => x.id))[b.id] ?? '/hero/hero-landscape.jpg'],
+      images: [blessingPhotos(BLESSINGS.map((x) => x.id))[b.id] ?? '/hero/share.jpg'],
     },
   };
 }

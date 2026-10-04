@@ -29,7 +29,7 @@ export async function generateMetadata({
       url: `/guides/${g.slug}`,
       title: `${g.metaTitle} · מִקְרָא`,
       description: g.metaDescription,
-      images: [{ url: '/hero/hero-landscape.jpg', alt: g.title }],
+      images: [{ url: '/hero/share.jpg', width: 1200, height: 630, alt: g.title }],
     },
   };
 }
