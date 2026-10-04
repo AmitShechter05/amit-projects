@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import Process from '@/components/home/Process';
 import NanoLoupe from '@/components/NanoLoupe';
@@ -135,6 +136,56 @@ export default function CraftPage() {
             >
               <NanoLoupe blessing={BLESSINGS[0].id} height="100%" radius={40} readPx={15} hint={false} />
             </ZoomLadder>
+          </div>
+        </div>
+      </section>
+
+      {/* ---- צילום אמיתי במיקרוסקופ ---- */}
+      {/* ההדמיה שלמעלה מסבירה את קנה המידה; שני הצילומים האלה מראים
+          שהכתב באמת שם. הם מיום הצילום של עמית (2.10.2026): מיקרוסקופ
+          דיגיטלי מעל השבב, והנוסח על המסך. חיתוך ויישור בלבד - בלי
+          עיבוד ובלי הדמיה. בלי מספר הגדלה, כי אין לו מקור */}
+      <section className="pb-24">
+        <div className="shell grid items-center gap-12 lg:grid-cols-2">
+          <figure className="reveal mx-auto w-full" style={{ maxWidth: 520 }}>
+            <Image
+              src="/craft/microscope-screen.jpg"
+              alt="מסך של מיקרוסקופ דיגיטלי שמציג את הכתוב על השבב: הכותרת אשת חיל, המקור משלי ל״א, והפסוקים הראשונים בניקוד"
+              width={1120}
+              height={1400}
+              sizes="(max-width: 1024px) 92vw, 520px"
+              className="h-auto w-full"
+              style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--line)' }}
+            />
+            <figcaption className="pt-3" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-3)' }}>
+              על המסך: אשת חיל, משלי ל״א, י׳-ל״א. הכותרת, המקור והפסוקים הראשונים, עם הניקוד.
+            </figcaption>
+          </figure>
+
+          <div>
+            <h2 className="display t-1">
+              <span className="mask-line">
+                <span>וכך זה נראה במיקרוסקופ</span>
+              </span>
+            </h2>
+            <p className="lede reveal mt-6 max-w-md" style={{ ['--d' as string]: '160ms' }}>
+              ההדמיה למעלה מסבירה את קנה המידה. כאן צילום אמיתי: מיקרוסקופ
+              דיגיטלי הונח על השבב, וזה מה שעלה על המסך.
+            </p>
+            <figure className="reveal mt-10" style={{ ['--d' as string]: '260ms' }}>
+              <Image
+                src="/craft/microscope-setup.jpg"
+                alt="מיקרוסקופ דיגיטלי מונח מעל שבב התכשיט על משטח שיש, והשבב מואר מתחתיו"
+                width={1400}
+                height={895}
+                sizes="(max-width: 1024px) 92vw, 560px"
+                className="h-auto w-full"
+                style={{ borderRadius: 'var(--radius-lg)', border: '1px solid var(--line)' }}
+              />
+              <figcaption className="pt-3" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-3)' }}>
+                השבב מתחת למיקרוסקופ.
+              </figcaption>
+            </figure>
           </div>
         </div>
       </section>
