@@ -23,7 +23,7 @@ export default async function GuidesIndex() {
         <div className="mx-auto max-w-2xl">
           <h1 className="display t-1">מדריכי מתנה</h1>
           <p className="lede mt-5">
-            למי מתאימה כל ברכה, איזה דגם לבחור, ומה להגיד כשנותנים. קצר, ובלי סופרלטיבים.
+            למי מתאימה כל ברכה, איזה תכשיט לבחור, ומה להגיד כשנותנים. קצר ולעניין.
           </p>
 
           <ul className="mt-12">

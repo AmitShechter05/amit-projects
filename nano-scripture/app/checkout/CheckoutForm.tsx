@@ -359,7 +359,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
             שמכירים מכל חנות. מי שבוחר איסוף אחרי שמילא כתובת רואה את
             שדות הכתובת נסגרים, וזה בסדר - השרת ממילא מתעלם מהם */}
         <fieldset className="mt-10">
-          <legend style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>איך לקבל</legend>
+          <legend style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>איך תרצו לקבל</legend>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             {SHIPPING.map((m) => {
               const on = customer.shipping === m.id;
@@ -432,7 +432,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
               />
               <span>
                 <span className="block" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink)' }}>
-                  זו מתנה — לשלוח היישר לנמען
+                  זו מתנה - לשלוח ישר למי שמקבל אותה
                 </span>
                 <span
                   className="mt-0.5 block"
@@ -506,7 +506,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
               style={{ marginTop: 3, accentColor: 'var(--accent)' }}
             />
             <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', lineHeight: 1.65 }}>
-              אשמח לקבל עדכונים על דגמים חדשים ומבצעים. אפשר להסיר בכל עת.
+              אשמח לקבל עדכונים על תכשיטים חדשים ומבצעים. אפשר להפסיק בכל רגע.
             </span>
           </label>
         </div>
@@ -537,8 +537,8 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
         */}
         <p className="mt-8" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)', lineHeight: 1.7 }}>
           {paymentReady
-            ? 'התשלום מתבצע בדף המאובטח של Grow. פרטי הכרטיס לא עוברים דרך האתר, ופריסה לתשלומים נבחרת שם.'
-            : 'לא נגבה עכשיו דבר. אחרי שליחת ההזמנה נשלח לך בוואטסאפ, למספר שמילאת, קישור מאובטח לתשלום - בדרך כלל תוך שעה בשעות הפעילות.'}
+            ? 'משלמים בדף המאובטח של Grow. פרטי הכרטיס לא עוברים דרך האתר, ואת מספר התשלומים בוחרים שם.'
+            : 'עכשיו לא משלמים כלום. אחרי ששולחים את ההזמנה נשלח לך בוואטסאפ, למספר שמילאת, קישור מאובטח לתשלום. בדרך כלל זה לוקח עד שעה, בשעות הפעילות.'}
         </p>
         <button
           type="submit"
@@ -553,7 +553,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
             "במה אפשר לשלם", והתשובה צריכה להיות מזוהה בעין */}
         <PaymentMarks tone="brand" size={32} className="mt-5 justify-center" />
         <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-3)' }}>
-          הפרטים נשלחים מוצפנים. פרטי האשראי נמסרים ישירות לחברת הסליקה ואינם נשמרים אצלנו.
+          הפרטים נשלחים בצורה מאובטחת. את פרטי האשראי מקבלת רק חברת הסליקה, והם לא נשמרים אצלנו.
         </p>
       </div>
 

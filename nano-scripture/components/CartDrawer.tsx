@@ -93,7 +93,7 @@ function CodeField() {
       </div>
 
       <p className="mt-1.5" style={{ fontSize: 'var(--fs-xs)', color: error ? 'var(--sale)' : 'var(--ink-3)' }}>
-        {error ? 'הקוד אינו מזוהה. בדקו את הכתיב ונסו שוב.' : 'חברי המועדון מקבלים קוד להזמנה הראשונה'}
+        {error ? 'הקוד לא מוכר. בדקו שהקלדתם נכון ונסו שוב.' : 'חברי המועדון מקבלים קוד להזמנה הראשונה'}
       </p>
     </div>
   );
@@ -432,7 +432,7 @@ export default function CartDrawer() {
                   {GIFT_BOX.title}
                 </span>
                 <span style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-                  מגיעה סגורה ומוכנה למסירה
+                  מגיעה סגורה, מוכנה לתת במתנה
                 </span>
               </span>
               <span className="num" style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent)' }}>

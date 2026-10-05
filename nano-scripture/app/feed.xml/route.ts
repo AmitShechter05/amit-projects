@@ -100,8 +100,8 @@ function description(p: Product) {
   const names = p.blessings.map((id) => BLESSING_BY_ID[id].plain);
   const chip =
     names.length > 1
-      ? `הנוסח שנצרב על השבב נבחר בהזמנה: ${names.join(' / ')}.`
-      : `על השבב נצרב הנוסח: ${names[0]}.`;
+      ? `את הברכה שחרוטה על השבב בוחרים בהזמנה: ${names.join(' / ')}.`
+      : `על השבב חרוטה הברכה: ${names[0]}.`;
   return `${p.short}. ${p.story} ${chip}`;
 }
 

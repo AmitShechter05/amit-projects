@@ -238,7 +238,7 @@ export default function ProductCard({
               className="link-u"
               style={{ fontSize: "var(--fs-sm)", color: "var(--accent)" }}
             >
-              לפריט ←
+              לתכשיט ←
             </span>
           </div>
         </div>

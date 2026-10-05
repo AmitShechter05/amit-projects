@@ -18,8 +18,8 @@ import Image from 'next/image';
  * המפעל, 17.9.2026).
  */
 const STEPS = [
-  { label: 'התכשיט', size: 'כ־20 מ״מ', scale: 1, x: '50%', y: '50%' },
-  { label: 'המשבצת', size: 'כ־5 מ״מ', scale: 3.2, x: '50%', y: '52%' },
+  { label: 'התכשיט', size: 'בערך 20 מ״מ', scale: 1, x: '50%', y: '50%' },
+  { label: 'המסגרת', size: 'בערך 5 מ״מ', scale: 3.2, x: '50%', y: '52%' },
 ];
 
 /**
@@ -41,9 +41,9 @@ export function ZoomTile({ photo, accent }: { photo: string; accent: string }) {
         className="absolute inset-x-0 bottom-0 flex items-baseline justify-between px-5 py-3.5"
         style={{ background: 'linear-gradient(to top, rgb(22 21 15 / .82), transparent)', color: '#fff' }}
       >
-        <span style={{ fontSize: 'var(--fs-sm)' }}>השבב במשבצת</span>
+        <span style={{ fontSize: 'var(--fs-sm)' }}>השבב במסגרת</span>
         <span className="num" style={{ fontSize: 'var(--fs-xs)', opacity: 0.85 }}>
-          5 מ״מ · חלון הצריבה
+          5 מ״מ · שטח החריטה
         </span>
       </figcaption>
       <span
@@ -152,7 +152,7 @@ export default function ZoomLadder({
             color: '#fff',
           }}
         >
-          <span style={{ fontSize: 'var(--fs-xs)' }}>הכתב</span>
+          <span style={{ fontSize: 'var(--fs-xs)' }}>האותיות</span>
           <span className="num" style={{ fontSize: 'var(--fs-2xs)', opacity: 0.85 }}>
             0.035 מ״מ
           </span>

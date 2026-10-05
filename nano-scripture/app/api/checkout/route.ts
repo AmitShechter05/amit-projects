@@ -34,7 +34,7 @@ type Body = {
 
 export async function POST(req: NextRequest) {
   if (!wcReady) {
-    return NextResponse.json({ error: 'החנות אינה מחוברת עדיין' }, { status: 503 });
+    return NextResponse.json({ error: 'החנות לא מחוברת עדיין' }, { status: 503 });
   }
 
   let body: Body;

@@ -37,7 +37,7 @@ export async function generateMetadata({
   // לראות שרשרת. og:title ירש עד כה את כותרת הבית הגנרית
   const banner = categoryBanner(cat.id)?.src ?? '/hero/hero-landscape.jpg';
   return {
-    title: `${cat.title} עם ברכה צרובה על שבב`,
+    title: `${cat.title} עם ברכה חרוטה על שבב`,
     description: cat.blurb,
     alternates: { canonical: `/categories/${cat.id}` },
     openGraph: {
@@ -128,7 +128,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
             <p className="reveal load mt-6" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
               <span className="num">{products.length}</span> דגמים · מ־
               <span className="num">{formatPrice(range.min)}</span> עד{' '}
-              <span className="num">{formatPrice(range.max)}</span> · הנוסח נבחר בעמוד הדגם
+              <span className="num">{formatPrice(range.max)}</span> · את הברכה בוחרים בעמוד של התכשיט
             </p>
 
             {/* בטלפון: הצילום עצמו, ברוחב המסך ובלי צעיף, אחרי הטקסט.
@@ -184,7 +184,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
             <div className="reveal text-center" style={{ ['--d' as string]: '120ms' }}>
               <p className="display t-3" style={{ lineHeight: 1.4 }}>
-                מה שמשתנה הוא הנוסח שנצרב, לא הדגם.
+                בכל תכשיט אפשר לבחור ברכה אחרת.
               </p>
               <div className="mt-6 flex items-center justify-center gap-2">
                 {BLESSINGS.map((b) => (

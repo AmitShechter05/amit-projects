@@ -29,7 +29,7 @@ export function validateLead(l: Lead, { emailOnly = false } = {}): LeadErrors {
     if (!/^0(5\d|[2-4,8-9])\d{7}$/.test(phone)) e.phone = 'מספר טלפון ישראלי';
   }
 
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(t(l.email))) e.email = 'כתובת דוא״ל תקינה';
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(t(l.email))) e.email = 'כתובת אימייל תקינה';
 
   /**
    * ההסכמה לדיוור.

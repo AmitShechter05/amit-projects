@@ -108,9 +108,9 @@ export default function Footer() {
           </nav>
 
           <div>
-            <p className="eyebrow mb-3">מכתב הבית</p>
+            <p className="eyebrow mb-3">עדכונים במייל</p>
             <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
-              דגמים חדשים, ומעט מאוד דואר.
+              תכשיטים חדשים, ומעט מאוד מיילים.
             </p>
             <form className="mt-5 flex" onSubmit={subscribe}>
               <input
@@ -153,7 +153,7 @@ export default function Footer() {
                 ? 'לא הצלחנו לרשום. נסו שוב.'
                 : state === 'sent'
                   ? 'הכתובת נשמרה.'
-                  : 'בלחיצה על הרשמה מאשרים קבלת דיוור מהחנות.'}
+                  : 'בלחיצה על הרשמה אתם מאשרים לקבל מיילים מהחנות.'}
             </p>
           </div>
         </div>

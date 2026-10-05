@@ -7,8 +7,8 @@ import { BLESSINGS, TOTAL_BLESSING_WORDS } from '@/lib/blessings';
  * עד שהוא נעצר. מספר עומד נקרא מיד.
  */
 const STATS = [
-  { value: TOTAL_BLESSING_WORDS.toLocaleString('he-IL'), label: 'מילים בחמשת הנוסחים' },
-  { value: '5', label: 'מ״מ - חלון הצריבה' },
+  { value: TOTAL_BLESSING_WORDS.toLocaleString('he-IL'), label: 'מילים בחמש הברכות' },
+  { value: '5', label: 'מ״מ - שטח החריטה' },
   { value: '0.035', label: 'מ״מ - גובה האות' },
   { value: '0.1', label: 'מ״מ - האות הגדולה ביותר, בכותרות' },
 ];
@@ -20,20 +20,20 @@ export default function Scale() {
         <div>
           <h2 className="display t-1">
             <span className="mask-line">
-              <span>גדול מכדי להכיל.</span>
+              <span>ברכה שלמה</span>
             </span>
             <span className="mask-line">
               <span className="accent-text" style={{ ['--d' as string]: '120ms' }}>
-                קטן מכדי לראות.
+                על שבב קטן
               </span>
             </span>
           </h2>
 
           <p className="lede reveal mt-7 max-w-lg" style={{ ['--d' as string]: '160ms' }}>
-            שבב הזכוכית שבליבת כל תכשיט הוא ריבוע של חמישה מילימטרים. עליו
-            נחרטות שורות הכתב בגובה של 0.035 מילימטר - כמחצית מעובי שערת אדם.
-            האות אינה מודפסת ואינה מצופה: היא חרוטה בזכוכית עצמה, ולכן בשימוש
-            רגיל לא תדהה ולא תתחמצן.
+            בכל תכשיט יש שבב זכוכית קטן: ריבוע של חמישה מילימטרים. עליו חרוטה
+            הברכה, באותיות בגובה 0.035 מילימטר - בערך חצי מעובי של שערה.
+            האותיות לא מודפסות ולא מצופות. הן חרוטות בתוך הזכוכית, ולכן בשימוש
+            רגיל הן לא דוהות ולא משנות צבע.
           </p>
 
           <dl className="mt-12 grid grid-cols-2 gap-x-8 gap-y-8">
@@ -56,7 +56,7 @@ export default function Scale() {
         <div className="reveal-x">
           <NanoLoupe blessing={BLESSINGS[0].id} height={520} />
           <p className="mt-5 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-            הדמיית פני השבב · הגדלה פי 9
+            הדמיה של השבב · מוגדל פי 9
           </p>
         </div>
       </div>

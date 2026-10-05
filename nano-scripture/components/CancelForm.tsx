@@ -17,7 +17,7 @@ const LABELS: { key: keyof Fields; label: string; hint?: string; inputMode?: 'nu
   { key: 'name', label: 'שם מלא' },
   { key: 'idNumber', label: 'מספר זהות', hint: 'נדרש לפי חוק הגנת הצרכן, סעיף 14ט(ג)', inputMode: 'numeric' },
   { key: 'orderNumber', label: 'מספר ההזמנה', hint: 'מופיע בעמוד התודה ובהודעת הוואטסאפ', inputMode: 'numeric' },
-  { key: 'contact', label: 'הטלפון או הדוא״ל שאיתם בוצעה ההזמנה' },
+  { key: 'contact', label: 'הטלפון או האימייל שרשמתם בהזמנה' },
 ];
 
 export default function CancelForm() {
@@ -61,7 +61,7 @@ export default function CancelForm() {
         <p className="display" style={{ fontSize: 'var(--fs-lg)' }}>הודעת הביטול התקבלה</p>
         <p className="mt-3" style={{ fontSize: 'var(--fs-base)', lineHeight: 1.8, color: 'var(--ink-2)' }}>
           הזמנה <span className="num">#{done.orderNumber}</span> · התקבל ב-<span className="num">{done.stamp}</span>.
-          שמרו את המסך הזה כאסמכתא.
+          שמרו צילום של המסך הזה כאישור.
         </p>
         <p className="mt-3" style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.8, color: 'var(--ink-2)' }}>
           {done.shipped
@@ -139,7 +139,7 @@ export default function CancelForm() {
             {', '}
           </>
         )}
-        בדוא״ל <a href={`mailto:${COMPANY.email}?subject=${encodeURIComponent('ביטול עסקה')}`} className="link-u">{COMPANY.email}</a>
+        באימייל <a href={`mailto:${COMPANY.email}?subject=${encodeURIComponent('ביטול עסקה')}`} className="link-u">{COMPANY.email}</a>
         {COMPANY.phone ? `, בטלפון ${COMPANY.phone}` : ''} או בדואר רשום ל{COMPANY.address}. בכל ערוץ מציינים שם, מספר זהות ומספר הזמנה.
       </p>
     </form>

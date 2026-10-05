@@ -23,7 +23,7 @@ export async function generateMetadata({
   if (!isBlessingId(slug)) return {};
   const b = getBlessing(slug);
   return {
-    title: `${b.plain} · הנוסח המלא שנצרב על השבב`,
+    title: `${b.plain} · הברכה המלאה שחרוטה על השבב`,
     description: clampWords(`${b.blurb} ${b.sources}.`),
     alternates: { canonical: `/blessings/${b.id}` },
     openGraph: {
@@ -101,7 +101,7 @@ export default async function BlessingPage({ params }: { params: Promise<{ slug:
             style={{ ['--d' as string]: '320ms', fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', lineHeight: 1.8 }}
           >
             <span className="num">{b.words}</span> מילים · <span className="num">{b.chars.toLocaleString('he-IL')}</span> תווים
-            · מתאים ל{b.gift.replace(/ · /g, ', ')}
+            · מתאימה ל{b.gift.replace(/ · /g, ', ')}
           </p>
         </div>
       </section>
@@ -111,7 +111,7 @@ export default async function BlessingPage({ params }: { params: Promise<{ slug:
         <div className="shell">
           <NanoLoupe blessing={b.id} height={440} radius={62} />
           <p className="mt-4 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-            זהו בדיוק הנוסח שנצרב - העבירו את הסמן כדי לקרוא אותו
+            זה בדיוק מה שחרוט על השבב - העבירו את העכבר כדי לקרוא
           </p>
         </div>
       </section>
@@ -126,8 +126,8 @@ export default async function BlessingPage({ params }: { params: Promise<{ slug:
               </span>
             </h2>
             <p className="lede reveal mt-5 max-w-xs" style={{ fontSize: 'var(--fs-base)' }}>
-              בלי קיצור ובלי השמטה. מה שכתוב כאן, בניקוד מלא, הוא בדיוק מה
-              שנצרב על השבב.
+              בלי קיצורים. מה שכתוב כאן, עם ניקוד מלא, הוא בדיוק מה
+              שחרוט על השבב.
             </p>
           </div>
 
@@ -157,7 +157,7 @@ export default async function BlessingPage({ params }: { params: Promise<{ slug:
                 </h2>
               </div>
               <p className="lede reveal max-w-sm" style={{ fontSize: 'var(--fs-base)' }}>
-                {carriers.length} דגמים בקטלוג נושאים את {b.plain} - בוחרים את התכשיט, ואז את הנוסח.
+                את {b.plain} אפשר להזמין על {carriers.length} תכשיטים. בוחרים קודם את התכשיט, ואז את הברכה.
               </p>
             </div>
 

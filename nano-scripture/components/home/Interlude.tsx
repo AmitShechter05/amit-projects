@@ -53,7 +53,7 @@ export default function Interlude({
           {shot.caption}
         </span>
         <Link href={shot.href} className="link-u" style={{ color: 'var(--accent-deep)' }}>
-          {shot.href.startsWith('/products/') ? 'לפריט ←' : 'לקטגוריה ←'}
+          {shot.href.startsWith('/products/') ? 'לתכשיט ←' : 'לקטגוריה ←'}
         </Link>
       </figcaption>
     </figure>

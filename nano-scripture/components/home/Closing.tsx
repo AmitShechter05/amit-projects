@@ -19,8 +19,8 @@ export default function Closing() {
         </h2>
 
         <p className="lede reveal mx-auto mt-8 max-w-lg" style={{ ['--d' as string]: '280ms' }}>
-          את הספר שממנו הכול התחיל - בגודל שאפשר לענוד מתחת לחולצה,
-          ולזכור שהוא שם.
+          תכשיט עם ברכה שלמה בפנים. עונדים אותו מתחת לחולצה,
+          ויודעים שהיא שם.
         </p>
 
         <div

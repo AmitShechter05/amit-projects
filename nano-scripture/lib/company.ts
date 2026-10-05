@@ -20,7 +20,7 @@ export const COMPANY = {
    * התקנות מבקשות שם ואמצעי קשר. כאן יש רק אמצעי קשר, כי שם לא
    * נמסר - ואת השם של אדם אמיתי לא ממציאים. שווה להשלים.
    */
-  accessibilityContact: 'בטלפון 050-775-5705 או בדוא״ל mikrajewelry@gmail.com' as string | null,
+  accessibilityContact: 'בטלפון 050-775-5705 או באימייל mikrajewelry@gmail.com' as string | null,
   updated: 'אוגוסט 2026',
 };
 

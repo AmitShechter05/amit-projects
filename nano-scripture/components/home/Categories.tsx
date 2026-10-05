@@ -33,8 +33,8 @@ export default function Categories() {
             </h2>
           </div>
           <p className="lede reveal max-w-sm" style={{ ['--d' as string]: '110ms' }}>
-            אותו שבב, שתי דרכים לשאת אותו. ההבדל הוא בפרופיל, במשקל ובמקום שבו
-            העין נופלת עליו.
+            אותו שבב ואותה ברכה: על שרשרת, על צמיד או על סיכה לתינוק.
+            בחרו מה שנוח לכם.
           </p>
         </div>
 

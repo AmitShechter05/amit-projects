@@ -86,10 +86,10 @@ export default function ProductView({ product }: { product: Product }) {
   // הצילום על הדגם נכנס מיד אחרי פאק־שוט המוצר, אם קיים כזה
   const VIEWS = [
     BASE_VIEWS[0],
-    ...(worn ? [{ id: 'worn' as View, label: 'על הדגם' }] : []),
+    ...(worn ? [{ id: 'worn' as View, label: 'כשעונדים' }] : []),
     ...(product.scenes ?? []).map((_, i) => ({
       id: `scene-${i}` as View,
-      label: (product.scenes?.length ?? 0) > 1 ? `בסצנה ${i + 1}` : 'בסצנה',
+      label: (product.scenes?.length ?? 0) > 1 ? `תמונה ${i + 1}` : 'תמונה',
     })),
     ...BASE_VIEWS.slice(1),
   ];
@@ -168,7 +168,7 @@ export default function ProductView({ product }: { product: Product }) {
     { label: 'מק״ט', value: product.sku },
     { label: 'חומר', value: MATERIALS[product.material].label },
     ...product.specs,
-    { label: 'סוג פריט', value: cat.singular },
+    { label: 'סוג התכשיט', value: cat.singular },
     { label: 'הברכה שנבחרה', value: `${b.plain} · ${b.words} מילים · ${b.sources}` },
   ];
 
@@ -193,7 +193,7 @@ export default function ProductView({ product }: { product: Product }) {
         <span>{b.openingSource}</span>
         <span className="num">{b.words} מילים</span>
         <Link href={`/blessings/${b.id}`} className="link-u" style={{ color: b.accentInk }}>
-          לקריאת הנוסח המלא ←
+          לקריאת הברכה המלאה ←
         </Link>
       </p>
 
@@ -206,12 +206,12 @@ export default function ProductView({ product }: { product: Product }) {
           מ-lib/faq.ts; מוצג רק כשיש באמת מבין מה לבחור */}
       {!one && (
         <p className="mt-1" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)', lineHeight: 1.8 }}>
-          אפשר לשנות את הנוסח בוואטסאפ עד שהחבילה יוצאת.{' '}
+          אפשר להחליף ברכה בוואטסאפ עד שהחבילה יוצאת.{' '}
           {waHref && (
             <>
               לא בטוחים מה מתאים?{' '}
               <a
-                href={`${waHref}?text=${encodeURIComponent(`שלום, אני מתלבט/ת איזה נוסח לבחור ל${product.name}. המתנה ל…`)}`}
+                href={`${waHref}?text=${encodeURIComponent(`שלום, אני מתלבט/ת איזו ברכה לבחור ל${product.name}. המתנה ל…`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link-u"
@@ -221,7 +221,7 @@ export default function ProductView({ product }: { product: Product }) {
               </a>
               {' · '}
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`איזה נוסח היית רוצה על התכשיט? אפשר לקרוא את כולם כאן: ${SITE_URL}/blessings`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`איזו ברכה היית רוצה על התכשיט? אפשר לקרוא את כולן כאן: ${SITE_URL}/blessings`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="link-u"
@@ -483,7 +483,7 @@ export default function ProductView({ product }: { product: Product }) {
           // בטלפון התווית והעיגולים בשורה אחת, ולא זו מעל זו
           <div className="mt-5 flex items-center justify-between gap-4 sm:mt-7 sm:block">
             <p className="sm:mb-3" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-              גימור:{' '}
+              צבע:{' '}
               <span style={{ color: 'var(--ink)' }}>{FINISHES[product.finish]}</span>
             </p>
             <div className="flex items-center gap-3">
@@ -532,21 +532,21 @@ export default function ProductView({ product }: { product: Product }) {
         <div ref={chooserRef} style={{ scrollMarginTop: 96 }}>
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="display" style={{ fontSize: 'var(--fs-md)', letterSpacing: 0 }}>
-              {one ? 'הברכה שנצרבת על השבב' : 'איזו ברכה תיצרב על השבב?'}
+              {one ? 'הברכה שחרוטה על השבב' : 'איזו ברכה תהיה על השבב?'}
             </p>
             <Link
               href="/blessings"
               className="link-u flex-shrink-0"
               style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}
             >
-              לכל הנוסחים ←
+              לכל הברכות ←
             </Link>
           </div>
 
           <div
             className={`grid gap-2.5 grid-cols-2 ${available.length >= 3 ? 'sm:grid-cols-3' : ''}`}
             role={one ? undefined : 'radiogroup'}
-            aria-label="הברכה שתיצרב"
+            aria-label="בחירת הברכה"
           >
             {available.map((item) => {
               const on = item.id === blessing;
@@ -746,22 +746,22 @@ export default function ProductView({ product }: { product: Product }) {
           }}
         >
           <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
-            איך אפשר לדעת שהנוסח באמת שם?
+            איך אפשר לדעת שהברכה באמת שם?
           </p>
 
           <ul className="mt-4 flex flex-col gap-3">
             {[
               [
-                'קראו אותו לפני שאתם קונים',
-                `הנוסח המלא של ${b.plain} פתוח כאן באתר, מילה במילה. אנחנו לא מבקשים להאמין לנו - אפשר להשוות אותו למקור.`,
+                'קראו אותה לפני שאתם קונים',
+                `כל הטקסט של ${b.plain} נמצא כאן באתר, מילה במילה. לא צריך להאמין לנו - אפשר להשוות למקור.`,
               ],
               [
-                'המקור נקוב בשם',
-                'Westminster Leningrad Codex, נחלת הכלל. לא נוסח שערכנו, ולא קיצור שנבחר כדי להיכנס לשטח.',
+                'כתוב מאיפה הטקסט',
+                'הטקסט לקוח מ-Westminster Leningrad Codex, מהדורה דיגיטלית של התנ״ך שפתוחה לשימוש של כולם. לא ערכנו אותו ולא קיצרנו אותו.',
               ],
               [
                 'עם ניקוד',
-                'הניקוד נצרב יחד עם האותיות, ולא מושמט כדי לחסוך מקום. זה מה שנראה מתחת למיקרוסקופ.',
+                'הניקוד חרוט יחד עם האותיות. לא ויתרנו עליו כדי לחסוך מקום, ורואים אותו במיקרוסקופ.',
               ],
             ].map(([h, t]) => (
               // כותרת רצה לתוך הפסקה, כמו בטקסט ערוך - ולא ריבוע צבעוני
@@ -778,10 +778,10 @@ export default function ProductView({ product }: { product: Product }) {
               className="link-u"
               style={{ fontSize: 'var(--fs-sm)', color: b.accentInk }}
             >
-              לקריאת הנוסח המלא ←
+              לקריאת הברכה המלאה ←
             </Link>
             <Link href="/craft" className="link-u" style={{ fontSize: 'var(--fs-sm)', color: b.accentInk }}>
-              איך זה נצרב ←
+              איך זה נעשה ←
             </Link>
           </div>
         </div>
@@ -800,13 +800,13 @@ export default function ProductView({ product }: { product: Product }) {
 
         {/* ---------- מפרט ---------- */}
         <div className="mt-14">
-          <p className="eyebrow mb-2">מפרט מלא</p>
+          <p className="eyebrow mb-2">כל הפרטים</p>
 
           {[
             { title: 'התכשיט', rows: productRows },
             { title: 'השבב', rows: CHIP_SPEC },
             { title: 'מה מגיע בקופסה', rows: BOX_SPEC },
-            { title: 'טיפוח ואחריות', rows: CARE_SPEC },
+            { title: 'שמירה ואחריות', rows: CARE_SPEC },
           ].map((group, i) => {
             const open = openSpec === i;
             return (
@@ -882,7 +882,7 @@ export default function ProductView({ product }: { product: Product }) {
       <section className="pb-24 pt-4" style={{ borderTop: '1px solid var(--line)' }}>
         <div className="shell grid gap-10 pt-14 lg:grid-cols-[.7fr_1.3fr] lg:gap-16">
           <div className="lg:sticky lg:top-32 lg:self-start">
-            <h2 className="display t-2">שאלות שחוזרות</h2>
+            <h2 className="display t-2">שאלות נפוצות</h2>
           </div>
           <Accordion items={faq} />
         </div>
@@ -928,7 +928,7 @@ export default function ProductView({ product }: { product: Product }) {
             </span>
             {/* בלי בחירה אין מה להציג כנוסח - הכפתור שולח לבורר */}
             <span className="block truncate" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
-              {mustChoose ? 'הנוסח עוד לא נבחר' : b.plain}
+              {mustChoose ? 'עוד לא נבחרה ברכה' : b.plain}
             </span>
           </span>
 
@@ -963,7 +963,7 @@ export default function ProductView({ product }: { product: Product }) {
             className="btn btn-solid shrink-0 sm:max-w-xs sm:flex-1"
             style={{ ['--pad' as string]: '.85rem 1.1rem', fontSize: 'var(--fs-sm)' }}
           >
-            {mustChoose ? 'בחירת הנוסח' : 'הוספה לעגלה'}
+            {mustChoose ? 'בחירת ברכה' : 'הוספה לעגלה'}
           </button>
         </div>
       </div>

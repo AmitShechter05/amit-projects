@@ -95,7 +95,7 @@ export default async function GuidePage({ params }: { params: Promise<{ slug: st
                 {b && (
                   <p className="mt-4" style={{ fontSize: 'var(--fs-sm)' }}>
                     <Link href={`/blessings/${b.id}`} className="link-u" style={{ color: b.accentInk }}>
-                      לקריאת הנוסח המלא של {b.plain} ←
+                      לקריאת הטקסט המלא של {b.plain} ←
                     </Link>
                   </p>
                 )}

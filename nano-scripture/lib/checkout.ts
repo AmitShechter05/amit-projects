@@ -122,21 +122,21 @@ export function validate(c: Customer): FieldErrors {
      * בלעדיו החבילה חוזרת למחסן.
      */
     if (c.toRecipient) {
-      if (t(c.toName).length < 2) e.toName = 'שם הנמען';
-      if (!IL_PHONE.test(normalizePhone(c.toPhone))) e.toPhone = 'טלפון הנמען, למשלוח';
+      if (t(c.toName).length < 2) e.toName = 'שם מי שמקבל';
+      if (!IL_PHONE.test(normalizePhone(c.toPhone))) e.toPhone = 'טלפון של מי שמקבל, בשביל המשלוח';
       if (t(c.toAddress).length < 4) e.toAddress = 'רחוב ומספר בית';
       if (t(c.toCity).length < 2) e.toCity = 'עיר חסרה';
 
       const toZip = t(c.toPostcode);
-      if (toZip && !IL_ZIP.test(toZip)) e.toPostcode = 'מיקוד בן 5 או 7 ספרות';
+      if (toZip && !IL_ZIP.test(toZip)) e.toPostcode = 'מיקוד של 5 או 7 ספרות';
     }
   }
 
-  if (!c.terms) e.terms = 'יש לאשר את תנאי השימוש';
+  if (!c.terms) e.terms = 'צריך לאשר את תנאי השימוש';
 
   // מיקוד אינו חובה בישראל לצורך משלוח, ולכן נבדק רק אם הוזן
   const zip = t(c.postcode);
-  if (zip && !IL_ZIP.test(zip)) e.postcode = 'מיקוד בן 5 או 7 ספרות';
+  if (zip && !IL_ZIP.test(zip)) e.postcode = 'מיקוד של 5 או 7 ספרות';
 
   return e;
 }
@@ -166,7 +166,7 @@ export const FIELDS: {
     inputMode: 'tel',
     hint: 'אם תהיה שאלה על ההזמנה או על המשלוח, נכתוב לך בוואטסאפ',
   },
-  { key: 'email', label: 'דוא״ל', type: 'email', autoComplete: 'email' },
+  { key: 'email', label: 'אימייל', type: 'email', autoComplete: 'email' },
   { key: 'address', label: 'רחוב ומספר', type: 'text', autoComplete: 'street-address' },
   { key: 'city', label: 'עיר', type: 'text', autoComplete: 'address-level2', half: true },
   { key: 'postcode', label: 'מיקוד', type: 'text', autoComplete: 'postal-code', half: true, optional: true, inputMode: 'numeric' },
@@ -181,8 +181,8 @@ export const FIELDS: {
  * ישים לב.
  */
 export const RECIPIENT_FIELDS: typeof FIELDS = [
-  { key: 'toName', label: 'שם הנמען', type: 'text', autoComplete: 'off' },
-  { key: 'toPhone', label: 'טלפון הנמען', type: 'tel', autoComplete: 'off', inputMode: 'tel', hint: 'השליח מתקשר לנמען לפני המסירה' },
+  { key: 'toName', label: 'שם מי שמקבל', type: 'text', autoComplete: 'off' },
+  { key: 'toPhone', label: 'הטלפון של מי שמקבל', type: 'tel', autoComplete: 'off', inputMode: 'tel', hint: 'השליח מתקשר אליו לפני המסירה' },
   { key: 'toAddress', label: 'רחוב ומספר', type: 'text', autoComplete: 'off' },
   { key: 'toCity', label: 'עיר', type: 'text', autoComplete: 'off', half: true },
   { key: 'toPostcode', label: 'מיקוד', type: 'text', autoComplete: 'off', half: true, optional: true, inputMode: 'numeric' },

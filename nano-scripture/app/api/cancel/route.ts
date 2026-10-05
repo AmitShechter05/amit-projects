@@ -56,13 +56,13 @@ export async function POST(req: Request) {
   if (name.length < 2) fields.name = 'שם מלא';
   if (!validIsraeliId(idNumber)) fields.idNumber = 'מספר זהות בן 9 ספרות';
   if (!/^\d{1,8}$/.test(orderNumber)) fields.orderNumber = 'מספר ההזמנה, ספרות בלבד';
-  if (contact.length < 5) fields.contact = 'הטלפון או הדוא״ל שאיתם בוצעה ההזמנה';
+  if (contact.length < 5) fields.contact = 'הטלפון או האימייל שרשמתם בהזמנה';
   if (Object.keys(fields).length) {
     return NextResponse.json({ error: 'פרטים חסרים או שגויים', fields }, { status: 400 });
   }
 
   if (!wcReady) {
-    return NextResponse.json({ error: 'החנות אינה מחוברת כרגע. אפשר לבטל בוואטסאפ או בדוא״ל.' }, { status: 503 });
+    return NextResponse.json({ error: 'החנות לא מחוברת כרגע. אפשר לבטל בוואטסאפ או באימייל.' }, { status: 503 });
   }
 
   let order: WcOrderLite;
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
     (contact.includes('@') && contact.toLowerCase() === (order.billing?.email ?? '').toLowerCase());
   if (!matches) {
     return NextResponse.json(
-      { error: 'הטלפון או הדוא״ל אינם תואמים להזמנה הזו.', fields: { contact: 'לא תואם להזמנה' } },
+      { error: 'הטלפון או האימייל לא מתאימים להזמנה הזו.', fields: { contact: 'לא מתאים להזמנה' } },
       { status: 403 },
     );
   }
@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     }
   } catch (e) {
     console.error('cancel: WC write failed', e);
-    return NextResponse.json({ error: 'לא הצלחנו לרשום את ההודעה. אפשר לבטל בוואטסאפ או בדוא״ל.' }, { status: 502 });
+    return NextResponse.json({ error: 'לא הצלחנו לרשום את ההודעה. אפשר לבטל בוואטסאפ או באימייל.' }, { status: 502 });
   }
 
   return NextResponse.json({

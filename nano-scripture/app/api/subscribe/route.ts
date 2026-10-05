@@ -22,7 +22,7 @@ type WcCustomer = { id: number; email: string };
  */
 export async function POST(req: NextRequest) {
   if (!wcReady) {
-    return NextResponse.json({ error: 'ההרשמה אינה זמינה כרגע' }, { status: 503 });
+    return NextResponse.json({ error: 'ההרשמה לא זמינה כרגע' }, { status: 503 });
   }
 
   let body: Partial<Lead> & { source?: string };
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
    */
   const emailOnly = body.source === 'footer';
   if (!emailOnly && !promoOn) {
-    return NextResponse.json({ error: 'המבצע אינו פעיל' }, { status: 410 });
+    return NextResponse.json({ error: 'המבצע לא פעיל' }, { status: 410 });
   }
 
   const lead: Lead = {

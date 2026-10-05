@@ -28,8 +28,8 @@ export default function Worn() {
           className="lede reveal max-w-sm"
           style={{ ['--d' as string]: '160ms', fontSize: 'var(--fs-base)' }}
         >
-          השבב הכחול הוא הסימן - בכל דגם הוא יושב במקום אחר, ותמיד הוא מה שקולט את
-          האור ראשון.
+          את השבב הכחול רואים מיד. בכל תכשיט הוא נמצא
+          במקום אחר.
         </p>
       </div>
 
@@ -81,7 +81,7 @@ export default function Worn() {
                 {product!.name}
               </span>
               <span style={{ fontSize: 'var(--fs-xs)', opacity: 0.72 }}>
-                {shot.products.length > 1 ? `+${shot.products.length - 1} בפריים` : 'לפריט ←'}
+                {shot.products.length > 1 ? `+${shot.products.length - 1} בתמונה` : 'לתכשיט ←'}
               </span>
             </span>
           </Link>

@@ -279,7 +279,7 @@ export default function SignupPopup() {
               הקוד שלך מוכן
             </h2>
             <p className="mt-3" style={{ fontSize: 'var(--fs-base)', color: 'var(--ink-2)' }}>
-              מזינים אותו בעגלה. {PROMO.percent}% על סכום הפריטים, בהזמנה אחת ללקוח.
+              מקלידים אותו בעגלה. {PROMO.percent}% הנחה על הפריטים, בהזמנה אחת לכל לקוח.
             </p>
             <button
               type="button"
@@ -307,10 +307,10 @@ export default function SignupPopup() {
               style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-3)' }}
               aria-live="polite"
             >
-              {copied ? 'הועתק' : 'לחיצה מעתיקה'}
+              {copied ? 'הועתק' : 'לחצו כדי להעתיק'}
             </p>
             <button type="button" onClick={dismiss} className="btn btn-solid mt-5 w-full">
-              להמשך הגלישה
+              חזרה לאתר
             </button>
           </>
         ) : (
@@ -319,13 +319,13 @@ export default function SignupPopup() {
               {PROMO.percent}% הנחה על כל האתר
             </h2>
             <p className="mt-3" style={{ fontSize: 'var(--fs-base)', color: 'var(--ink-2)' }}>
-              משאירים שם, טלפון ודוא״ל - והקוד נפתח כאן על המסך.
+              משאירים שם, טלפון ואימייל, והקוד מופיע כאן על המסך.
             </p>
 
             <div className="mt-6 flex flex-col gap-4">
               {field('name', 'שם מלא', 'text', 'name', firstField)}
               {field('phone', 'טלפון', 'tel', 'tel')}
-              {field('email', 'דוא״ל', 'email', 'email')}
+              {field('email', 'אימייל', 'email', 'email')}
             </div>
 
             {/* הסכמה מפורשת, לא מסומנת מראש. סעיף 30א לחוק התקשורת */}
@@ -338,7 +338,7 @@ export default function SignupPopup() {
                 style={{ marginTop: 3 }}
               />
               <span style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.6 }}>
-                אני מאשר/ת קבלת דיוור פרסומי בדוא״ל ובמסרון. אפשר להסיר בכל עת.
+                אני מאשר/ת לקבל הודעות פרסומיות באימייל וב-SMS. אפשר להפסיק בכל רגע.
                 {errors.consent && (
                   <span className="block" style={{ color: 'var(--sale)' }}>
                     {errors.consent}

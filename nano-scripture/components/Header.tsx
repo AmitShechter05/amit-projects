@@ -288,7 +288,7 @@ export default function Header() {
 
           <hr className="rule my-7" />
 
-          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>חמשת הנוסחים</p>
+          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>חמש הברכות</p>
           <div className="mt-3 flex flex-col">
             {BLESSINGS.map((b) => (
               <Link
@@ -306,7 +306,7 @@ export default function Header() {
 
           <hr className="rule my-7" />
 
-          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>להכיר</p>
+          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>מידע</p>
           <div className="mt-3 flex flex-col">
             <Link href="/craft" className="tap-row" style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-base)', padding: '.34rem 0' }}>
               הטכנולוגיה

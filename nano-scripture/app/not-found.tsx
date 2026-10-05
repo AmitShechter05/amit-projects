@@ -7,9 +7,9 @@ export default function NotFound() {
         <p className="display accent-text" style={{ fontSize: 'var(--ds-mega)', lineHeight: 1 }}>
           404
         </p>
-        <h1 className="display t-2 mt-4">הדף הזה לא נצרב</h1>
+        <h1 className="display t-2 mt-4">הדף לא נמצא</h1>
         <p className="lede mx-auto mt-5 max-w-md">
-          יכול להיות שהקישור השתנה, או שהדגם ירד מהמדף. אפשר להתחיל מהקטלוג.
+          יכול להיות שהקישור השתנה, או שהתכשיט כבר לא נמכר. אפשר להתחיל מהקטלוג.
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-4">
           <Link href="/" className="btn btn-solid">לדף הבית</Link>

@@ -23,19 +23,19 @@ export const PAIRS: Pair[] = [
   {
     photo: '/scene/pair-libi-er.jpg',
     title: 'הזוג, בכסף ובזהב',
-    note: 'אותו דגם בשני הגימורים. נענד יחד, או אחד לכל אחד.',
+    note: 'אותו תכשיט בשני צבעים. אפשר לענוד את שניהם יחד, או אחד לכל אחד.',
     members: ['libi-er', 'libi-er-gold'],
   },
   {
     photo: '/scene/pair-ein-sof.jpg',
     title: 'הצמיד והשרשרת',
-    note: 'סמל האינסוף חוזר בשניהם, וכל אחד נושא נוסח משלו.',
+    note: 'סמל האינסוף מופיע בשניהם, ועל כל אחד אפשר לבחור ברכה אחרת.',
     members: ['ahavat-olam', 'tipat-or'],
   },
   {
     photo: '/scene/pair-trio.jpg',
-    title: 'שלוש שרשראות, שכבה על שכבה',
-    note: 'אורכים שונים ונוסחים שונים - הם לא מתחרים על אותו מקום.',
+    title: 'שלוש שרשראות יחד',
+    note: 'לכל אחת אורך אחר וברכה אחרת, אז הן לא יושבות אחת על השנייה.',
     members: ['al-kapayim', 'toldot', 'tipat-or'],
   },
 ];

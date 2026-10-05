@@ -136,7 +136,7 @@ export default function BlessingCard({
             {b.words} מילים
           </span>
           <Link href={href} className="link-u" style={{ color: b.accentInk }}>
-            לקריאת הנוסח המלא
+            לקריאת הברכה המלאה
           </Link>
         </p>
 
@@ -148,7 +148,7 @@ export default function BlessingCard({
               className="me-1"
               style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-3)' }}
             >
-              נענדת על
+              אפשר להזמין על
             </span>
             {carriers.map((p) => (
               <Link
