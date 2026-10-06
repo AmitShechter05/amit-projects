@@ -10,14 +10,14 @@ import Accordion, { type QA } from '@/components/Accordion';
 import { deliveryLine, dispatchLine } from '@/lib/policy';
 
 export const metadata: Metadata = {
-  title: 'הטכנולוגיה',
+  title: 'איך זה עובד',
   alternates: { canonical: '/craft' },
   description:
     'איך חורטים ברכה שלמה באותיות של 0.035 מילימטר: חריטה בלייזר, בדיקה של כל אות מול הטקסט המקורי, והכנסת השבב לתכשיט.',
   openGraph: {
     type: 'website',
     url: '/craft',
-    title: 'הטכנולוגיה · מִקְרָא',
+    title: 'איך זה עובד · מִקְרָא',
     description: 'איך חורטים ברכה שלמה על שבב, ואיך בודקים שהיא מדויקת.',
     images: [{ url: '/scene/lo-yanum-hand.jpg', alt: 'השבב בין האצבעות' }],
   },

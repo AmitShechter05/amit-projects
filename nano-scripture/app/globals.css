@@ -853,11 +853,25 @@ html[data-a11y-motion='off'] * {
 }
 .wa-fab:hover { transform: translateY(-2px); }
 
-/* בעמוד מוצר יושב פס קנייה דביק בגובה 88 פיקסל, ובלי ההרמה הזאת
-   הכפתור נבלע מתחתיו */
+/* בעמוד מוצר בטלפון אין כפתור וואטסאפ צף. הוא הורם מעל פס הקנייה
+   הדביק, ושם ישב בדיוק על בחירת הברכה ועל כפתור ההוספה לעגלה. קישור
+   "כתבו לנו" לוואטסאפ כבר קיים בעמוד, ליד בחירת הברכה (6.10.2026) */
 @media (max-width: 1023px) {
   body:has(.buybar-space) .wa-fab {
-    bottom: calc(88px + 1rem + env(safe-area-inset-bottom));
+    display: none;
+  }
+}
+
+/* בטלפון המשגר צר יותר: 44 פיקסל רוחב כיסו את קצה התמונות והטקסט.
+   הגובה נשאר 40 - מטרה נוחה לאצבע (6.10.2026) */
+@media (max-width: 767px) {
+  .a11y-launcher {
+    width: 30px;
+    height: 40px;
+  }
+  .a11y-launcher svg {
+    width: 19px;
+    height: 19px;
   }
 }
 

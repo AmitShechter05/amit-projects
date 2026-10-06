@@ -20,8 +20,8 @@ const CAT_NAV = [
 const PAGE_NAV = [
   { href: '/blessings', label: 'הברכות' },
   // המדריכים ישבו רק בפוטר. מי שקונה מתנה מתחיל מ"למי", לא מ"מה"
-  { href: '/guides', label: 'מתנה ל…' },
-  { href: '/craft', label: 'הטכנולוגיה' },
+  { href: '/guides', label: 'מדריכי מתנה' },
+  { href: '/craft', label: 'איך זה עובד' },
 ];
 const NAV = [...CAT_NAV, ...PAGE_NAV];
 
@@ -315,7 +315,7 @@ export default function Header() {
           <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>מידע</p>
           <div className="mt-3 flex flex-col">
             <Link href="/craft" className="tap-row" style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-base)', padding: '.34rem 0' }}>
-              הטכנולוגיה
+              איך זה עובד
             </Link>
             <Link href="/legal/shipping-returns" className="tap-row" style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-base)', padding: '.34rem 0' }}>
               משלוחים והחזרות
