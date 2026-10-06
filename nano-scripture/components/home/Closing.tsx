@@ -27,7 +27,7 @@ export default function Closing() {
           className="reveal mt-12 flex flex-wrap items-center justify-center gap-4"
           style={{ ['--d' as string]: '380ms' }}
         >
-          <Link href="/categories/necklaces" className="btn btn-solid">
+          <Link href="/catalog" className="btn btn-solid">
             בחירת תכשיט
           </Link>
           <Link href="/blessings" className="btn">

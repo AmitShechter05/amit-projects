@@ -276,7 +276,7 @@ export default function CraftPage() {
               ))}
             </ol>
             <div className="mt-10 flex flex-wrap gap-4">
-              <Link href="/categories/necklaces" className="btn btn-solid">לקטלוג</Link>
+              <Link href="/catalog" className="btn btn-solid">לקטלוג</Link>
               <Link href="/blessings" className="btn">חמש הברכות</Link>
             </div>
           </div>

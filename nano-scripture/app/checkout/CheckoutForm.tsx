@@ -244,7 +244,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
       <div className="card mx-auto max-w-xl p-10 text-center">
         <h1 className="display t-2">העגלה ריקה</h1>
         <p className="lede mt-4">אין מה לשלם עליו עדיין.</p>
-        <Link href="/categories/necklaces" className="btn btn-solid mt-8 inline-block">לקטלוג</Link>
+        <Link href="/catalog" className="btn btn-solid mt-8 inline-block">לקטלוג</Link>
       </div>
     );
   }

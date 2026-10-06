@@ -10,10 +10,13 @@ import { CATEGORIES, ACTIVE_CATEGORIES } from '@/lib/catalog';
 import { BLESSINGS } from '@/lib/blessings';
 
 // הניווט נגזר מהקטגוריות הפעילות — קטגוריה ריקה נעלמת מכאן מאליה
-const CAT_NAV = ACTIVE_CATEGORIES.map((id) => ({
-  href: `/categories/${id}`,
-  label: CATEGORIES[id].title,
-}));
+const CAT_NAV = [
+  { href: '/catalog', label: 'כל התכשיטים' },
+  ...ACTIVE_CATEGORIES.map((id) => ({
+    href: `/categories/${id}`,
+    label: CATEGORIES[id].title,
+  })),
+];
 const PAGE_NAV = [
   { href: '/blessings', label: 'הברכות' },
   // המדריכים ישבו רק בפוטר. מי שקונה מתנה מתחיל מ"למי", לא מ"מה"
@@ -279,6 +282,9 @@ export default function Header() {
               הסדר הוא סדר הכוונה: לקנות, לבחור נוסח, להבין מה זה */}
           <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>הקטלוג</p>
           <div className="mt-3 flex flex-col">
+            <Link href="/catalog" className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
+              כל התכשיטים
+            </Link>
             {ACTIVE_CATEGORIES.map((id) => (
               <Link key={id} href={`/categories/${id}`} className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
                 {CATEGORIES[id].title}

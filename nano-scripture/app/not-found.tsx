@@ -13,7 +13,7 @@ export default function NotFound() {
         </p>
         <div className="mt-9 flex flex-wrap justify-center gap-4">
           <Link href="/" className="btn btn-solid">לדף הבית</Link>
-          <Link href="/categories/necklaces" className="btn">לקטלוג</Link>
+          <Link href="/catalog" className="btn">לקטלוג</Link>
         </div>
       </div>
     </section>

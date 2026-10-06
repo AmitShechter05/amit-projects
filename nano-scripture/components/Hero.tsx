@@ -145,10 +145,9 @@ export default function Hero() {
             className="reveal load mt-8 flex flex-wrap items-center gap-4 max-md:mx-auto max-md:w-[var(--shell)]"
             style={{ ['--d' as string]: '440ms' }}
           >
-            <Link href="/blessings" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
-              לבחירת הברכה
-            </Link>
-            <Link href="/categories/necklaces" className="btn">
+            {/* כפתור אחד (עמית, 6.10.2026). "לבחירת הברכה" הוביל לעמוד שבו
+                קוראים ברכות ולא קונים, והלקוח לא הבין מאיפה מתחילים */}
+            <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
               לקטלוג
             </Link>
           </div>

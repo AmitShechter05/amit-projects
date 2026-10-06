@@ -101,7 +101,7 @@ export default async function SuccessPage({
                 <span className="ltr num">{COMPANY.phone}</span>
               </a>
             )}
-            <Link href="/categories/necklaces" className="btn btn-solid">
+            <Link href="/catalog" className="btn btn-solid">
               המשך לקטלוג
             </Link>
           </div>

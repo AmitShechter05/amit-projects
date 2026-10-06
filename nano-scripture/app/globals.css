@@ -860,3 +860,10 @@ html[data-a11y-motion='off'] * {
     bottom: calc(88px + 1rem + env(safe-area-inset-bottom));
   }
 }
+
+/* רשת שמתחלפת בלחיצה (הקטלוג עם הסינון): כרטיס חדש לא מחכה לגלילה */
+.reveal-off .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
