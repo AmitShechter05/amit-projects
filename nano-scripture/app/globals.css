@@ -881,3 +881,11 @@ html[data-a11y-motion='off'] * {
   transform: none;
   transition: none;
 }
+
+/* בעמוד מוצר בטלפון פס הקנייה גלוי מהטעינה, ובאנר העוגיות יושב מעליו
+   ולא מכסה אותו (6.10.2026) */
+@media (max-width: 1023px) {
+  body:has(.buybar-space) .cookie-banner {
+    bottom: calc(68px + env(safe-area-inset-bottom));
+  }
+}

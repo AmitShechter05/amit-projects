@@ -145,7 +145,11 @@ export default function ProductView({ product }: { product: Product }) {
       const r = el.getBoundingClientRect();
       const passed = r.bottom < 0;
       const notReached = r.top > window.innerHeight;
-      setStuck((passed || notReached) && window.scrollY > 320);
+      // בטלפון הפס מופיע כבר בטעינה: התמונה הראשית ממלאת את המסך הראשון,
+      // והכפתור האמיתי מתחת לו. עמית (6.10.2026): "לא רואים את הכפתור
+      // הוסף לעגלה". במסך רחב הכפתור כבר במסך הראשון, והסף נשאר
+      const mobile = window.innerWidth < 1024;
+      setStuck((passed || notReached) && (mobile || window.scrollY > 320));
     };
     const onScroll = () => {
       if (ticking) return;
@@ -298,7 +302,7 @@ export default function ProductView({ product }: { product: Product }) {
             צר מדי - ולכן אין תנאי רספונסיבי.
             בטלפון הן 64 ולא 84: עדיין מטרה נוחה לאצבע, ו-24 פיקסלים
             פחות בדרך אל הכפתור */}
-        <div className="mt-3 flex gap-2.5 overflow-x-auto sm:mt-4 sm:gap-3">
+        <div className="no-scrollbar mt-3 flex gap-2.5 overflow-x-auto sm:mt-4 sm:gap-3">
           {VIEWS.map((v) => {
             const on = v.id === view;
             return (

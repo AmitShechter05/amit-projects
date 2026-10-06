@@ -156,7 +156,7 @@ export default function Hero() {
               הכוכבית היא סימן היכר של עיצוב מיוצר, ורשימה של חמישה
               פריטים בשתי עמודות תפסה גובה של פסקה כדי לומר משפט אחד */}
           <p
-            className="reveal load mt-6 max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-14"
+            className="reveal load mt-6 max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-2"
             style={{
               ['--d' as string]: '580ms',
               fontSize: 'var(--fs-xs)',

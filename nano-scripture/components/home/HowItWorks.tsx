@@ -18,7 +18,7 @@ const LETTERS = ['א', 'ב', 'ג'];
 
 export default function HowItWorks() {
   return (
-    <section className="py-10 md:py-16" style={{ borderBottom: '1px solid var(--line)' }}>
+    <section className="pb-10 pt-6 md:py-16" style={{ borderBottom: '1px solid var(--line)' }}>
       <div className="shell">
         <h2 className="display t-3">איך זה עובד</h2>
         <ol className="mt-6 grid gap-5 md:grid-cols-3 md:gap-10">

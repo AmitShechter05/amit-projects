@@ -40,7 +40,7 @@ export default function CookieBanner() {
     <div
       role="region"
       aria-label="הודעת עוגיות"
-      className="fixed inset-x-0 bottom-0"
+      className="cookie-banner fixed inset-x-0 bottom-0"
       style={{ zIndex: 110, padding: '0 .75rem .75rem' }}
     >
       <div
