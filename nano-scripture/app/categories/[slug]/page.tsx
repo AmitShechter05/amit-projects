@@ -76,10 +76,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
   const featured = products.find((p) => p.featured) ?? products[0];
   const rest = products.filter((p) => p.slug !== featured?.slug);
 
-  // שבירה אחרי השורה הראשונה: רצף של שתים־עשרה משבצות זהות מאבד את העין
-  const BREAK_AFTER = 3;
-  const beforeBreak = rest.slice(0, BREAK_AFTER);
-  const afterBreak = rest.slice(BREAK_AFTER);
+  // כל הדגמים ברשת אחת, ורק אחריה פס הצילומים. עד 6.10.2026 הפס ישב
+  // אחרי שלושה כרטיסים: הכרטיס המוביל תופס שתי משבצות, ולכן השורה השנייה
+  // נשארה עם חור, ונראה כאילו השרשראות נגמרו (עמית: "אל תעשה חורים כאלו")
 
   return (
     <>
@@ -159,13 +158,13 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </div>
       </section>
 
-      {/* ---------- הדגם המוביל והשורה הראשונה ---------- */}
+      {/* ---------- כל הדגמים ---------- */}
       <section className="pb-4">
         <div className="shell">
           <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
             {featured && <FeaturedCard product={featured} />}
-            {beforeBreak.map((p, i) => (
-              <ProductCard key={p.slug} product={p} index={i} priority />
+            {rest.map((p, i) => (
+              <ProductCard key={p.slug} product={p} index={i} priority={i < 3} />
             ))}
           </div>
         </div>
@@ -173,7 +172,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
       {/* ---------- שבירה: זוג צילומים ושורת ברכה ---------- */}
       {breakPhotos.length >= 2 && (
-        <section className="py-16 md:py-24">
+        <section className="pb-32 pt-16 md:pt-24">
           <div className="shell grid items-center gap-8 md:grid-cols-[1fr_.85fr_1fr]">
             <div
               className="reveal relative overflow-hidden"
@@ -214,18 +213,6 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         </section>
       )}
 
-      {/* ---------- שאר הדגמים ---------- */}
-      {afterBreak.length > 0 && (
-        <section className="pb-32">
-          <div className="shell">
-            <div className="grid grid-cols-2 gap-3 sm:gap-6 lg:grid-cols-3">
-              {afterBreak.map((p, i) => (
-                <ProductCard key={p.slug} product={p} index={i} />
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
     </>
   );
 }
