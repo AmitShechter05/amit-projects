@@ -1,5 +1,4 @@
 import Hero from '@/components/Hero';
-import HowItWorks from '@/components/home/HowItWorks';
 import Bestsellers from '@/components/home/Bestsellers';
 import Worn from '@/components/home/Worn';
 import Scale from '@/components/home/Scale';
@@ -26,7 +25,6 @@ export default async function HomePage() {
   return (
     <>
       <Hero />
-      <HowItWorks />
       <Bestsellers />
       <Interlude shot={j2} />
       <Worn />

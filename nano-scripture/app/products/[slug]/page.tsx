@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductView from '@/components/ProductView';
 import ProductCard from '@/components/ProductCard';
+import HowItWorks from '@/components/home/HowItWorks';
 import { PRODUCTS, getProduct, productsByCategory, CATEGORIES } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { productFaq } from '@/lib/faq';
@@ -69,6 +70,10 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         ]}
       />
       <ProductView product={product} />
+
+      {/* איך זה עובד, עם מסכים מוקטנים וצילום השבב במיקרוסקופ.
+          עבר מעמוד הבית לכאן (עמית, 11.10.2026) */}
+      <HowItWorks />
 
       {related.length > 0 && (
         <section className="py-24" style={{ borderTop: '1px solid var(--line)', background: 'var(--bg-2)' }}>
