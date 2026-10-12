@@ -21,6 +21,7 @@ $mikra_heroes = array(
 	'customer_processing_order' => 'email-hero-received.jpg',
 	'customer_on_hold_order'    => 'email-hero-received.jpg',
 	'customer_completed_order'  => 'email-hero-shipped.jpg',
+	'customer_pending_reminder' => 'email-hero-reminder.jpg',
 );
 $mikra_hero   = isset( $mikra_heroes[ $mikra_email_id ] ) ? $mikra_heroes[ $mikra_email_id ] : '';
 ?>

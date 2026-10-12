@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.0.2
+ * Version: 1.1.0
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -134,6 +134,77 @@ function mikra_store_email_body( $order, $args ) {
 		)
 	);
 	include MIKRA_STORE_DIR . 'templates/parts/body.php';
+}
+
+/* ------------------------------------------------------------------
+ * 1א. תזכורת לתשלום שלא הושלם
+ * ------------------------------------------------------------------
+ *
+ * הזמנה שנוצרה מהקופה של mikra.shop (created_via = checkout) וממתינה
+ * לתשלום: אחרי 15 דקות נשלחת ללקוח תזכורת עם כפתור לתשלום. מי שקיבל
+ * תזכורת, ההזמנה שלו נשמרת עוד יום (ווקומרס היה מבטל אותה אחרי 30
+ * דקות), ואז מתבטלת אם לא שולמה.
+ */
+
+define( 'MIKRA_REMINDER_DELAY', 15 * MINUTE_IN_SECONDS );
+define( 'MIKRA_REMINDER_HOLD', DAY_IN_SECONDS );
+
+add_filter( 'woocommerce_email_classes', 'mikra_store_email_classes' );
+function mikra_store_email_classes( $emails ) {
+	require_once MIKRA_STORE_DIR . 'includes/class-mikra-email-pending-reminder.php';
+	$emails['Mikra_Email_Pending_Reminder'] = new Mikra_Email_Pending_Reminder();
+	return $emails;
+}
+
+add_action( 'woocommerce_new_order', 'mikra_store_schedule_reminder', 20, 2 );
+function mikra_store_schedule_reminder( $order_id, $order = null ) {
+	$order = ( $order instanceof WC_Order ) ? $order : wc_get_order( $order_id );
+	if ( ! $order || 'pending' !== $order->get_status() || 'checkout' !== $order->get_created_via() || ! $order->get_billing_email() ) {
+		return;
+	}
+	$args = array( (int) $order->get_id() );
+	if ( ! wp_next_scheduled( 'mikra_store_reminder', $args ) ) {
+		wp_schedule_single_event( time() + MIKRA_REMINDER_DELAY, 'mikra_store_reminder', $args );
+	}
+}
+
+add_action( 'mikra_store_reminder', 'mikra_store_send_reminder' );
+function mikra_store_send_reminder( $order_id ) {
+	$order = wc_get_order( $order_id );
+	if ( ! $order || ! in_array( $order->get_status(), array( 'pending', 'failed' ), true ) || $order->get_meta( '_mikra_reminded' ) ) {
+		return;
+	}
+	$emails = WC()->mailer()->get_emails();
+	if ( empty( $emails['Mikra_Email_Pending_Reminder'] ) ) {
+		return;
+	}
+	if ( ! $emails['Mikra_Email_Pending_Reminder']->trigger( $order->get_id() ) ) {
+		return; // המייל כבוי בהגדרות, או שאין כתובת - ווקומרס יבטל כרגיל
+	}
+	$order->update_meta_data( '_mikra_reminded', time() );
+	$order->add_order_note( 'נשלחה ללקוח תזכורת לתשלום. ההזמנה נשמרת עוד יום.' );
+	$order->save();
+	wp_schedule_single_event( time() + MIKRA_REMINDER_HOLD, 'mikra_store_expire', array( (int) $order->get_id() ) );
+}
+
+/** מי שקיבל תזכורת - ווקומרס לא מבטל אותו אחרי 30 דקות, אלא אנחנו אחרי יום */
+add_filter( 'woocommerce_cancel_unpaid_order', 'mikra_store_keep_reminded', 10, 2 );
+function mikra_store_keep_reminded( $cancel, $order ) {
+	if ( $order instanceof WC_Order ) {
+		$reminded = (int) $order->get_meta( '_mikra_reminded' );
+		if ( $reminded && ( time() - $reminded ) < MIKRA_REMINDER_HOLD ) {
+			return false;
+		}
+	}
+	return $cancel;
+}
+
+add_action( 'mikra_store_expire', 'mikra_store_expire_order' );
+function mikra_store_expire_order( $order_id ) {
+	$order = wc_get_order( $order_id );
+	if ( $order && 'pending' === $order->get_status() ) {
+		$order->update_status( 'cancelled', 'לא שולמה יום אחרי התזכורת.' );
+	}
 }
 
 /* ------------------------------------------------------------------
