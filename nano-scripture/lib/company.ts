@@ -11,16 +11,16 @@ export const COMPANY = {
   address: 'גולדה מאיר 112, מודיעין',
   email: 'mikrajewelry@gmail.com',
   /** חוק הגנת הצרכן מחייב אמצעי קשר טלפוני */
-  phone: '050-775-5705' as string | null,
+  phone: '053-371-4872' as string | null,
   /** ערוץ הביטול הרשמי. ללא מספר אי אפשר לממש אותו בפועל */
-  whatsapp: '050-775-5705' as string | null,
+  whatsapp: '053-371-4872' as string | null,
   /**
    * ממונה נגישות - נדרש בהצהרת הנגישות.
    *
    * התקנות מבקשות שם ואמצעי קשר. כאן יש רק אמצעי קשר, כי שם לא
    * נמסר - ואת השם של אדם אמיתי לא ממציאים. שווה להשלים.
    */
-  accessibilityContact: 'בטלפון 050-775-5705 או באימייל mikrajewelry@gmail.com' as string | null,
+  accessibilityContact: 'בטלפון 053-371-4872 או באימייל mikrajewelry@gmail.com' as string | null,
   updated: 'אוגוסט 2026',
 };
 

@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות למי שנרשם, תזכורת לתשלום, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.2.0
+ * Version: 1.2.1
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -21,8 +21,8 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'MIKRA_STORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MIKRA_SITE', 'https://mikra.shop' );
-define( 'MIKRA_WHATSAPP', '972507755705' );
-define( 'MIKRA_PHONE', '050-775-5705' );
+define( 'MIKRA_WHATSAPP', '972533714872' );
+define( 'MIKRA_PHONE', '053-371-4872' );
 define( 'MIKRA_EMAIL', 'mikrajewelry@gmail.com' );
 
 // סדרת ההצטרפות (שיווק) והבלוקים של העיצוב החדש - משמשים גם את תזכורת התשלום
