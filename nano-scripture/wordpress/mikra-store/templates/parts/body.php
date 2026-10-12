@@ -51,11 +51,13 @@ $mikra_font = 'font-family:Heebo,Arial,Helvetica,sans-serif;';
 		$mikra_qty      = (int) $mikra_item->get_quantity();
 		?>
 		<tr>
-			<?php if ( $mikra_img ) : ?>
-			<td width="76" style="padding:14px 0;<?php echo $mikra_line; ?>vertical-align:middle;">
+			<td width="76" style="width:76px;padding:14px 0;<?php echo $mikra_line; ?>vertical-align:middle;">
+				<?php if ( $mikra_img ) : ?>
 				<img src="<?php echo esc_url( $mikra_img ); ?>" width="64" height="64" alt="" style="display:block;width:64px;height:64px;border:1px solid #efe6d4;border-radius:8px;" />
+				<?php else : ?>
+				<div style="width:64px;height:64px;background:#f6efe1;border-radius:8px;"></div>
+				<?php endif; ?>
 			</td>
-			<?php endif; ?>
 			<td style="padding:14px 12px;<?php echo $mikra_line; ?>vertical-align:middle;text-align:right;">
 				<p style="margin:0;font-size:16px;font-weight:700;color:#16150f;"><?php echo esc_html( $mikra_item->get_name() ); ?><?php if ( $mikra_qty > 1 ) : ?> <span style="font-weight:400;color:#8a877c;">× <?php echo (int) $mikra_qty; ?></span><?php endif; ?></p>
 				<?php if ( '' !== $mikra_blessing ) : ?>
