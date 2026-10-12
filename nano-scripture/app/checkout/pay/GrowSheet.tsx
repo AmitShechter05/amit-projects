@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { formatPrice } from '@/lib/catalog';
 import { POLICY } from '@/lib/policy';
 import PaymentMarks from '@/components/PaymentMarks';
+import { savePending, clearPending } from '@/components/PendingPayment';
 
 /**
  * חלון התשלום של Grow, מעל העמוד שלנו.
@@ -83,6 +84,11 @@ export default function GrowSheet({
     } catch {
       /* אין אחסון */
     }
+    // אם הלקוח חוזר מ-bit לעמוד אחר באתר, PendingPayment ימצא את ההזמנה משם
+    {
+      const q = new URLSearchParams(path.split('?')[1] ?? '');
+      savePending({ o: q.get('o') ?? '', k: q.get('k') ?? '', number, total });
+    }
     const fail = (reason: string) => {
       // ההזמנה נוסעת לעמוד הכישלון, כדי שיציג אותה גם בלי מה שנשמר בדפדפן
       const q = new URLSearchParams(path.split('?')[1] ?? '');
@@ -97,6 +103,7 @@ export default function GrowSheet({
         version: '1.0',
         events: {
           onSuccess: () => {
+            clearPending();
             window.location.href = `/checkout/success?order=${encodeURIComponent(number)}&sum=${total.toFixed(2)}`;
           },
           onFailure: (r: unknown) => fail(reasonOf(r)),
@@ -122,7 +129,8 @@ export default function GrowSheet({
         const d = (await r.json()) as { paid?: boolean };
         if (d.paid && !gone) {
           gone = true;
-          window.location.href = `/checkout/success?order=${encodeURIComponent(number)}&sum=${total.toFixed(2)}`;
+          clearPending();
+            window.location.href = `/checkout/success?order=${encodeURIComponent(number)}&sum=${total.toFixed(2)}`;
         }
       } catch {
         /* ננסה בפעם הבאה */

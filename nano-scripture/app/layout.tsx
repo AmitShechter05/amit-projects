@@ -14,6 +14,7 @@ import Analytics from '@/components/Analytics';
 import CookieBanner from '@/components/CookieBanner';
 import SignupPopup from '@/components/SignupPopup';
 import WhatsAppFab from '@/components/WhatsAppFab';
+import PendingPayment from '@/components/PendingPayment';
 import { organizationSchema, websiteSchema } from '@/lib/schema';
 import LivePrices from '@/components/LivePrices';
 import { syncPrices } from '@/lib/livePrices';
@@ -97,6 +98,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           <CartDrawer />
         </LivePrices>
         <WhatsAppFab />
+        <PendingPayment />
         <A11yWidget />
         <CookieBanner />
         <SignupPopup />

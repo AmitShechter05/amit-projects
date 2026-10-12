@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
-import { skuToId, wcPost, wcReady } from '@/lib/wc';
+import { skuToId, wcGet, wcPost, wcReady } from '@/lib/wc';
 import type { WcOrder } from '@/lib/wcOrderCore';
 import { WC_GROW_METHOD } from '@/lib/grow';
 
@@ -11,7 +11,12 @@ import { WC_GROW_METHOD } from '@/lib/grow';
  * בווקומרס ולא קיים בקטלוג של האתר, ולכן לא מופיע ללקוחות. המפתח
  * בכתובת מונע מבוטים ליצור הזמנות; במקרה הגרוע מישהו משלם לנו שקל.
  * לבטל = למחוק את הקובץ.
+ *
+ * הזמנה אחת לדפדפן (עוגייה ל-30 דקות): bit מחזיר לפעמים לקישור המקורי
+ * ולא לעמוד התשלום, ובלי זה כל חזרה יצרה הזמנה חדשה (#72, 12.10.2026).
+ * שולמה - עמוד התודה; עדיין ממתינה - אותו עמוד תשלום.
  */
+const COOKIE = 'mikra-test-order';
 const KEY = 's01cuG1LCzT6';
 const SKU = 'TEST-1ILS';
 
@@ -21,6 +26,23 @@ export async function GET(req: NextRequest) {
   if (req.nextUrl.searchParams.get('k') !== KEY || !wcReady) {
     return new NextResponse('Not found', { status: 404 });
   }
+  const prev = req.cookies.get(COOKIE)?.value?.split('|');
+  if (prev?.length === 2) {
+    try {
+      const o = await wcGet<WcOrder>(`/orders/${Number(prev[0])}`);
+      if (o.order_key === prev[1]) {
+        if (['processing', 'completed', 'on-hold'].includes(o.status ?? '')) {
+          return NextResponse.redirect(new URL(`/checkout/success?order=${encodeURIComponent(o.number)}`, req.url));
+        }
+        if (o.status === 'pending' || o.status === 'failed') {
+          return NextResponse.redirect(new URL(`/checkout/pay?o=${o.id}&k=${encodeURIComponent(prev[1])}`, req.url));
+        }
+      }
+    } catch {
+      /* ההזמנה נמחקה - יוצרים חדשה */
+    }
+  }
+
   const id = (await skuToId()).get(SKU);
   if (!id) return new NextResponse('מוצר הבדיקה לא נמצא בווקומרס', { status: 500 });
 
@@ -50,5 +72,6 @@ export async function GET(req: NextRequest) {
     new URL(`/checkout/pay?o=${order.id}&k=${encodeURIComponent(order.order_key ?? '')}`, req.url),
   );
   res.headers.set('X-Robots-Tag', 'noindex');
+  res.cookies.set(COOKIE, `${order.id}|${order.order_key ?? ''}`, { maxAge: 30 * 60, httpOnly: true, sameSite: 'lax', secure: true, path: '/' });
   return res;
 }

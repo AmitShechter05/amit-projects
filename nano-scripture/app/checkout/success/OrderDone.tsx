@@ -9,6 +9,7 @@ import { GIFT_BOX } from '@/lib/extras';
 import { shippingMethod } from '@/lib/policy';
 import { trackPurchase } from '@/lib/analytics';
 import { readOrderDone, type OrderDone as Done } from '@/lib/orderDone';
+import { clearPending } from '@/components/PendingPayment';
 
 /**
  * מה נקנה — הסיכום שמופיע אחרי שההזמנה נסגרה.
@@ -51,6 +52,7 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
     }
 
     clear();
+    clearPending();
     // הסיכום נשאר לרענון של אותה לשונית, ונמחק בסגירתה
   }, [clear, order, sum]);
 
