@@ -1,8 +1,8 @@
 <?php
 /**
  * Plugin Name: Mikra Store
- * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות למי שנרשם, תזכורת לתשלום, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.2.1
+ * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
+ * Version: 1.3.0
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -25,8 +25,10 @@ define( 'MIKRA_WHATSAPP', '972533714872' );
 define( 'MIKRA_PHONE', '053-371-4872' );
 define( 'MIKRA_EMAIL', 'mikrajewelry@gmail.com' );
 
-// סדרת ההצטרפות (שיווק) והבלוקים של העיצוב החדש - משמשים גם את תזכורת התשלום
+// סדרת ההצטרפות (שיווק) והבלוקים של העיצוב החדש
 require_once MIKRA_STORE_DIR . 'includes/marketing.php';
+// זרימות: נטישה, אחרי הזמנה, חזרה - עם חלון שליחה, שבת וחג
+require_once MIKRA_STORE_DIR . 'includes/flows.php';
 
 /* ------------------------------------------------------------------
  * 1. תבניות המייל
@@ -140,72 +142,21 @@ function mikra_store_email_body( $order, $args ) {
 }
 
 /* ------------------------------------------------------------------
- * 1א. תזכורת לתשלום שלא הושלם
+ * 1א. הזמנה שלא שולמה = נטישה (includes/flows.php)
  * ------------------------------------------------------------------
  *
- * הזמנה שנוצרה מהקופה של mikra.shop (created_via = checkout) וממתינה
- * לתשלום: אחרי 15 דקות נשלחת ללקוח תזכורת עם כפתור לתשלום. מי שקיבל
- * תזכורת, ההזמנה שלו נשמרת עוד יום (ווקומרס היה מבטל אותה אחרי 30
- * דקות), ואז מתבטלת אם לא שולמה.
+ * עד 1.2 נשלחה כאן "תזכורת לתשלום" אחת, ובווקומרס גם "התשלום נכשל".
+ * מ-1.3 שניהם הוחלפו בזרימת הנטישה. מייל "התשלום נכשל" ללקוח כבוי,
+ * כדי שלא יגיעו שני מיילים על אותו רגע.
  */
 
-define( 'MIKRA_REMINDER_DELAY', 15 * MINUTE_IN_SECONDS );
-define( 'MIKRA_REMINDER_HOLD', DAY_IN_SECONDS );
+add_filter( 'woocommerce_email_enabled_customer_failed_order', '__return_false' );
 
-add_filter( 'woocommerce_email_classes', 'mikra_store_email_classes' );
-function mikra_store_email_classes( $emails ) {
-	require_once MIKRA_STORE_DIR . 'includes/class-mikra-email-pending-reminder.php';
-	$emails['Mikra_Email_Pending_Reminder'] = new Mikra_Email_Pending_Reminder();
-	return $emails;
-}
-
-add_action( 'woocommerce_new_order', 'mikra_store_schedule_reminder', 20, 2 );
-function mikra_store_schedule_reminder( $order_id, $order = null ) {
-	$order = ( $order instanceof WC_Order ) ? $order : wc_get_order( $order_id );
-	if ( ! $order || 'pending' !== $order->get_status() || 'checkout' !== $order->get_created_via() || ! $order->get_billing_email() ) {
-		return;
-	}
-	$args = array( (int) $order->get_id() );
-	if ( ! wp_next_scheduled( 'mikra_store_reminder', $args ) ) {
-		wp_schedule_single_event( time() + MIKRA_REMINDER_DELAY, 'mikra_store_reminder', $args );
-	}
-}
-
-add_action( 'mikra_store_reminder', 'mikra_store_send_reminder' );
-function mikra_store_send_reminder( $order_id ) {
-	$order = wc_get_order( $order_id );
-	if ( ! $order || ! in_array( $order->get_status(), array( 'pending', 'failed' ), true ) || $order->get_meta( '_mikra_reminded' ) ) {
-		return;
-	}
-	$emails = WC()->mailer()->get_emails();
-	if ( empty( $emails['Mikra_Email_Pending_Reminder'] ) ) {
-		return;
-	}
-	if ( ! $emails['Mikra_Email_Pending_Reminder']->trigger( $order->get_id() ) ) {
-		return; // המייל כבוי בהגדרות, או שאין כתובת - ווקומרס יבטל כרגיל
-	}
-	$order->update_meta_data( '_mikra_reminded', time() );
-	$order->add_order_note( 'נשלחה ללקוח תזכורת לתשלום. ההזמנה נשמרת עוד יום.' );
-	$order->save();
-	wp_schedule_single_event( time() + MIKRA_REMINDER_HOLD, 'mikra_store_expire', array( (int) $order->get_id() ) );
-}
-
-/** מי שקיבל תזכורת - ווקומרס לא מבטל אותו אחרי 30 דקות, אלא אנחנו אחרי יום */
-add_filter( 'woocommerce_cancel_unpaid_order', 'mikra_store_keep_reminded', 10, 2 );
-function mikra_store_keep_reminded( $cancel, $order ) {
-	if ( $order instanceof WC_Order ) {
-		$reminded = (int) $order->get_meta( '_mikra_reminded' );
-		if ( $reminded && ( time() - $reminded ) < MIKRA_REMINDER_HOLD ) {
-			return false;
-		}
-	}
-	return $cancel;
-}
-
+/** אירועי ביטול שתוזמנו בגרסה 1.2, לפני העדכון */
 add_action( 'mikra_store_expire', 'mikra_store_expire_order' );
 function mikra_store_expire_order( $order_id ) {
 	$order = wc_get_order( $order_id );
-	if ( $order && 'pending' === $order->get_status() ) {
+	if ( $order && 'pending' === $order->get_status() && ! $order->get_meta( '_mikra_ab_base' ) ) {
 		$order->update_status( 'cancelled', 'לא שולמה יום אחרי התזכורת.' );
 	}
 }

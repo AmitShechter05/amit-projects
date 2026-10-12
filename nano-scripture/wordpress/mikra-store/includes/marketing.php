@@ -108,21 +108,27 @@ function mk_para( $html, $pad = '30px 40px 0' ) {
 	return mk_row( mk_text( $html, 17, 300, '#16150f', 'line-height:1.7;' ), $pad );
 }
 
-/** כרטיס הקופון: אחוז ענק דק, ניקוב, והקוד */
-function mk_ticket( $promo, $lead = 'הקוד שלך' ) {
+/**
+ * כרטיס הקופון: אחוז ענק דק, ניקוב, והקוד. $small מחליף את שורת
+ * "מקלידים בקופה" ו-$scope את "על כל האתר" (למשל קוד שנכנס להזמנה
+ * בלחיצה על הכפתור)
+ */
+function mk_ticket( $promo, $lead = 'הקוד שלך', $small = null, $scope = 'על כל האתר' ) {
 	if ( ! $promo ) {
 		return '';
 	}
-	$until = $promo['until'] ? 'מקלידים בקופה · בתוקף עד ' . $promo['until'] : 'מקלידים בקופה';
+	if ( null === $small ) {
+		$small = $promo['until'] ? 'מקלידים בקופה · בתוקף עד ' . $promo['until'] : 'מקלידים בקופה';
+	}
 	return '<tr><td class="mk-pad" style="padding:28px 36px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#f3ead8;"><tr>'
 		. '<td align="right" style="padding:28px 30px 28px 18px;text-align:right;">'
 		. mk_text( esc_html( $lead ), 14, 300, '#4a4840' )
 		. mk_text( '<span dir="ltr">' . esc_html( $promo['code'] ) . '</span>', 32, 800, '#16150f', 'letter-spacing:2px;line-height:1.2;margin:4px 0;' )
-		. mk_text( esc_html( $until ), 12, 400, '#8a877c' )
+		. mk_text( esc_html( $small ), 12, 400, '#8a877c' )
 		. '</td><td width="1" style="border-right:2px dashed #d9c7a3;font-size:0;">&nbsp;</td>'
 		. '<td align="center" width="150" style="padding:24px 18px;text-align:center;">'
 		. mk_text( '<span dir="ltr">' . (int) $promo['percent'] . '%</span>', 58, 200, '#96661c', 'line-height:1;text-align:center;' )
-		. mk_text( 'על כל האתר', 12, 500, '#4a4840', 'text-align:center;margin-top:6px;' )
+		. mk_text( esc_html( $scope ), 12, 500, '#4a4840', 'text-align:center;margin-top:6px;' )
 		. '</td></tr></table></td></tr>';
 }
 
@@ -222,13 +228,17 @@ function mk_steps() {
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr>' . $c . '</tr></table></td></tr>';
 }
 
-/** רצועת המשי הכחול עם פסוק. רקע מתמונה, וצבע אחיד לאאוטלוק */
+/**
+ * רצועת פסוק על צילום כהה (שרשרת על שיש שחור, מוחשכת מראש בקובץ).
+ * באאוטלוק, שלא מציג רקע, נשאר הצבע הכהה והטקסט קריא
+ */
 function mk_quote_band( $kicker, $verse, $source ) {
-	return '<tr><td background="' . esc_url( MIKRA_IMG . 'navy-silk.jpg' ) . '" bgcolor="#141a2e" align="center" style="background:#141a2e url(' . esc_url( MIKRA_IMG . 'navy-silk.jpg' ) . ') center/cover no-repeat;padding:96px 50px 70px;text-align:center;">'
-		. mk_text( esc_html( $kicker ), 12, 700, '#fbf8f1', 'text-align:center;opacity:.85;' )
+	$bg = esc_url( MIKRA_IMG . 'quote-bg.jpg' );
+	return '<tr><td background="' . $bg . '" bgcolor="#1d1a16" align="center" style="background:#1d1a16 url(' . $bg . ') center/cover no-repeat;padding:96px 50px 70px;text-align:center;">'
+		. mk_text( esc_html( $kicker ), 12, 700, '#c9a35a', 'text-align:center;' )
 		. mk_text( $verse, 34, 200, '#fbf8f1', 'text-align:center;line-height:1.4;margin-top:16px;' )
 		. '<div style="width:40px;height:1px;line-height:1px;background:#c9a35a;margin:20px auto 14px;">&nbsp;</div>'
-		. mk_text( esc_html( $source ), 12, 400, '#a9a594', 'text-align:center;' ) . '</td></tr>';
+		. mk_text( esc_html( $source ), 12, 400, '#b9b3a3', 'text-align:center;' ) . '</td></tr>';
 }
 
 function mk_signoff( $text ) {
@@ -237,8 +247,17 @@ function mk_signoff( $text ) {
 		. mk_text( 'צוות מִקְרָא', 15, 500, '#16150f', 'margin-top:8px;' ) . '</td></tr>';
 }
 
-function mk_footer( $unsub = '' ) {
-	$u = $unsub ? '<br>קיבלת את המייל כי נרשמת באתר. <a href="' . esc_url( $unsub ) . '" style="color:#8a877c;text-decoration:underline;">להסרה מרשימת התפוצה</a>' : '';
+/**
+ * תחתית: פרטי העסק, ובמייל שיווקי - למה קיבלת והסרה. מייל שירות (בלי
+ * הסכמה לדיוור) מקבל במקום זה שורה שמסבירה על איזו הזמנה מדובר
+ */
+function mk_footer( $unsub = '', $why = 'כי נרשמת באתר', $service = '' ) {
+	$u = '';
+	if ( $unsub ) {
+		$u = '<br>קיבלת את המייל ' . esc_html( $why ) . '. <a href="' . esc_url( $unsub ) . '" style="color:#8a877c;text-decoration:underline;">להסרה מרשימת התפוצה</a>';
+	} elseif ( $service ) {
+		$u = '<br>' . esc_html( $service );
+	}
 	return '<tr><td align="center" style="padding:40px 30px 36px;' . MIKRA_FONT . 'font-size:11px;line-height:1.8;color:#8a877c;text-align:center;">'
 		. 'מִקְרָא · תכשיטים עם ברכה חרוטה · גולדה מאיר 112, מודיעין<br>'
 		. '<a href="' . esc_url( MIKRA_SITE ) . '" style="color:#96661c;text-decoration:none;">mikra.shop</a> · <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span> · ' . esc_html( MIKRA_EMAIL )
@@ -253,7 +272,7 @@ function mk_wrap( $title, $preheader, $rows ) {
 		. '<style>body{margin:0;padding:0;background:#fbf8f1}a{text-decoration:none}'
 		. '@media (max-width:620px){.mk-wrap{width:100%!important}.mk-pad{padding-left:20px!important;padding-right:20px!important}'
 		. '.mk-col{display:block!important;width:100%!important;padding:0 0 18px!important}.mk-hide{display:none!important}'
-		. '.mk-h p{font-size:38px!important}.mk-pcol{padding:0 3px!important}}</style></head>'
+		. '.mk-h p{font-size:38px!important}.mk-pcol{padding:0 3px!important}.mk-hero{height:560px!important}.mk-hero p.mk-ht{font-size:32px!important}}</style></head>'
 		. '<body dir="rtl" style="margin:0;padding:0;background:#fbf8f1;">'
 		. '<div style="display:none;max-height:0;overflow:hidden;">' . esc_html( $preheader ) . '</div>'
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#fbf8f1;"><tr><td align="center">'
@@ -307,29 +326,9 @@ function mikra_series_email( $step, $first_name, $unsub ) {
 			break;
 
 		case 3:
-			$pick = array(
-				array( 'לאמא, לאישה, לסבתא', 'אשת חיל', 'אֵשֶׁת חַיִל מִי יִמְצָא,<br>וְרָחֹק מִפְּנִינִים מִכְרָהּ', 'eshet-chayil', 'kachotam', 'OYANN001G', 'כַּחוֹתָם', 'm3-kachotam.jpg' ),
-				array( 'לתינוק שנולד', 'ברכת התינוק', 'יְבָרֶכְךָ ה׳<br>וְיִשְׁמְרֶךָ', 'tinok', 'tzel-knafayim', 'BABYPIN01', 'צֵל כְּנָפַיִם', 'm3-tzel.jpg' ),
-				array( 'למי שיוצא לדרך', 'שמירה והגנה', 'יֹשֵׁב בְּסֵתֶר עֶלְיוֹן,<br>בְּצֵל שַׁדַּי יִתְלוֹנָן', 'shmira', 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm3-beseter.jpg' ),
-				array( 'למי שבונה משהו', 'ברכת הפרנסה', 'לַה׳ הָאָרֶץ וּמְלוֹאָהּ,<br>תֵּבֵל וְיֹשְׁבֵי בָהּ', 'parnasa', 'avot', 'OYANB007RS', 'עֲבוֹת', 'm3-avot.jpg' ),
-				array( 'לכל רגע של התחלה', 'הברכה שלך', 'וּבָאוּ עָלֶיךָ כָּל הַבְּרָכוֹת<br>הָאֵלֶּה וְהִשִּׂיגֻךָ', 'bracha', 'toldot', 'YASNN004W', 'תּוֹלְדוֹת', 'm3-toldot.jpg' ),
-			);
 			$rows = mk_topbar( 'למי המתנה · מכתב 3' )
-				. mk_heading( 'חמש ברכות, חמישה רגעים', 'למי', 'המתנה?', $hi . 'כל ברכה נכתבה לרגע אחר בחיים. ככה בוחרים: מתחילים ממי שמקבל.', 56 );
-			foreach ( $pick as $i => $b ) {
-				list( $who, $name, $verse, $bslug, $pslug, $sku, $pname, $img ) = $b;
-				$price = mikra_sku_price( $sku );
-				$img_td = '<td class="mk-col" width="250" style="vertical-align:middle;"><a href="' . esc_url( mikra_utm( '/products/' . $pslug, $camp ) ) . '"><img src="' . esc_url( MIKRA_IMG . $img ) . '" width="250" alt="' . esc_attr( $pname ) . '" style="display:block;width:100%;height:auto;border:0;"></a></td>';
-				$txt_td = '<td class="mk-col" align="right" style="vertical-align:middle;text-align:right;padding:0 28px;">'
-					. mk_text( esc_html( $who ), 12, 700, '#96661c' )
-					. mk_text( esc_html( $name ), 30, 200, '#16150f', 'line-height:1.15;margin-top:6px;' )
-					. mk_text( $verse, 14, 300, '#4a4840', 'line-height:1.6;margin-top:10px;' )
-					. mk_text( esc_html( $pname ) . ( $price ? ' · ' . esc_html( $price ) : '' ), 14, 800, '#16150f', 'margin-top:14px;' )
-					. '<p style="margin:8px 0 0;' . MIKRA_FONT . 'font-size:13px;font-weight:500;"><a href="' . esc_url( mikra_utm( '/blessings/' . $bslug, $camp ) ) . '" style="color:#96661c;text-decoration:underline;">לקריאת הברכה</a> &nbsp;·&nbsp; <a href="' . esc_url( mikra_utm( '/products/' . $pslug, $camp ) ) . '" style="color:#96661c;text-decoration:underline;">לתכשיט</a></p>'
-					. '</td>';
-				// מתחלף צד: dir="ltr" הופך את סדר העמודות בלי לשנות את הטקסט
-				$rows .= '<tr><td style="padding:' . ( 0 === $i ? '36px' : '18px' ) . ' 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="' . ( 0 === $i % 2 ? 'rtl' : 'ltr' ) . '" style="background:#ffffff;"><tr>' . $img_td . $txt_td . '</tr></table></td></tr>';
-			}
+				. mk_heading( 'חמש ברכות, חמישה רגעים', 'למי', 'המתנה?', $hi . 'כל ברכה נכתבה לרגע אחר בחיים. ככה בוחרים: מתחילים ממי שמקבל.', 56 )
+				. mk_blessing_rows( array( 'eshet-chayil', 'tinok', 'shmira', 'parnasa', 'bracha' ), $camp );
 			$rows .= mk_ticket( $p ) . mk_button( 'לכל התכשיטים', mikra_utm( '/catalog', $camp ) )
 				. mk_signoff( 'עדיין לא בטוחים? עונים למייל הזה וכותבים למי המתנה ולאיזה רגע. נציע ברכה ותכשיט.' );
 			$subject = 'פרסומת: למי המתנה? ככה בוחרים ברכה';
@@ -340,10 +339,7 @@ function mikra_series_email( $step, $first_name, $unsub ) {
 			$rows = mk_topbar( 'ככה זה נראה · מכתב 4' )
 				. mk_image( 'm4-hero.jpg', 'זוג עונד צמידים של מקרא' )
 				. mk_heading( 'קטן מספיק ליום-יום', 'ככה זה נראה', 'עליכם.', $hi . 'שבב של 5 מ״מ לא מושך תשומת לב. מי שעונד יודע מה כתוב עליו, וזה מספיק.', 50 )
-				. '<tr><td class="mk-pad" style="padding:34px 30px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl">'
-				. '<tr>' . mk4_cell( 'tipat-or', 'YASNN010W', 'טִפַּת אוֹר', 'm4-tipat.jpg', $camp ) . mk4_cell( 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm4-beseter.jpg', $camp ) . '</tr>'
-				. '<tr>' . mk4_cell( 'ahavat-olam', 'YASNB001W', 'אַהֲבַת עוֹלָם', 'm4-ahavat.jpg', $camp ) . mk4_cell( 'avot-black', 'OYANB007B', 'עֲבוֹת', 'm4-avot-black.jpg', $camp ) . '</tr>'
-				. '</table></td></tr>'
+				. mk_gallery4( $camp )
 				. '<tr><td align="center" style="padding:30px 40px 0;"><table role="presentation" cellpadding="0" cellspacing="0" dir="rtl"><tr>'
 				. '<td style="padding:0 6px;"><a href="' . esc_url( mikra_utm( '/catalog?for=women', $camp ) ) . '" style="display:inline-block;border:1px solid #16150f;color:#16150f;' . MIKRA_FONT . 'font-size:15px;font-weight:500;text-decoration:none;padding:14px 34px;">לאישה</a></td>'
 				. '<td style="padding:0 6px;"><a href="' . esc_url( mikra_utm( '/catalog?for=men', $camp ) ) . '" style="display:inline-block;border:1px solid #16150f;color:#16150f;' . MIKRA_FONT . 'font-size:15px;font-weight:500;text-decoration:none;padding:14px 34px;">לגבר</a></td>'
@@ -390,6 +386,197 @@ function mk4_cell( $slug, $sku, $name, $img, $camp ) {
 		. '</tr></table></a></td>';
 }
 
+/** ארבע תמונות על הגוף, שתיים בשורה (מכתב 4 של ההצטרפות, וההטבה בזרימת החזרה) */
+function mk_gallery4( $camp ) {
+	return '<tr><td class="mk-pad" style="padding:34px 30px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl">'
+		. '<tr>' . mk4_cell( 'tipat-or', 'YASNN010W', 'טִפַּת אוֹר', 'm4-tipat.jpg', $camp ) . mk4_cell( 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm4-beseter.jpg', $camp ) . '</tr>'
+		. '<tr>' . mk4_cell( 'ahavat-olam', 'YASNB001W', 'אַהֲבַת עוֹלָם', 'm4-ahavat.jpg', $camp ) . mk4_cell( 'avot-black', 'OYANB007B', 'עֲבוֹת', 'm4-avot-black.jpg', $camp ) . '</tr>'
+		. '</table></td></tr>';
+}
+
+/** הברכות שמופיעות בשורות "למי המתנה": למי, שם, פסוק, תכשיט לדוגמה */
+function mikra_blessing_picks() {
+	return array(
+		'eshet-chayil' => array( 'לאמא, לאישה, לסבתא', 'אשת חיל', 'אֵשֶׁת חַיִל מִי יִמְצָא,<br>וְרָחֹק מִפְּנִינִים מִכְרָהּ', 'kachotam', 'OYANN001G', 'כַּחוֹתָם', 'm3-kachotam.jpg' ),
+		'tinok'        => array( 'לתינוק שנולד', 'ברכת התינוק', 'יְבָרֶכְךָ ה׳<br>וְיִשְׁמְרֶךָ', 'tzel-knafayim', 'BABYPIN01', 'צֵל כְּנָפַיִם', 'm3-tzel.jpg' ),
+		'shmira'       => array( 'למי שיוצא לדרך', 'שמירה והגנה', 'יֹשֵׁב בְּסֵתֶר עֶלְיוֹן,<br>בְּצֵל שַׁדַּי יִתְלוֹנָן', 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm3-beseter.jpg' ),
+		'parnasa'      => array( 'למי שבונה משהו', 'ברכת הפרנסה', 'לַה׳ הָאָרֶץ וּמְלוֹאָהּ,<br>תֵּבֵל וְיֹשְׁבֵי בָהּ', 'avot', 'OYANB007RS', 'עֲבוֹת', 'm3-avot.jpg' ),
+		'bracha'       => array( 'לכל רגע של התחלה', 'הברכה שלך', 'וּבָאוּ עָלֶיךָ כָּל הַבְּרָכוֹת<br>הָאֵלֶּה וְהִשִּׂיגֻךָ', 'toldot', 'YASNN004W', 'תּוֹלְדוֹת', 'm3-toldot.jpg' ),
+	);
+}
+
+/** שורות לבנות של תמונה וברכה, מתחלפות צד */
+function mk_blessing_rows( $ids, $camp ) {
+	$all  = mikra_blessing_picks();
+	$rows = '';
+	$i    = 0;
+	foreach ( $ids as $id ) {
+		if ( empty( $all[ $id ] ) ) {
+			continue;
+		}
+		list( $who, $name, $verse, $pslug, $sku, $pname, $img ) = $all[ $id ];
+		$price  = mikra_sku_price( $sku );
+		$img_td = '<td class="mk-col" width="250" style="vertical-align:middle;"><a href="' . esc_url( mikra_utm( '/products/' . $pslug, $camp ) ) . '"><img src="' . esc_url( MIKRA_IMG . $img ) . '" width="250" alt="' . esc_attr( $pname ) . '" style="display:block;width:100%;height:auto;border:0;"></a></td>';
+		$txt_td = '<td class="mk-col" align="right" style="vertical-align:middle;text-align:right;padding:0 28px;">'
+			. mk_text( esc_html( $who ), 12, 700, '#96661c' )
+			. mk_text( esc_html( $name ), 30, 200, '#16150f', 'line-height:1.15;margin-top:6px;' )
+			. mk_text( $verse, 14, 300, '#4a4840', 'line-height:1.6;margin-top:10px;' )
+			. mk_text( esc_html( $pname ) . ( $price ? ' · ' . esc_html( $price ) : '' ), 14, 800, '#16150f', 'margin-top:14px;' )
+			. '<p style="margin:8px 0 0;' . MIKRA_FONT . 'font-size:13px;font-weight:500;"><a href="' . esc_url( mikra_utm( '/blessings/' . $id, $camp ) ) . '" style="color:#96661c;text-decoration:underline;">לקריאת הברכה</a> &nbsp;·&nbsp; <a href="' . esc_url( mikra_utm( '/products/' . $pslug, $camp ) ) . '" style="color:#96661c;text-decoration:underline;">לתכשיט</a></p>'
+			. '</td>';
+		// מתחלף צד: dir="ltr" הופך את סדר העמודות בלי לשנות את הטקסט
+		$rows .= '<tr><td style="padding:' . ( 0 === $i ? '36px' : '18px' ) . ' 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="' . ( 0 === $i % 2 ? 'rtl' : 'ltr' ) . '" style="background:#ffffff;"><tr>' . $img_td . $txt_td . '</tr></table></td></tr>';
+		$i++;
+	}
+	return $rows;
+}
+
+/**
+ * פתיחה: צילום על הגוף עם הטקסט עליו. בקובץ התמונה כבר צרובים ההצללה
+ * והלוגו (נאפו מהפריים בפיגמה), והטקסט עצמו חי - כדי שיהיה קריא,
+ * נגיש ומתורגם. באאוטלוק, שלא מציג רקע, נשאר צבע כהה והטקסט עליו
+ */
+function mk_photo_hero( $file, $kicker, $title_html, $sub, $cta = '', $url = '' ) {
+	$bg = esc_url( MIKRA_IMG . $file );
+	$in = ( $kicker ? mk_text( esc_html( $kicker ), 13, 700, '#c9a35a', 'text-align:center;margin-bottom:10px;' ) : '' )
+		. '<p class="mk-ht" style="margin:0;' . MIKRA_FONT . 'font-size:40px;font-weight:800;line-height:1.15;color:#fbf8f1;text-align:center;">' . $title_html . '</p>'
+		. ( $sub ? mk_text( esc_html( $sub ), 16, 300, '#e8e2d4', 'text-align:center;line-height:1.6;margin-top:12px;' ) : '' )
+		. ( $cta ? '<p style="margin:24px 0 0;text-align:center;"><a href="' . esc_url( $url ) . '" style="display:inline-block;background:#c9a35a;color:#16150f;' . MIKRA_FONT . 'font-size:16px;font-weight:700;text-decoration:none;padding:16px 46px;">' . esc_html( $cta ) . '</a></p>' : '' );
+	return '<tr><td class="mk-hero" background="' . $bg . '" bgcolor="#1d1a16" height="680" valign="bottom" align="center" style="background:#1d1a16 url(' . $bg . ') center top/cover no-repeat;height:680px;vertical-align:bottom;padding:0 44px 40px;text-align:center;">' . $in . '</td></tr>';
+}
+
+/** מה שבהזמנה: תמונה, שם, ברכה ומחיר, ובסוף הסכום */
+function mk_cart( $order, $kicker = 'מה שחיכה לך בעגלה' ) {
+	$items = '';
+	foreach ( $order->get_items() as $item ) {
+		$img      = mikra_store_item_image( $item );
+		$blessing = (string) $item->get_meta( 'הברכה', true );
+		$qty      = (int) $item->get_quantity();
+		$items   .= '<tr><td style="padding:0 0 14px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#ffffff;"><tr>'
+			. '<td width="170" style="vertical-align:middle;">' . ( $img ? '<img src="' . esc_url( $img ) . '" width="170" alt="" style="display:block;width:170px;height:auto;border:0;">' : '' ) . '</td>'
+			. '<td align="right" style="vertical-align:middle;text-align:right;padding:18px 26px;">'
+			. mk_text( esc_html( $item->get_name() ) . ( $qty > 1 ? ' <span style="font-weight:300;color:#8a877c;">× ' . $qty . '</span>' : '' ), 20, 800, '#16150f', 'line-height:1.2;' )
+			. ( '' !== $blessing ? mk_text( 'ברכה: ' . esc_html( $blessing ), 13, 300, '#4a4840', 'margin-top:6px;' ) : '' )
+			. mk_text( wp_kses_post( mikra_store_money( $item->get_subtotal(), $order ) ), 15, 500, '#16150f', 'margin-top:10px;' )
+			. '</td></tr></table></td></tr>';
+	}
+	return '<tr><td class="mk-pad" style="padding:36px 36px 0;">'
+		. mk_text( esc_html( $kicker ), 12, 700, '#96661c', 'margin-bottom:14px;' )
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl">' . $items . '</table>'
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="border-top:1px solid #d9c7a3;margin-top:4px;"><tr>'
+		. '<td align="right" style="padding-top:14px;text-align:right;">' . mk_text( 'סה״כ, כולל משלוח', 14, 300, '#4a4840' ) . '</td>'
+		. '<td align="left" style="padding-top:14px;text-align:left;">' . mk_text( wp_kses_post( mikra_store_money( $order->get_total(), $order ) ), 24, 800, '#16150f', 'text-align:left;' ) . '</td>'
+		. '</tr></table></td></tr>';
+}
+
+/** קופסה בהירה עם כותרת קצרה ושורה (שאלה לפני שמזמינים, "אם משהו לא בסדר") */
+function mk_note( $title, $body_html, $pad = '34px 36px 0' ) {
+	return '<tr><td class="mk-pad" style="padding:' . $pad . ';"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#f3ead8;"><tr>'
+		. '<td align="right" style="padding:22px 26px;text-align:right;">'
+		. mk_text( esc_html( $title ), 17, 800, '#16150f' )
+		. mk_text( $body_html, 15, 300, '#4a4840', 'line-height:1.65;margin-top:6px;' )
+		. '</td></tr></table></td></tr>';
+}
+
+/** ארבעה כללי שמירה, שניים בשורה, עם אות זהב */
+function mk_care() {
+	$r = array(
+		array( 'א', 'מורידים לפני מים', 'מקלחת, ים ובריכה. עדיף בלי התכשיט.' ),
+		array( 'ב', 'קודם בושם, אחר כך תכשיט', 'מתבשמים ומתמרחים, ורק אז עונדים.' ),
+		array( 'ג', 'שומרים בקופסה', 'בנפרד משאר התכשיטים, כדי שלא יישרט.' ),
+		array( 'ד', 'מנגבים בעדינות', 'במטלית רכה ויבשה. בלי חומרי ניקוי.' ),
+	);
+	$cell = function ( $it ) {
+		return '<td class="mk-col" width="50%" style="vertical-align:top;padding:6px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#ffffff;"><tr><td align="right" style="padding:22px 22px 24px;text-align:right;">'
+			. mk_text( esc_html( $it[0] ), 44, 200, '#96661c', 'line-height:1;' )
+			. mk_text( esc_html( $it[1] ), 18, 800, '#16150f', 'line-height:1.3;margin-top:10px;' )
+			. mk_text( esc_html( $it[2] ), 14, 300, '#4a4840', 'line-height:1.6;margin-top:6px;' )
+			. '</td></tr></table></td>';
+	};
+	return '<tr><td class="mk-pad" style="padding:10px 24px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl">'
+		. '<tr>' . $cell( $r[0] ) . $cell( $r[1] ) . '</tr><tr>' . $cell( $r[2] ) . $cell( $r[3] ) . '</tr></table></td></tr>';
+}
+
+/** שורה לבנה של תמונה וטקסט - כמו בשורות הברכות, לתוכן חופשי */
+function mk_feature_row( $img, $kicker, $title, $body, $link_label = '', $link = '' ) {
+	return '<tr><td style="padding:40px 0 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl" style="background:#ffffff;"><tr>'
+		. '<td class="mk-col" align="right" style="vertical-align:middle;text-align:right;padding:0 28px;">'
+		. mk_text( esc_html( $kicker ), 12, 700, '#96661c' )
+		. mk_text( esc_html( $title ), 30, 200, '#16150f', 'line-height:1.15;margin-top:6px;' )
+		. mk_text( esc_html( $body ), 14, 300, '#4a4840', 'line-height:1.6;margin-top:10px;' )
+		. ( $link ? '<p style="margin:12px 0 0;' . MIKRA_FONT . 'font-size:13px;font-weight:500;"><a href="' . esc_url( $link ) . '" style="color:#96661c;text-decoration:underline;">' . esc_html( $link_label ) . '</a></p>' : '' )
+		. '</td><td class="mk-col" width="250" style="vertical-align:middle;"><img src="' . esc_url( MIKRA_IMG . $img ) . '" width="250" alt="" style="display:block;width:100%;height:auto;border:0;"></td>'
+		. '</tr></table></td></tr>';
+}
+
+/** חמש קוביות דירוג. כל אחת קישור משלה (5 בשמאל, 1 בימין) */
+function mk_rating( $url_for ) {
+	$c = '';
+	foreach ( array( 5, 4, 3, 2, 1 ) as $n ) {
+		$c .= '<td width="20%" style="padding:0 5px;"><a href="' . esc_url( $url_for( $n ) ) . '" style="display:block;background:#ffffff;border:1px solid #d9c7a3;text-align:center;padding:14px 0 12px;text-decoration:none;">'
+			. mk_text( '★', 22, 400, '#c9a35a', 'text-align:center;line-height:1.1;' )
+			. mk_text( (string) $n, 20, 800, '#16150f', 'text-align:center;line-height:1.1;' ) . '</a></td>';
+	}
+	return '<tr><td class="mk-pad" style="padding:14px 35px 0;">'
+		. mk_text( 'לחצו על הציון', 13, 700, '#96661c', 'text-align:center;margin-bottom:14px;' )
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="ltr"><tr>' . $c . '</tr></table>'
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="ltr" style="margin-top:8px;"><tr>'
+		. '<td align="left" style="padding-left:5px;' . MIKRA_FONT . 'font-size:12px;color:#8a877c;">מעולה</td>'
+		. '<td align="right" style="padding-right:5px;' . MIKRA_FONT . 'font-size:12px;color:#8a877c;text-align:right;">לא טוב</td>'
+		. '</tr></table></td></tr>';
+}
+
+/** שלוש תמונות מרובעות בשורה, עם כותרת */
+function mk_sq3( $title ) {
+	$c = '';
+	foreach ( array( 'sq-choose.jpg', 'sq-engrave.jpg', 'sq-pack.jpg' ) as $f ) {
+		$c .= '<td class="mk-pcol" width="33%" style="padding:0 5px;"><img src="' . esc_url( MIKRA_IMG . $f ) . '" width="170" alt="" style="display:block;width:100%;height:auto;border:0;"></td>';
+	}
+	return '<tr><td class="mk-pad" style="padding:40px 30px 0;">'
+		. mk_text( esc_html( $title ), 20, 800, '#16150f', 'text-align:center;margin-bottom:18px;' )
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr>' . $c . '</tr></table></td></tr>';
+}
+
+/** שלוש קופסאות לבנות: מספר זהב גדול ומתחתיו מה הוא אומר */
+function mk_fact_boxes( $items ) {
+	$c = '';
+	foreach ( $items as $it ) {
+		$c .= '<td class="mk-pcol" width="33%" style="padding:0 5px;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ffffff;"><tr><td align="center" style="padding:18px 6px;text-align:center;">'
+			. mk_text( esc_html( $it[0] ), 26, 200, '#96661c', 'text-align:center;line-height:1.1;' )
+			. mk_text( esc_html( $it[1] ), 12, 500, '#4a4840', 'text-align:center;margin-top:6px;' ) . '</td></tr></table></td>';
+	}
+	return '<tr><td class="mk-pad" style="padding:24px 30px 0;"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr>' . $c . '</tr></table></td></tr>';
+}
+
+/** כותרת קטנה בתוך המייל ("לרגעים שבדרך") */
+function mk_subhead( $text ) {
+	return mk_row( mk_text( esc_html( $text ), 22, 800, '#16150f' ), '36px 44px 0' );
+}
+
+/**
+ * מכתב: טקסט פשוט על לבן, בלי עיצוב - כמו מייל אישי. $paras הן שורות
+ * HTML מוכנות (כבר מנוקות), $link אופציונלי בסוף
+ */
+function mk_letter( $title, $preheader, $paras, $unsub, $why = 'כי אישרת דיוור', $link = null ) {
+	$body = '';
+	foreach ( $paras as $p ) {
+		$body .= '<p style="margin:0 0 16px;' . MIKRA_FONT . 'font-size:16px;line-height:1.65;color:#222222;">' . $p . '</p>';
+	}
+	if ( $link ) {
+		$body .= '<p style="margin:4px 0 16px;' . MIKRA_FONT . 'font-size:16px;"><a href="' . esc_url( $link[1] ) . '" style="color:#96661c;text-decoration:underline;">' . esc_html( $link[0] ) . '</a></p>';
+	}
+	$foot = '—<br>מִקְרָא · גולדה מאיר 112, מודיעין · <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span>'
+		. ( $unsub ? '<br>קיבלת את המייל ' . esc_html( $why ) . '. <a href="' . esc_url( $unsub ) . '" style="color:#9a9a9a;text-decoration:underline;">להסרה מרשימת התפוצה</a>' : '' );
+	return '<!DOCTYPE html><html lang="he" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>' . esc_html( $title ) . '</title></head>'
+		. '<body dir="rtl" style="margin:0;padding:0;background:#ffffff;">'
+		. '<div style="display:none;max-height:0;overflow:hidden;">' . esc_html( $preheader ) . '</div>'
+		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr><td align="right" style="padding:28px 24px;">'
+		. '<table role="presentation" width="560" cellpadding="0" cellspacing="0" dir="rtl" style="width:100%;max-width:560px;text-align:right;"><tr><td align="right" style="text-align:right;">'
+		. $body
+		. '<p style="margin:26px 0 0;' . MIKRA_FONT . 'font-size:11px;line-height:1.7;color:#9a9a9a;">' . $foot . '</p>'
+		. '</td></tr></table></td></tr></table></body></html>';
+}
+
 /* ------------------------------------------------------------------
  * שליחה, תזמון והסרה
  * ------------------------------------------------------------------ */
@@ -420,7 +607,7 @@ function mikra_series_allowed( $user ) {
 	if ( ! $user || ! $user->user_email ) {
 		return false;
 	}
-	if ( get_user_meta( $user->ID, 'mikra_unsubscribed', true ) ) {
+	if ( get_user_meta( $user->ID, 'mikra_unsubscribed', true ) || mikra_is_suppressed( $user->user_email ) ) {
 		return false;
 	}
 	if ( 0 !== strpos( (string) get_user_meta( $user->ID, 'הסכמה לדיוור', true ), 'כן' ) ) {
@@ -448,10 +635,23 @@ function mikra_series_run( $user_id, $step ) {
 	if ( ! mikra_series_allowed( $user ) || get_user_meta( $user_id, 'mikra_series_' . $step, true ) ) {
 		return;
 	}
+	// מכתב 1 נשלח מיד: ביקשו אותו עכשיו (הקוד מהפופאפ). השאר - בחלון
+	// השליחה, מייל אחד ביום, ומחכים בזמן שיש הזמנה פתוחה בזרימת נטישה
+	if ( 1 !== (int) $step ) {
+		$at = mikra_gate( $user->user_email );
+		if ( ! $at && mikra_in_abandon( $user->user_email ) ) {
+			$at = mikra_when( time() + DAY_IN_SECONDS );
+		}
+		if ( $at ) {
+			wp_schedule_single_event( $at, 'mikra_store_series', array( (int) $user_id, (int) $step ) );
+			return;
+		}
+	}
 	$unsub = mikra_unsub_url( $user_id, $user->user_email );
 	$mail  = mikra_series_email( $step, (string) get_user_meta( $user_id, 'first_name', true ), $unsub );
 	if ( $mail && mikra_send_html( $user->user_email, $mail[0], $mail[1], $unsub ) ) {
 		update_user_meta( $user_id, 'mikra_series_' . $step, time() );
+		mikra_mark_sent( $user->user_email );
 	}
 	$next = array( 1 => array( 2, DAY_IN_SECONDS ), 2 => array( 3, 2 * DAY_IN_SECONDS ), 3 => array( 4, 2 * DAY_IN_SECONDS ) );
 	if ( isset( $next[ $step ] ) ) {
@@ -479,8 +679,7 @@ function mikra_series_unsubscribe() {
 	$tok  = isset( $_REQUEST['t'] ) ? (string) $_REQUEST['t'] : '';
 	$user = get_userdata( $uid );
 	if ( $user && hash_equals( mikra_unsub_token( $uid, $user->user_email ), $tok ) ) {
-		update_user_meta( $uid, 'mikra_unsubscribed', time() );
-		update_user_meta( $uid, 'הסכמה לדיוור', 'לא · הוסר ' . wp_date( 'Y-m-d H:i' ) );
+		mikra_suppress( $user->user_email ); // גם מהזרימות של ההזמנות, לא רק מהסדרה
 	}
 	if ( 'POST' === strtoupper( (string) ( $_SERVER['REQUEST_METHOD'] ?? 'GET' ) ) ) {
 		status_header( 200 );
