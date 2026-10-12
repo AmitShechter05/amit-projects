@@ -292,7 +292,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
             <div style={{ borderTop: '1px solid var(--line)' }} className="pt-4">
               {totals.discount > 0 && (
                 <div className="mb-2 flex justify-between" style={{ fontSize: 'var(--fs-sm)' }}>
-                  <span style={{ color: 'var(--sale)' }}>{PROMO.pill} · {PROMO.code}</span>
+                  <span style={{ color: 'var(--sale)' }}>{PROMO.pill}</span>
                   <span className="num" style={{ color: 'var(--sale)' }}>−{formatPrice(totals.discount)}</span>
                 </div>
               )}

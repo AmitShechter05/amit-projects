@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { waHref } from '@/lib/company';
+import { readOrderDone, type OrderDone } from '@/lib/orderDone';
+import { getProduct, formatPrice } from '@/lib/catalog';
+import { getBlessing } from '@/lib/blessings';
 
 /**
  * התשלום לא עבר.
@@ -29,9 +33,12 @@ function readReason(q: URLSearchParams): string | null {
 }
 
 export default function FailedView() {
-  const [state, setState] = useState<{ retry: string | null; number: string | null; reason: string | null } | null>(
-    null,
-  );
+  const [state, setState] = useState<{
+    retry: string | null;
+    number: string | null;
+    reason: string | null;
+    order: OrderDone | null;
+  } | null>(null);
 
   useEffect(() => {
     // נטען בתוך מסגרת התשלום? יוצאים ממנה, ואז ממשיכים בעמוד המלא
@@ -52,7 +59,9 @@ export default function FailedView() {
     } catch {
       /* אין אחסון */
     }
-    setState({ retry, number, reason: readReason(new URLSearchParams(window.location.search)) });
+    // מה היה בהזמנה: הסיכום שנשמר רגע לפני המעבר לתשלום (lib/orderDone)
+    const order = readOrderDone();
+    setState({ retry, number: number ?? order?.number ?? null, reason: readReason(new URLSearchParams(window.location.search)), order });
   }, []);
 
   if (!state) return null;
@@ -71,6 +80,47 @@ export default function FailedView() {
           ' ההזמנה נשמרה, ואפשר לנסות שוב.'
         )}
       </p>
+
+      {/* העגלה (עמית, 12.10.2026): הלקוח רואה מה הוא עומד לקנות לפני שמנסה שוב */}
+      {state.order && state.order.lines.length > 0 && (
+        <div className="mt-8">
+          <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
+            ההזמנה שלך
+          </p>
+          <ul className="mt-3 flex flex-col">
+            {state.order.lines.flatMap((l) => {
+              const p = getProduct(l.slug);
+              if (!p) return [];
+              const b = getBlessing(l.blessing);
+              return [
+                <li key={`${l.slug}::${l.blessing}`} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid var(--line)' }}>
+                  <span className="tile relative shrink-0 overflow-hidden" style={{ width: 56, height: 56, borderRadius: 'var(--radius)' }}>
+                    <Image src={p.image} alt="" fill sizes="56px" className="object-contain p-1" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>
+                      {p.name}
+                      {l.qty > 1 && <span className="num" style={{ color: 'var(--ink-3)' }}> × {l.qty}</span>}
+                    </span>
+                    <span className="block truncate" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
+                      {b.plain}
+                    </span>
+                  </span>
+                  <span className="num shrink-0" style={{ fontSize: 'var(--fs-sm)' }}>
+                    {formatPrice(p.price * l.qty)}
+                  </span>
+                </li>,
+              ];
+            })}
+          </ul>
+          <div className="flex items-baseline justify-between pt-3" style={{ borderTop: '1px solid var(--line-strong)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>סה״כ לתשלום</span>
+            <span className="num display" style={{ fontSize: 'var(--fs-lg)' }}>
+              {formatPrice(state.order.total)}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div
         className="mt-8 p-5"

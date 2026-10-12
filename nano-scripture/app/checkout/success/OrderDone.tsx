@@ -7,7 +7,6 @@ import { getProduct, formatPrice } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { GIFT_BOX } from '@/lib/extras';
 import { shippingMethod } from '@/lib/policy';
-import { PROMO } from '@/lib/promo';
 import { trackPurchase } from '@/lib/analytics';
 import { readOrderDone, type OrderDone as Done } from '@/lib/orderDone';
 
@@ -169,7 +168,7 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
 
         {totals.discount > 0 && (
           <Row
-            label={`הנחה · ${PROMO.code}`}
+            label="הנחה"
             value={`−${formatPrice(totals.discount)}`}
             color="var(--sale)"
           />
