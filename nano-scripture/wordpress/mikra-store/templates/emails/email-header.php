@@ -9,7 +9,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$mikra_email_id = ( isset( $email ) && is_object( $email ) && isset( $email->id ) ) ? (string) $email->id : '';
+$mikra_email    = mikra_store_current_email( isset( $email ) ? $email : null );
+$mikra_email_id = ( $mikra_email && isset( $mikra_email->id ) ) ? (string) $mikra_email->id : '';
 $mikra_customer = 0 === strpos( $mikra_email_id, 'customer_' );
 $mikra_hero     = in_array( $mikra_email_id, array( 'customer_processing_order', 'customer_on_hold_order', 'customer_completed_order' ), true );
 ?>

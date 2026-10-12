@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$mikra_email    = ( isset( $email ) && is_object( $email ) ) ? $email : null;
+$mikra_email    = mikra_store_current_email( isset( $email ) ? $email : null );
 $mikra_customer = $mikra_email && isset( $mikra_email->id ) && 0 === strpos( (string) $mikra_email->id, 'customer_' );
 $mikra_order    = ( $mikra_email && isset( $mikra_email->object ) && $mikra_email->object instanceof WC_Order ) ? $mikra_email->object : null;
 ?>

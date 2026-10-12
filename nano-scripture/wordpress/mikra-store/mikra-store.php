@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -41,6 +41,36 @@ function mikra_store_locate_template( $template, $template_name, $template_path 
 	}
 	$ours = MIKRA_STORE_DIR . 'templates/' . $template_name;
 	return file_exists( $ours ) ? $ours : $template;
+}
+
+/**
+ * איזה מייל נבנה עכשיו.
+ *
+ * ווקומרס טוען את email-header.php ו-email-footer.php בלי אובייקט המייל
+ * (WC_Emails::email_header מקבל רק את הכותרת), ולכן התבנית לא יודעת אם
+ * זה מייל ללקוח ואיזה. כאן תופסים את האובייקט מאותו do_action, לפני
+ * ווקומרס, ושומרים אותו לתבניות (התגלה במייל הבדיקה, 12.10.2026: בלי
+ * תמונה ובלי וואטסאפ).
+ */
+add_action( 'woocommerce_email_header', 'mikra_store_remember_email', 1, 2 );
+add_action( 'woocommerce_email_footer', 'mikra_store_remember_email_footer', 1, 1 );
+function mikra_store_remember_email( $email_heading, $email = null ) {
+	if ( is_object( $email ) ) {
+		$GLOBALS['mikra_store_email'] = $email;
+	}
+}
+function mikra_store_remember_email_footer( $email = null ) {
+	if ( is_object( $email ) ) {
+		$GLOBALS['mikra_store_email'] = $email;
+	}
+}
+
+/** המייל שנבנה עכשיו, אם ידוע */
+function mikra_store_current_email( $email = null ) {
+	if ( is_object( $email ) ) {
+		return $email;
+	}
+	return ( isset( $GLOBALS['mikra_store_email'] ) && is_object( $GLOBALS['mikra_store_email'] ) ) ? $GLOBALS['mikra_store_email'] : null;
 }
 
 /** כתובת עמוד התשלום שלנו להזמנה (חלון Grow בתוך mikra.shop) */
