@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import ProductView from '@/components/ProductView';
 import ProductCard from '@/components/ProductCard';
 import HowItWorks from '@/components/home/HowItWorks';
-import { PRODUCTS, getProduct, productsByCategory, CATEGORIES } from '@/lib/catalog';
+import { PRODUCTS, getProduct, productsByCategory, CATEGORIES, isHiddenProduct } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { productFaq } from '@/lib/faq';
 import JsonLd from '@/components/JsonLd';
@@ -23,6 +23,8 @@ export async function generateMetadata({
   const { slug } = await params;
   const p = getProduct(slug);
   if (!p) return {};
+  // דגם חבוי (מוצר הבדיקה) - לא לגוגל
+  if (isHiddenProduct(p.slug)) return { title: p.name, robots: { index: false, follow: false } };
   return {
     title: productTitle(p),
     description: productDescription(p),

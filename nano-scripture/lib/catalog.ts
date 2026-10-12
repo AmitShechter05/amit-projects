@@ -522,6 +522,38 @@ export const PRODUCTS: Product[] = [
   },
 ];
 
+/**
+ * דגמים חבויים: יש להם עמוד מוצר ואפשר לקנות אותם, אבל הם לא מופיעים
+ * בשום רשימה - לא בקטלוג, לא בדף הבית, לא במפת האתר ולא בפיד. העמוד
+ * שלהם מסומן "לא לאינדקס".
+ *
+ * מוצר הבדיקה (עמית, 12.10.2026): לבדוק את כל המסלול של לקוח - עמוד
+ * מוצר, עגלה, קופה, תשלום - בשקל. בווקומרס הוא פרטי, והמחיר שם 1 ש"ח
+ * (הסנכרון קורא רק מוצרים מפורסמים, אז המספר כאן הוא שקובע באתר -
+ * לשמור את שניהם זהים). משלוח: "איסוף עצמי", אחרת נוספים 29 ש"ח; בלי
+ * קוד הנחה.
+ */
+export const HIDDEN_PRODUCTS: Product[] = [
+  {
+    sku: 'TEST-1ILS',
+    slug: 'bdika',
+    name: 'מוצר בדיקה',
+    nameLatin: 'TEST',
+    category: 'bracelets',
+    material: 'steel',
+    finish: 'silver',
+    audience: 'unisex',
+    price: 1,
+    image: '/products/OYANB001S.webp',
+    blessings: ['bracha', 'shmira'],
+    short: 'מוצר לבדיקת התשלום בלבד. לא נשלח.',
+    story: 'מוצר לבדיקת התשלום באתר, מהעמוד ועד התשלום. לא נשלח ולא מיוצר.',
+    specs: [{ label: 'מה זה', value: 'מוצר בדיקה - לא למכירה' }],
+  },
+];
+
+export const isHiddenProduct = (slug: string) => HIDDEN_PRODUCTS.some((p) => p.slug === slug);
+
 /* ---------- מחירים חיים ---------- */
 
 /** מק״ט → המחיר שבתוקף בווקומרס */
@@ -547,7 +579,7 @@ export type PriceMap = Record<string, number>;
  * ------------------------------------------------------------------
  */
 export function applyPrices(map: PriceMap) {
-  for (const p of PRODUCTS) {
+  for (const p of [...PRODUCTS, ...HIDDEN_PRODUCTS]) {
     const live = map[p.sku];
     if (typeof live === 'number' && Number.isFinite(live) && live > 0) p.price = live;
   }
@@ -666,11 +698,11 @@ export function productsByCategory(id: CategoryId) {
 }
 
 export function getProduct(slug: string) {
-  return PRODUCTS.find((p) => p.slug === slug);
+  return PRODUCTS.find((p) => p.slug === slug) ?? HIDDEN_PRODUCTS.find((p) => p.slug === slug);
 }
 
 export function getProductBySku(sku: string) {
-  return PRODUCTS.find((p) => p.sku === sku);
+  return PRODUCTS.find((p) => p.sku === sku) ?? HIDDEN_PRODUCTS.find((p) => p.sku === sku);
 }
 
 /** קטגוריות שיש בהן לפחות דגם אחד — טבעות ייעלמו מעצמן עד שיגיעו */
