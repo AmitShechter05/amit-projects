@@ -146,7 +146,8 @@ export async function POST(req: NextRequest) {
         orderId: order.id,
         orderNumber: order.number,
         total: totals.total,
-        payment: order.payment_url,
+        // דף התשלום של ווקומרס, בתוך מסגרת באתר (עמית, 12.10.2026)
+        payment: `/checkout/pay?u=${encodeURIComponent(order.payment_url)}`,
       });
     }
 

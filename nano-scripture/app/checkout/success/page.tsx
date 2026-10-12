@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { POLICY, deliveryLine, dispatchLine } from '@/lib/policy';
 import { COMPANY, telHref, waHref } from '@/lib/company';
 import OrderDone from './OrderDone';
+import BreakOut from './BreakOut';
 
 export const metadata: Metadata = {
   title: 'ההזמנה התקבלה',
@@ -38,6 +39,7 @@ export default async function SuccessPage({
 
   return (
     <section className="pb-32 pt-40">
+      <BreakOut />
       <div className="shell max-w-2xl">
         <h1 className="display t-hero">ההזמנה התקבלה.</h1>
 
