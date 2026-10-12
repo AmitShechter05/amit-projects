@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { validate, normalizePhone, type Customer } from '@/lib/checkout';
 import { createOrder, orderTotal, type OrderLine } from '@/lib/wcOrder';
 import { wcReady } from '@/lib/wc';
-import { paymentReady, createPayment } from '@/lib/grow';
+import { paymentReady, payViaWc, onlinePayment, createPayment } from '@/lib/grow';
 import { isBlessingId } from '@/lib/blessings';
 import { getProduct } from '@/lib/catalog';
 import { SITE_URL } from '@/lib/site';
@@ -117,7 +117,9 @@ export async function POST(req: NextRequest) {
       customer,
       note: typeof body.note === 'string' ? body.note.slice(0, 500) : '',
       // במסלול הידני ההזמנה נולדת on-hold - כך ווקומרס מודיע למנהל
-      status: paymentReady ? 'pending' : 'on-hold',
+      status: onlinePayment ? 'pending' : 'on-hold',
+      // במסלול התוסף, התוסף של Grow בווקומרס הוא שגובה את ההזמנה
+      ...(payViaWc ? { paymentMethod: { id: 'meshulam-payment', title: 'Grow · כרטיס אשראי / bit' } } : {}),
     });
 
     // שני החישובים אמורים להסכים. אם לא - יש מחיר, משלוח או קופון שהאתר
@@ -137,6 +139,17 @@ export async function POST(req: NextRequest) {
      * גמור, וזה בדיוק הרגע שבו הוא מתחרט. מה שהוא צריך לדעת זה מה
      * קורה עכשיו ומתי.
      */
+    // מסלול התוסף: דף התשלום של ההזמנה בווקומרס. אם ווקומרס לא החזיר
+    // קישור, ההזמנה כבר קיימת - נופלים למסלול הידני ולא משאירים אותה תלויה
+    if (payViaWc && order.payment_url) {
+      return NextResponse.json({
+        orderId: order.id,
+        orderNumber: order.number,
+        total: totals.total,
+        payment: order.payment_url,
+      });
+    }
+
     if (!paymentReady) {
       return NextResponse.json({
         orderId: order.id,

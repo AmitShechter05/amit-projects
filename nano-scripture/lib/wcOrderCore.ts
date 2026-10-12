@@ -64,9 +64,11 @@ export type OrderInput = {
    * שעה" שמתקיים לבין כזה שמתגלה בפתיחת הפאנל למחרת.
    */
   status?: 'pending' | 'on-hold';
+  /** אמצעי התשלום בווקומרס. ברירת המחדל: Grow דרך ה-API */
+  paymentMethod?: { id: string; title: string };
 };
 
-export type WcOrder = { id: number; number: string; total: string };
+export type WcOrder = { id: number; number: string; total: string; payment_url?: string };
 
 export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
   if (!input.lines.length) throw new Error('עגלה ריקה');
@@ -157,8 +159,8 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
     : { ...billing, email: undefined, phone: undefined };
 
   return {
-    payment_method: 'grow',
-    payment_method_title: 'Grow · כרטיס אשראי',
+    payment_method: input.paymentMethod?.id ?? 'grow',
+    payment_method_title: input.paymentMethod?.title ?? 'Grow · כרטיס אשראי',
     // ההזמנה נוצרת ממתינה לתשלום. רק הוובהוק של הסולק מעביר אותה
     // ל"בתהליך" - אחרת הזמנה שנטשה באמצע התשלום נראית כמשולמת
     set_paid: false,

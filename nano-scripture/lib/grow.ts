@@ -39,6 +39,22 @@ const API = `${BASE}/api/light/server/1.0`;
 export const paymentReady = Boolean(USER_ID && PAGE_CODE);
 export const paymentSandbox = SANDBOX;
 
+/**
+ * תשלום דרך התוסף של Grow בווקומרס, בלי ה-API.
+ *
+ * Grow התקינו את התוסף שלהם ב-wp.mikra.shop (12.10.2026); גישת ה-API
+ * עולה 500 ש"ח בחודש. במסלול הזה ההזמנה נוצרת כאן כרגיל, והלקוח עובר
+ * לדף "שלם עבור ההזמנה" של ווקומרס - שם התוסף מציג כרטיס, ארנק ו-bit,
+ * גובה, ומעדכן את ההזמנה בעצמו.
+ *
+ * כבוי עד שאתר הוורדפרס יעבור ממצב "בקרוב" ל-Live: עד אז הדף הזה מציג
+ * "החנות תושק בקרוב" במקום טופס תשלום, והלקוח היה נתקע שם.
+ */
+const PAY_VIA_WC_PLUGIN = false;
+export const payViaWc = !paymentReady && PAY_VIA_WC_PLUGIN;
+/** יש תשלום אונליין, באחד משני המסלולים */
+export const onlinePayment = paymentReady || payViaWc;
+
 export type PaymentRequest = {
   orderId: number;
   orderNumber: string;

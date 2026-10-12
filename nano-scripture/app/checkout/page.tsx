@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import CheckoutForm from './CheckoutForm';
-import { paymentReady } from '@/lib/grow';
+import { onlinePayment } from '@/lib/grow';
 
 export const metadata: Metadata = {
   title: 'תשלום',
@@ -14,7 +14,7 @@ export default function CheckoutPage() {
     <section className="pb-32 pt-40">
       <div className="shell">
         {/* grow.ts הוא server-only; הטופס לומד ממנו רק דרך הפרופ */}
-        <CheckoutForm paymentReady={paymentReady} />
+        <CheckoutForm paymentReady={onlinePayment} />
       </div>
     </section>
   );
