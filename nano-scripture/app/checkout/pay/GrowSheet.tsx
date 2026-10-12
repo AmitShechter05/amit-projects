@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import { formatPrice } from '@/lib/catalog';
 import { POLICY } from '@/lib/policy';
+import PaymentMarks from '@/components/PaymentMarks';
 
 /**
  * חלון התשלום של Grow, מעל העמוד שלנו.
@@ -49,7 +50,18 @@ export type PaySummary = {
 
 const row = { fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' } as const;
 
-export default function GrowSheet({ token, number, summary }: { token: string; number: string; summary: PaySummary }) {
+export default function GrowSheet({
+  token,
+  number,
+  path,
+  summary,
+}: {
+  token: string;
+  number: string;
+  /** כתובת עמוד התשלום של ההזמנה (?o=&k=) */
+  path: string;
+  summary: PaySummary;
+}) {
   const total = summary.total;
   const [state, setState] = useState<'loading' | 'open' | 'closed' | 'error'>('loading');
   const ready = useRef(false);
@@ -66,14 +78,16 @@ export default function GrowSheet({ token, number, summary }: { token: string; n
     try {
       sessionStorage.setItem(
         'mikra-last-payment',
-        JSON.stringify({ url: window.location.pathname + window.location.search, number }),
+        JSON.stringify({ url: path, number }),
       );
     } catch {
       /* אין אחסון */
     }
     const fail = (reason: string) => {
-      const q = reason ? `?reason=${encodeURIComponent(reason.slice(0, 160))}` : '';
-      window.location.href = `/checkout/failed${q}`;
+      // ההזמנה נוסעת לעמוד הכישלון, כדי שיציג אותה גם בלי מה שנשמר בדפדפן
+      const q = new URLSearchParams(path.split('?')[1] ?? '');
+      if (reason) q.set('reason', reason.slice(0, 160));
+      window.location.href = `/checkout/failed?${q}`;
     };
     const start = () => {
       if (ready.current || !window.growPayment) return;
@@ -191,10 +205,11 @@ export default function GrowSheet({ token, number, summary }: { token: string; n
       <button type="button" className="btn btn-solid mt-6 w-full" onClick={reopen} disabled={state === 'loading'}>
         {state === 'loading' ? 'פותחים את התשלום…' : `לתשלום · ${formatPrice(total)}`}
       </button>
+      <PaymentMarks tone="cards" gap={6} className="mt-5 justify-center" />
       <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: state === 'error' ? 'var(--accent)' : 'var(--ink-3)' }}>
         {state === 'error'
           ? 'חלון התשלום לא נטען. בדקו את החיבור לאינטרנט ונסו שוב.'
-          : `כרטיס אשראי, bit, Apple Pay או Google Pay · עד ${POLICY.maxInstallments} תשלומים · התשלום מאובטח אצל Grow, ופרטי הכרטיס לא נשמרים אצלנו.`}
+          : `עד ${POLICY.maxInstallments} תשלומים · התשלום מאובטח אצל Grow, ופרטי הכרטיס לא נשמרים אצלנו.`}
       </p>
     </div>
   );

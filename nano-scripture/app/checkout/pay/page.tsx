@@ -1,48 +1,9 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { wcGet, wcReady } from '@/lib/wc';
-import { BLESSING_KEY, type WcOrder } from '@/lib/wcOrderCore';
 import { growWalletToken } from '@/lib/grow';
-import { getProductBySku } from '@/lib/catalog';
-import GrowSheet, { type PaySummary } from './GrowSheet';
-
-/** השדות של הזמנה בווקומרס שהסיכום צריך */
-type WcFullOrder = WcOrder & {
-  discount_total?: string;
-  line_items?: { name: string; sku?: string; quantity: number; subtotal: string; meta_data?: { key: string; value: unknown }[] }[];
-  fee_lines?: { name: string; total: string }[];
-  shipping_lines?: { method_id?: string; method_title: string; total: string }[];
-  shipping?: { first_name?: string; last_name?: string; address_1?: string; city?: string };
-};
-
-/** הסיכום שמוצג מאחורי חלון התשלום - מתוך ההזמנה עצמה, לא מהעגלה */
-function summarize(o: WcFullOrder): PaySummary {
-  const ship = o.shipping_lines?.[0];
-  const pickup = ship?.method_id === 'local_pickup';
-  const to = o.shipping;
-  return {
-    lines: (o.line_items ?? []).map((l) => {
-      const p = l.sku ? getProductBySku(l.sku) : undefined;
-      const blessing = l.meta_data?.find((m) => m.key === BLESSING_KEY)?.value;
-      return {
-        name: p?.name ?? l.name,
-        image: p?.image ?? null,
-        blessing: typeof blessing === 'string' ? blessing : null,
-        qty: l.quantity,
-        amount: Number(l.subtotal),
-      };
-    }),
-    fees: (o.fee_lines ?? []).map((f) => ({ name: f.name, amount: Number(f.total) })),
-    shipping: ship ? { label: ship.method_title, amount: Number(ship.total) } : null,
-    discount: Number(o.discount_total ?? 0),
-    total: Number(o.total),
-    shipTo:
-      !pickup && to?.address_1
-        ? { name: `${to.first_name ?? ''} ${to.last_name ?? ''}`.trim(), address: [to.address_1, to.city].filter(Boolean).join(', ') }
-        : null,
-  };
-}
+import { findOrder, summarize, payPath, type WcFullOrder } from '@/lib/paySummary';
+import GrowSheet from './GrowSheet';
 
 export const metadata: Metadata = {
   title: 'תשלום מאובטח',
@@ -66,18 +27,8 @@ export default async function PayPage({
   searchParams: Promise<{ o?: string; k?: string }>;
 }) {
   const { o, k } = await searchParams;
-  const id = Number(o);
-
-  let order: WcFullOrder | null = null;
+  const order: WcFullOrder | null = await findOrder(o, k);
   let token: string | null = null;
-  if (wcReady && Number.isInteger(id) && id > 0 && k) {
-    try {
-      const found = await wcGet<WcFullOrder>(`/orders/${id}`);
-      if (found.order_key === k) order = found;
-    } catch (e) {
-      console.error('pay page: order lookup failed', id, e);
-    }
-  }
 
   // כבר שולם (למשל חזרה אחורה אחרי התשלום) - לא פותחים תשלום שני
   if (order && ['processing', 'completed', 'on-hold'].includes(order.status ?? '')) {
@@ -96,7 +47,25 @@ export default async function PayPage({
     <section className="pb-24 pt-32 md:pt-40">
       <div className="shell">
         {order && token ? (
-          <GrowSheet token={token} number={order.number} summary={summarize(order)} />
+          <GrowSheet token={token} number={order.number} path={payPath(order)} summary={summarize(order)} />
+        ) : order?.status === 'cancelled' ? (
+          // ווקומרס מבטל הזמנה שלא שולמה תוך 30 דקות. העגלה עדיין שמורה
+          // בדפדפן (היא מתרוקנת רק בעמוד התודה), אז חוזרים לקופה
+          <div className="mx-auto max-w-lg text-center">
+            <h1 className="display t-2">ההזמנה פגה</h1>
+            <p className="lede mt-4">
+              הזמנה <span className="num">#{order.number}</span> לא שולמה תוך חצי שעה, ולכן בוטלה. לא חויבתם. אפשר
+              להזמין שוב מהעגלה.
+            </p>
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link href="/checkout" className="btn btn-solid">
+                חזרה לקופה
+              </Link>
+              <Link href="/catalog" className="btn">
+                לקטלוג
+              </Link>
+            </div>
+          </div>
         ) : (
           <div className="mx-auto max-w-lg text-center">
             <h1 className="display t-2">לא הצלחנו לפתוח את התשלום</h1>
@@ -107,7 +76,7 @@ export default async function PayPage({
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">
               {order && (
-                <Link href={`/checkout/pay?o=${order.id}&k=${encodeURIComponent(k ?? '')}`} className="btn btn-solid">
+                <Link href={payPath(order)} className="btn btn-solid">
                   לנסות שוב
                 </Link>
               )}

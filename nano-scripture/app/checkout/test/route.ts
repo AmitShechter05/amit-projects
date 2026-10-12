@@ -39,6 +39,7 @@ export async function GET(req: NextRequest) {
     payment_method_title: WC_GROW_METHOD.title,
     set_paid: false,
     status: 'pending',
+    created_via: 'checkout',
     billing,
     line_items: [{ product_id: id, quantity: 1 }],
     customer_note: 'בדיקת סליקה ב-1 ש"ח (קישור הבדיקה)',

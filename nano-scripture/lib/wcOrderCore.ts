@@ -173,6 +173,10 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
     // ל"בתהליך" - אחרת הזמנה שנטשה באמצע התשלום נראית כמשולמת
     set_paid: false,
     status: input.status ?? 'pending',
+    // ווקומרס מבטל בעצמו הזמנה שלא שולמה אחרי "החזקת מלאי" (30 דקות, עמית
+    // 12.10.2026) - אבל רק הזמנה שנוצרה "בקופה". בלי זה כל לקוח שסגר את
+    // חלון התשלום משאיר הזמנה ממתינה לנצח
+    created_via: 'checkout',
     currency: 'ILS',
     billing,
     shipping,

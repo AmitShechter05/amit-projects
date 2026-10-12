@@ -7,6 +7,8 @@ import { waHref } from '@/lib/company';
 import { readOrderDone, type OrderDone } from '@/lib/orderDone';
 import { getProduct, formatPrice } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
+import type { PaySummary } from '../pay/GrowSheet';
+import { WhatsAppIcon } from '@/components/WhatsAppFab';
 
 /**
  * התשלום לא עבר.
@@ -32,7 +34,21 @@ function readReason(q: URLSearchParams): string | null {
   return null;
 }
 
-export default function FailedView() {
+/**
+ * מה עוד לנסות, לפי מה שנכשל. אם Apple Pay הוא שנכשל, אין טעם להציע
+ * אותו שוב (עמית, 12.10.2026).
+ */
+function nextTry(reason: string | null) {
+  const r = (reason ?? '').toLowerCase();
+  if (r.includes('apple')) return 'אפשר לשלם באותו חלון בכרטיס אשראי או ב-bit.';
+  if (r.includes('google')) return 'אפשר לשלם באותו חלון בכרטיס אשראי או ב-bit.';
+  if (r.includes('bit') || r.includes('ביט')) return 'אפשר לשלם באותו חלון בכרטיס אשראי.';
+  return 'אפשר לנסות כרטיס אחר או bit באותו חלון תשלום.';
+}
+
+type FromOrder = { number: string; retry: string; summary: PaySummary } | null;
+
+export default function FailedView({ fromOrder = null }: { fromOrder?: FromOrder }) {
   const [state, setState] = useState<{
     retry: string | null;
     number: string | null;
@@ -50,21 +66,23 @@ export default function FailedView() {
     } catch {
       /* מסגרת מאתר אחר */
     }
-    let retry: string | null = null;
-    let number: string | null = null;
+    let retry: string | null = fromOrder?.retry ?? null;
+    let number: string | null = fromOrder?.number ?? null;
     try {
       const saved = JSON.parse(sessionStorage.getItem(PAY_KEY) || 'null');
-      if (saved?.url) retry = String(saved.url);
-      if (saved?.number) number = String(saved.number);
+      if (!retry && saved?.url) retry = String(saved.url);
+      if (!number && saved?.number) number = String(saved.number);
     } catch {
       /* אין אחסון */
     }
     // מה היה בהזמנה: הסיכום שנשמר רגע לפני המעבר לתשלום (lib/orderDone)
     const order = readOrderDone();
     setState({ retry, number: number ?? order?.number ?? null, reason: readReason(new URLSearchParams(window.location.search)), order });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!state) return null;
+  const summary = fromOrder?.summary ?? null;
 
   return (
     <div className="mx-auto max-w-xl">
@@ -81,8 +99,45 @@ export default function FailedView() {
         )}
       </p>
 
-      {/* העגלה (עמית, 12.10.2026): הלקוח רואה מה הוא עומד לקנות לפני שמנסה שוב */}
-      {state.order && state.order.lines.length > 0 && (
+      {/* העגלה (עמית, 12.10.2026): הלקוח רואה מה הוא עומד לקנות לפני שמנסה שוב.
+          קודם מההזמנה בווקומרס, ואם אין - ממה שנשמר בדפדפן */}
+      {summary && summary.lines.length > 0 && (
+        <div className="mt-8">
+          <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
+            ההזמנה שלך
+          </p>
+          <ul className="mt-3 flex flex-col">
+            {summary.lines.map((l, i) => (
+              <li key={i} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid var(--line)' }}>
+                <span className="tile relative shrink-0 overflow-hidden" style={{ width: 56, height: 56, borderRadius: 'var(--radius)' }}>
+                  {l.image && <Image src={l.image} alt="" fill sizes="56px" className="object-contain p-1" />}
+                </span>
+                <span className="min-w-0 flex-1">
+                  <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>
+                    {l.name}
+                    {l.qty > 1 && <span className="num" style={{ color: 'var(--ink-3)' }}> × {l.qty}</span>}
+                  </span>
+                  {l.blessing && (
+                    <span className="block truncate" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
+                      {l.blessing}
+                    </span>
+                  )}
+                </span>
+                <span className="num shrink-0" style={{ fontSize: 'var(--fs-sm)' }}>
+                  {formatPrice(l.amount)}
+                </span>
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-baseline justify-between pt-3" style={{ borderTop: '1px solid var(--line-strong)' }}>
+            <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>סה״כ לתשלום</span>
+            <span className="num display" style={{ fontSize: 'var(--fs-lg)' }}>
+              {formatPrice(summary.total)}
+            </span>
+          </div>
+        </div>
+      )}
+      {!summary && state.order && state.order.lines.length > 0 && (
         <div className="mt-8">
           <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
             ההזמנה שלך
@@ -161,14 +216,15 @@ export default function FailedView() {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="btn"
+            className="btn inline-flex items-center gap-2"
           >
+            <WhatsAppIcon size={18} />
             לעזרה בוואטסאפ
           </a>
         )}
       </div>
       <p className="mt-4" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-        אפשר לנסות כרטיס אחר, bit או Apple Pay באותו דף תשלום.
+        {nextTry(state.reason)}
       </p>
     </div>
   );

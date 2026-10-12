@@ -558,9 +558,9 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
           {busy ? 'רגע…' : paymentReady ? `המשך לתשלום המאובטח · ${formatPrice(total)}` : `שליחת ההזמנה · ${formatPrice(total)}`}
         </button>
 
-        {/* הסימנים בצבעי המותגים, כאן בלבד: זה הרגע שבו שואלים
+        {/* הלוגואים באריחים, כאן ובעמוד התשלום: זה הרגע שבו שואלים
             "במה אפשר לשלם", והתשובה צריכה להיות מזוהה בעין */}
-        <PaymentMarks tone="brand" size={32} className="mt-5 justify-center" />
+        <PaymentMarks tone="cards" gap={6} className="mt-5 justify-center" />
         <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-3)' }}>
           הפרטים נשלחים בצורה מאובטחת. את פרטי האשראי מקבלת רק חברת הסליקה, והם לא נשמרים אצלנו.
         </p>

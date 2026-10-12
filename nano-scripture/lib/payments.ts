@@ -11,6 +11,9 @@
  * ------------------------------------------------------------------
  *
  * הסדר הוא סדר התצוגה: הכרטיסים הנפוצים בישראל, ואז הארנקים.
+ *
+ * 12.10.2026: מול חלון התשלום של Grow בפועל - PayPal ירד (אין אותו
+ * בחלון), PayBox נוסף (יש).
  */
 export type PaymentId =
   | 'visa'
@@ -21,7 +24,7 @@ export type PaymentId =
   | 'bit'
   | 'applepay'
   | 'googlepay'
-  | 'paypal';
+  | 'paybox';
 
 export const PAYMENT_METHODS: { id: PaymentId; label: string }[] = [
   { id: 'visa', label: 'ויזה' },
@@ -32,5 +35,5 @@ export const PAYMENT_METHODS: { id: PaymentId; label: string }[] = [
   { id: 'bit', label: 'ביט' },
   { id: 'applepay', label: 'Apple Pay' },
   { id: 'googlepay', label: 'Google Pay' },
-  { id: 'paypal', label: 'PayPal' },
+  { id: 'paybox', label: 'PayBox' },
 ];
