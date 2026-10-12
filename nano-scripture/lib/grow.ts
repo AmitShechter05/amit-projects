@@ -43,18 +43,54 @@ export const paymentSandbox = SANDBOX;
  * תשלום דרך התוסף של Grow בווקומרס, בלי ה-API.
  *
  * Grow התקינו את התוסף שלהם ב-wp.mikra.shop (12.10.2026); גישת ה-API
- * עולה 500 ש"ח בחודש. במסלול הזה ההזמנה נוצרת כאן כרגיל, והלקוח עובר
- * לדף "שלם עבור ההזמנה" של ווקומרס - שם התוסף מציג כרטיס, ארנק ו-bit,
- * גובה, ומעדכן את ההזמנה בעצמו.
+ * עולה 500 ש"ח בחודש. במסלול הזה ההזמנה נוצרת כאן כרגיל, ואז:
+ *   1. השרת שלנו מבקש מהתוסף אסימון תשלום להזמנה (growWalletToken)
+ *   2. עמוד /checkout/pay טוען את ה-SDK של Grow ופותח את חלון התשלום
+ *      שלהם מעל העמוד שלנו - כרטיס, bit, Apple/Google Pay, PayBox
+ *   3. Grow מודיעים לתוסף, והתוסף מעדכן את ההזמנה בווקומרס
  *
- * הודלק ב-12.10.2026, אחרי שהוורדפרס עבר ל-Live ועמית מילא את הגדרות שלושת
- * אמצעי התשלום (כותרות, דף תודה, דף כישלון, פופאפ). נבדק עם הזמנת בדיקה:
- * הדף מציג את ההזמנה ואת בלוק Grow (כרטיס, ארנק, bit). לכבות = false.
+ * כך התשלום נשאר ב-mikra.shop, כמו ב-OneZone (עמית, 12.10.2026), בלי
+ * דף "שלם עבור ההזמנה" של וורדפרס. לכבות = false.
  */
 const PAY_VIA_WC_PLUGIN = true;
 export const payViaWc = !paymentReady && PAY_VIA_WC_PLUGIN;
 /** יש תשלום אונליין, באחד משני המסלולים */
 export const onlinePayment = paymentReady || payViaWc;
+
+/**
+ * אמצעי התשלום של התוסף שההזמנה נרשמת עליו. רק "הארנק" פותח את חלון
+ * Grow מחוץ לוורדפרס, והחלון עצמו כולל גם כרטיס אשראי ו-bit.
+ */
+export const WC_GROW_METHOD = { id: 'grow-wallet-payment', title: 'Grow · כרטיס / bit / ארנק' };
+
+/**
+ * אסימון לחלון התשלום של Grow, דרך התוסף.
+ *
+ * זו אותה קריאה שהתוסף עושה בעצמו בקופה של וורדפרס (wallet_block.js,
+ * הפעולה meshulam_grow_wallet_iframe). כל קריאה מחזירה אסימון חדש, ולכן
+ * "לנסות שוב" פשוט טוען את העמוד מחדש.
+ */
+export async function growWalletToken(orderId: number): Promise<string> {
+  const wc = (process.env.NEXT_PUBLIC_WC_URL || '').replace(/\/$/, '');
+  const res = await fetch(`${wc}/wp-admin/admin-ajax.php`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ order_id: String(orderId), action: 'meshulam_grow_wallet_iframe' }),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(20_000),
+  });
+  const raw = await res.text();
+  let data: { token?: string; error?: string } | null = null;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error(`התוסף של Grow החזיר תשובה שאינה JSON: ${raw.slice(0, 200)}`);
+  }
+  if (!data || typeof data !== 'object' || !data.token) {
+    throw new Error(`התוסף של Grow לא החזיר אסימון: ${data?.error ?? raw.slice(0, 200)}`);
+  }
+  return data.token;
+}
 
 export type PaymentRequest = {
   orderId: number;

@@ -68,7 +68,15 @@ export type OrderInput = {
   paymentMethod?: { id: string; title: string };
 };
 
-export type WcOrder = { id: number; number: string; total: string; payment_url?: string };
+export type WcOrder = {
+  id: number;
+  number: string;
+  total: string;
+  status?: string;
+  order_key?: string;
+  payment_method?: string;
+  payment_url?: string;
+};
 
 export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
   if (!input.lines.length) throw new Error('עגלה ריקה');

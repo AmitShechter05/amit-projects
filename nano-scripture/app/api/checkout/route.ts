@@ -2,7 +2,7 @@ import { NextResponse, type NextRequest } from 'next/server';
 import { validate, normalizePhone, type Customer } from '@/lib/checkout';
 import { createOrder, orderTotal, type OrderLine } from '@/lib/wcOrder';
 import { wcReady } from '@/lib/wc';
-import { paymentReady, payViaWc, onlinePayment, createPayment } from '@/lib/grow';
+import { paymentReady, payViaWc, onlinePayment, createPayment, WC_GROW_METHOD } from '@/lib/grow';
 import { isBlessingId } from '@/lib/blessings';
 import { getProduct } from '@/lib/catalog';
 import { SITE_URL } from '@/lib/site';
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
       // במסלול הידני ההזמנה נולדת on-hold - כך ווקומרס מודיע למנהל
       status: onlinePayment ? 'pending' : 'on-hold',
       // במסלול התוסף, התוסף של Grow בווקומרס הוא שגובה את ההזמנה
-      ...(payViaWc ? { paymentMethod: { id: 'meshulam-payment', title: 'Grow · כרטיס אשראי / bit' } } : {}),
+      ...(payViaWc ? { paymentMethod: WC_GROW_METHOD } : {}),
     });
 
     // שני החישובים אמורים להסכים. אם לא - יש מחיר, משלוח או קופון שהאתר
@@ -139,15 +139,15 @@ export async function POST(req: NextRequest) {
      * גמור, וזה בדיוק הרגע שבו הוא מתחרט. מה שהוא צריך לדעת זה מה
      * קורה עכשיו ומתי.
      */
-    // מסלול התוסף: דף התשלום של ההזמנה בווקומרס. אם ווקומרס לא החזיר
-    // קישור, ההזמנה כבר קיימת - נופלים למסלול הידני ולא משאירים אותה תלויה
-    if (payViaWc && order.payment_url) {
+    // מסלול התוסף: עמוד התשלום שלנו, שפותח את חלון Grow. מפתח ההזמנה
+    // נוסע בכתובת כדי שרק מי שיצר את ההזמנה יוכל לפתוח עליה תשלום. אם
+    // ווקומרס לא החזיר מפתח, ההזמנה כבר קיימת - נופלים למסלול הידני
+    if (payViaWc && order.order_key) {
       return NextResponse.json({
         orderId: order.id,
         orderNumber: order.number,
         total: totals.total,
-        // דף התשלום של ווקומרס, בתוך מסגרת באתר (עמית, 12.10.2026)
-        payment: `/checkout/pay?u=${encodeURIComponent(order.payment_url)}`,
+        payment: `/checkout/pay?o=${order.id}&k=${encodeURIComponent(order.order_key)}`,
       });
     }
 
