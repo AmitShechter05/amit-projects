@@ -12,7 +12,17 @@ defined( 'ABSPATH' ) || exit;
 $mikra_email    = mikra_store_current_email( isset( $email ) ? $email : null );
 $mikra_email_id = ( $mikra_email && isset( $mikra_email->id ) ) ? (string) $mikra_email->id : '';
 $mikra_customer = 0 === strpos( $mikra_email_id, 'customer_' );
-$mikra_hero     = in_array( $mikra_email_id, array( 'customer_processing_order', 'customer_on_hold_order', 'customer_completed_order' ), true );
+/*
+ * תמונת הזוג עם הכותרת כתובה עליה (עמית, 12.10.2026: "נגדיל אותה שיראו
+ * את התכשיטים, ואת 'תודה, ההזמנה התקבלה' לשים על התמונה"). הכותרת
+ * צרובה בתמונה, כי טקסט מעל תמונת רקע לא מוצג באאוטלוק.
+ */
+$mikra_heroes = array(
+	'customer_processing_order' => 'email-hero-received.jpg',
+	'customer_on_hold_order'    => 'email-hero-received.jpg',
+	'customer_completed_order'  => 'email-hero-shipped.jpg',
+);
+$mikra_hero   = isset( $mikra_heroes[ $mikra_email_id ] ) ? $mikra_heroes[ $mikra_email_id ] : '';
 ?>
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
@@ -33,16 +43,17 @@ $mikra_hero     = in_array( $mikra_email_id, array( 'customer_processing_order',
 
 	<tr><td style="background:#ffffff;border:1px solid #eadfca;border-radius:14px;">
 		<?php if ( $mikra_hero ) : ?>
-		<img src="<?php echo esc_url( MIKRA_SITE . '/brand/email-hero.jpg' ); ?>" width="600" alt="" style="display:block;width:100%;height:auto;border:0;border-radius:14px 14px 0 0;" />
+		<img src="<?php echo esc_url( MIKRA_SITE . '/brand/' . $mikra_hero ); ?>" width="600" alt="<?php echo esc_attr( $email_heading ); ?>" style="display:block;width:100%;height:auto;border:0;border-radius:14px 14px 0 0;" />
 		<?php endif; ?>
 
 		<table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+			<?php if ( ! $mikra_hero ) : ?>
 			<tr><td class="mikra-pad" style="padding:32px 40px 0;">
-				<?php if ( in_array( $mikra_email_id, array( 'customer_processing_order', 'customer_on_hold_order' ), true ) ) : ?>
-				<p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#96661c;">תודה שקניתם אצלנו</p>
-				<?php endif; ?>
 				<h1 class="mikra-h1" style="margin:0;font-family:Heebo,Arial,Helvetica,sans-serif;font-size:30px;line-height:1.25;font-weight:800;color:#16150f;text-align:right;"><?php echo esc_html( $email_heading ); ?></h1>
 			</td></tr>
+			<?php else : ?>
+			<tr><td style="padding:16px 0 0;"></td></tr>
+			<?php endif; ?>
 
 			<?php /* התוכן של כל מייל נכנס לתא הזה. המיילים שלנו (parts/body.php) מביאים ריווח
 			משלהם; מיילים אחרים (למשל "הזמנה חדשה" אליך) מקבלים ריווח כאן */ ?>
