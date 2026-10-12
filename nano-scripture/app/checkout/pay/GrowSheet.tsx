@@ -61,6 +61,16 @@ export default function GrowSheet({ token, number, summary }: { token: string; n
   };
 
   useEffect(() => {
+    // "לנסות לשלם שוב" בעמוד הכישלון חוזר לכאן, גם כשלא הגיעו מהקופה
+    // (למשל מקישור תשלום ששלחנו). המפתח של FailedView.PAY_KEY
+    try {
+      sessionStorage.setItem(
+        'mikra-last-payment',
+        JSON.stringify({ url: window.location.pathname + window.location.search, number }),
+      );
+    } catch {
+      /* אין אחסון */
+    }
     const fail = (reason: string) => {
       const q = reason ? `?reason=${encodeURIComponent(reason.slice(0, 160))}` : '';
       window.location.href = `/checkout/failed${q}`;
