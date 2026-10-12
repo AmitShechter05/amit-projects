@@ -599,7 +599,11 @@ function mikra_send_html( $to, $subject, $html, $unsub = '' ) {
 		$headers[] = 'List-Unsubscribe: <' . $unsub . '>';
 		$headers[] = 'List-Unsubscribe-Post: List-Unsubscribe=One-Click';
 	}
-	return wp_mail( $to, $subject, $html, $headers );
+	$ok = wp_mail( $to, $subject, $html, $headers );
+	if ( function_exists( 'mikra_log' ) ) {
+		mikra_log( $ok ? 'sent' : 'fail', '', $to, 0, $subject );
+	}
+	return $ok;
 }
 
 /** האם מותר לשלוח לנרשם הזה עכשיו */

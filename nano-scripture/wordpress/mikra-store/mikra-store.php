@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.3.0
+ * Version: 1.3.1
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -29,6 +29,10 @@ define( 'MIKRA_EMAIL', 'mikrajewelry@gmail.com' );
 require_once MIKRA_STORE_DIR . 'includes/marketing.php';
 // זרימות: נטישה, אחרי הזמנה, חזרה - עם חלון שליחה, שבת וחג
 require_once MIKRA_STORE_DIR . 'includes/flows.php';
+// מסך "מקרא · אוטומציות" בניהול: מי בזרימה, מה יוצא, מי יצא ולמה
+if ( is_admin() ) {
+	require_once MIKRA_STORE_DIR . 'includes/admin.php';
+}
 
 /* ------------------------------------------------------------------
  * 1. תבניות המייל

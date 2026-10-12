@@ -116,6 +116,7 @@ function mikra_suppress( $email ) {
 	$list = is_array( $list ) ? $list : array();
 	$list[ mikra_ekey( $email ) ] = time();
 	update_option( 'mikra_suppressed', $list, false );
+	mikra_log( 'unsub', '', $email, 0, 'הוסר מרשימת התפוצה' );
 	$user = get_user_by( 'email', $email );
 	if ( $user ) {
 		update_user_meta( $user->ID, 'mikra_unsubscribed', time() );
@@ -237,6 +238,45 @@ function mikra_unsubscribe_email() {
 }
 
 /* ------------------------------------------------------------------
+ * יומן: מה נשלח ומי יצא ולמה. נקרא במסך "מקרא · אוטומציות"
+ * ------------------------------------------------------------------ */
+
+/**
+ * רשומה ביומן (300 האחרונות, באופציה אחת). $kind: sent | exit | enter
+ */
+function mikra_log( $kind, $flow, $email, $order_id, $text ) {
+	$log = get_option( 'mikra_flow_log', array() );
+	$log = is_array( $log ) ? $log : array();
+	array_unshift( $log, array( 't' => time(), 'k' => $kind, 'f' => (string) $flow, 'e' => (string) $email, 'o' => (int) $order_id, 'x' => (string) $text ) );
+	update_option( 'mikra_flow_log', array_slice( $log, 0, 300 ), false );
+}
+
+/** מוחק מיילים מתוזמנים של זרימה, כדי שמי שיצא לא יופיע כ"בזרימה" */
+function mikra_unschedule( $flow, $key, $steps ) {
+	foreach ( $steps as $st ) {
+		wp_clear_scheduled_hook( 'mikra_flow', array( (string) $flow, $key, (int) $st ) );
+	}
+}
+
+/** יציאה מזרימה: הערה בהזמנה (אם יש), רשומה ביומן, ומחיקת המיילים הבאים */
+function mikra_exit( $flow, $email, $order, $why ) {
+	$key = 'winback' === $flow ? (string) $email : ( $order ? (int) $order->get_id() : 0 );
+	mikra_unschedule( $flow, $key, array( 0, 1, 2, 3, 4 ) );
+	$label = array( 'abandon' => 'נטישה', 'post' => 'אחרי הזמנה', 'winback' => 'חזרה' );
+	$text  = 'יצא מזרימת ' . ( $label[ $flow ] ?? $flow ) . ': ' . $why;
+	if ( $order ) {
+		$order->add_order_note( $text );
+		$order->save();
+	}
+	mikra_log( 'exit', $flow, $email, $order ? $order->get_id() : 0, $why );
+}
+
+/** למה אין הסכמה: הוסר, או פשוט לא אישר */
+function mikra_no_consent_reason( $email ) {
+	return mikra_is_suppressed( $email ) ? 'הוסר מרשימת התפוצה' : 'אין הסכמה לדיוור';
+}
+
+/* ------------------------------------------------------------------
  * תזמון ומריץ אחד לכל הזרימות
  * ------------------------------------------------------------------ */
 
@@ -310,8 +350,7 @@ function mikra_abandon_start( $order_id, $order = null ) {
 	$older = wc_get_orders( array( 'customer' => $email, 'status' => array( 'wc-pending', 'wc-failed' ), 'exclude' => array( (int) $order->get_id() ), 'limit' => 5 ) );
 	foreach ( $older as $o ) {
 		if ( $o->get_meta( '_mikra_ab_base' ) && ! $o->get_meta( '_mikra_ab_done' ) ) {
-			$o->update_meta_data( '_mikra_ab_done', 'replaced' );
-			$o->save();
+			mikra_abandon_end( $o, 'replaced' );
 			$o->update_status( 'cancelled', 'הוחלפה בהזמנה חדשה (#' . $order->get_order_number() . ') של אותו לקוח.' );
 		}
 	}
@@ -322,7 +361,30 @@ function mikra_abandon_start( $order_id, $order = null ) {
 	$order->update_meta_data( '_mikra_ab_until', $base + $keep );
 	$order->save();
 	mikra_set_abandoning( $email, $base + $keep );
+	mikra_log( 'enter', 'abandon', $email, $order->get_id(), $returning ? 'לקוח חוזר' : 'לקוח חדש' );
 	mikra_flow_schedule( 'abandon', (int) $order->get_id(), 1, $base + ( $returning ? 30 : 20 ) * MINUTE_IN_SECONDS );
+}
+
+/**
+ * שולם: יוצאים מהזרימה מיד (לא בשלב הבא), וגם הזמנות פתוחות אחרות של
+ * אותה כתובת שבזרימה - נסגרות, כי הלקוח כבר קנה
+ */
+add_action( 'woocommerce_order_status_processing', 'mikra_abandon_on_paid', 5, 2 );
+add_action( 'woocommerce_order_status_completed', 'mikra_abandon_on_paid', 5, 2 );
+function mikra_abandon_on_paid( $order_id, $order = null ) {
+	$order = ( $order instanceof WC_Order ) ? $order : wc_get_order( $order_id );
+	if ( ! $order || ! $order->get_billing_email() ) {
+		return;
+	}
+	if ( $order->get_meta( '_mikra_ab_base' ) && ! $order->get_meta( '_mikra_ab_done' ) ) {
+		mikra_abandon_end( $order, 'paid' );
+	}
+	$open = wc_get_orders( array( 'customer' => $order->get_billing_email(), 'status' => array( 'wc-pending', 'wc-failed' ), 'exclude' => array( (int) $order->get_id() ), 'limit' => 5 ) );
+	foreach ( $open as $o ) {
+		if ( $o->get_meta( '_mikra_ab_base' ) && ! $o->get_meta( '_mikra_ab_done' ) ) {
+			mikra_abandon_end( $o, 'bought', true );
+		}
+	}
 }
 
 /** ווקומרס מבטל הזמנות שלא שולמו אחרי זמן החזקת המלאי. בזמן הזרימה - לא */
@@ -344,9 +406,20 @@ function mikra_abandon_keep( $cancel, $order ) {
 
 /** סוף הזרימה: מנקים, ומי שלא שולמה - מתבטלת */
 function mikra_abandon_end( $order, $why, $cancel = false ) {
+	$text = array(
+		'paid'       => 'שילם',
+		'bought'     => 'שילם בהזמנה אחרת',
+		'cancelled'  => 'הזרימה הסתיימה בלי תשלום',
+		'no-consent' => mikra_no_consent_reason( $order->get_billing_email() ),
+		'replaced'   => 'פתח הזמנה חדשה במקומה',
+	);
 	if ( ! $order->get_meta( '_mikra_ab_done' ) ) {
 		$order->update_meta_data( '_mikra_ab_done', $why );
 		$order->save();
+		mikra_exit( 'abandon', $order->get_billing_email(), $order, isset( $text[ $why ] ) ? $text[ $why ] : $why );
+		if ( in_array( $why, array( 'paid', 'bought', 'replaced' ), true ) ) {
+			mikra_unschedule( 'abandon', (int) $order->get_id(), array( 9 ) );
+		}
 	}
 	mikra_set_abandoning( $order->get_billing_email(), 0 );
 	if ( $cancel && in_array( $order->get_status(), array( 'pending', 'failed' ), true ) ) {
@@ -356,7 +429,14 @@ function mikra_abandon_end( $order, $why, $cancel = false ) {
 
 function mikra_abandon_run( $order_id, $step ) {
 	$order = wc_get_order( $order_id );
-	if ( ! $order || $order->get_meta( '_mikra_ab_done' ) ) {
+	if ( ! $order ) {
+		return;
+	}
+	if ( $order->get_meta( '_mikra_ab_done' ) ) {
+		// הזרימה נגמרה. נשאר רק לבטל הזמנה של תזכורת שירות שלא שולמה
+		if ( 9 === $step && 'no-consent' === $order->get_meta( '_mikra_ab_done' ) && in_array( $order->get_status(), array( 'pending', 'failed' ), true ) ) {
+			$order->update_status( 'cancelled', 'לא שולמה יום אחרי התזכורת.' );
+		}
 		return;
 	}
 	$email = $order->get_billing_email();
@@ -409,7 +489,9 @@ function mikra_abandon_run( $order_id, $step ) {
 	if ( ! $consent ) {
 		// בלי הסכמה: תזכורת שירות אחת, וההזמנה נשמרת יום כמו פעם
 		$order->update_meta_data( '_mikra_ab_until', $base + DAY_IN_SECONDS );
+		$order->update_meta_data( '_mikra_ab_done', 'no-consent' );
 		$order->save();
+		mikra_exit( 'abandon', $email, $order, mikra_no_consent_reason( $email ) . ' - קיבל רק תזכורת שירות אחת' );
 		mikra_set_abandoning( $email, 0 );
 		mikra_flow_schedule( 'abandon', $order_id, 9, $base + DAY_IN_SECONDS );
 		return;
@@ -609,6 +691,9 @@ function mikra_post_shipped( $order_id, $order = null ) {
 	$t = time();
 	$order->update_meta_data( '_mikra_pp_shipped', $t );
 	$order->save();
+	if ( mikra_consent( $order->get_billing_email() ) ) {
+		mikra_log( 'enter', 'post', $order->get_billing_email(), $order->get_id(), 'ההזמנה נשלחה' );
+	}
 	mikra_flow_schedule( 'post', (int) $order->get_id(), 1, mikra_day_at( $t, 4, '10:00' ) );
 }
 
@@ -618,17 +703,28 @@ function mikra_post_run( $order_id, $step ) {
 		return;
 	}
 	$email = $order->get_billing_email();
+	if ( $order->get_meta( '_mikra_pp_done' ) ) {
+		return;
+	}
+	$stop = function ( $why ) use ( $order, $email ) {
+		$order->update_meta_data( '_mikra_pp_done', $why );
+		$order->save();
+		mikra_exit( 'post', $email, $order, $why );
+	};
 	if ( ! in_array( $order->get_status(), array( 'processing', 'completed' ), true ) || (float) $order->get_total_refunded() > 0 ) {
+		$stop( 'ההזמנה בוטלה או הוחזרה' );
 		return;
 	}
 	// הזמנה חדשה יותר שנשלחה - הזרימה שלה ממשיכה, לא זו
 	if ( $step > 0 ) {
 		$newer = wc_get_orders( array( 'customer' => $email, 'status' => array( 'wc-completed' ), 'limit' => 1, 'orderby' => 'date', 'order' => 'DESC' ) );
 		if ( $newer && (int) $newer[0]->get_id() !== (int) $order_id ) {
+			$stop( 'הזמנה חדשה יותר (#' . $newer[0]->get_order_number() . ') ממשיכה במקומה' );
 			return;
 		}
 	}
 	if ( ! mikra_consent( $email ) ) {
+		$stop( mikra_no_consent_reason( $email ) );
 		return;
 	}
 	if ( mikra_flow_defer( 'post', $order_id, $step, $email ) ) {
@@ -646,6 +742,8 @@ function mikra_post_run( $order_id, $step ) {
 	$plan    = array( 1 => array( 2, 10, '10:00' ), 2 => array( 3, 14, '19:30' ) );
 	if ( $shipped && isset( $plan[ $step ] ) ) {
 		mikra_flow_schedule( 'post', $order_id, $plan[ $step ][0], mikra_day_at( $shipped, $plan[ $step ][1], $plan[ $step ][2] ) );
+	} elseif ( 3 === $step ) {
+		$stop( 'סיים את כל המיילים' );
 	}
 }
 
@@ -773,7 +871,8 @@ function mikra_winback_scan() {
 		if ( ! $last || (int) $last[0]->get_id() !== (int) $o->get_id() || ! mikra_consent( $email ) ) {
 			continue; // קנה מאז, או בלי הסכמה
 		}
-		$state[ $k ] = array( 't' => time(), 'name' => (string) $o->get_billing_first_name(), 'sent' => array() );
+		$state[ $k ] = array( 't' => time(), 'name' => (string) $o->get_billing_first_name(), 'sent' => array(), 'e' => $email );
+		mikra_log( 'enter', 'winback', $email, $o->get_id(), MIKRA_WINBACK_DAYS . ' ימים בלי קנייה' );
 		mikra_flow_schedule( 'winback', $email, 1, mikra_day_at( time(), 0, '10:00' ) );
 	}
 	update_option( 'mikra_winback', $state, false );
@@ -786,11 +885,21 @@ function mikra_winback_run( $email, $step ) {
 		return;
 	}
 	$entry = (int) $state[ $k ]['t'];
-	$last  = mikra_paid_orders( $email );
+	if ( ! empty( $state[ $k ]['done'] ) ) {
+		return;
+	}
+	$stop = function ( $why ) use ( &$state, $k, $email ) {
+		$state[ $k ]['done'] = $why;
+		update_option( 'mikra_winback', $state, false );
+		mikra_exit( 'winback', $email, null, $why );
+	};
+	$last = mikra_paid_orders( $email );
 	if ( $last && $last[0]->get_date_created() && $last[0]->get_date_created()->getTimestamp() > $entry ) {
-		return; // חזר וקנה
+		$stop( 'חזר וקנה (#' . $last[0]->get_order_number() . ')' );
+		return;
 	}
 	if ( ! mikra_consent( $email ) ) {
+		$stop( mikra_no_consent_reason( $email ) );
 		return;
 	}
 	if ( mikra_flow_defer( 'winback', $email, $step, $email ) ) {
@@ -817,6 +926,8 @@ function mikra_winback_run( $email, $step ) {
 	}
 	if ( isset( $next[ $step ] ) ) {
 		mikra_flow_schedule( 'winback', $email, $next[ $step ][0], mikra_day_at( $entry, $next[ $step ][1], $next[ $step ][2] ) );
+	} else {
+		$stop( 'סיים את כל המיילים' );
 	}
 }
 

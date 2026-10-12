@@ -183,6 +183,11 @@ uniformly sized at 5x5 mm." לכן "קטן מראש סיכה" (ראש סיכה �
     **רשימת החגים (`mikra_holidays`) עד 2028 - להוסיף.** הסרה לפי כתובת:
     `?mikra_unsub_e=` (רשימה באופציה `mikra_suppressed`).
   * בדיקה: `POST /wp-json/wc/mikra/flow-test {email, flow, step, order_id}`.
+  * **מסך "מקרא · אוטומציות"** (ווקומרס → מקרא · אוטומציות, מ-1.3.1): מי בזרימה עכשיו
+    ומתי המייל הבא שלו (מקור: מה שמתוזמן ב-WP-Cron), יומן של מי נכנס/מה נשלח/מי יצא
+    ולמה/מי הוסר (אופציה `mikra_flow_log`, 300 אחרונות), מונה מיילים ל-24 שעות, ואזהרה
+    כשאין תוסף SMTP (Hostinger: 100 ביום דרך השרת). כל יציאה נרשמת גם כהערה בהזמנה,
+    ומוחקת את המיילים המתוזמנים הבאים.
 * הפניית wp.mikra.shop ל-mikra.shop, ו-noindex.
 
 המיילים יוצאים מ-`orders@mikra.shop` (תיבה ב-Hostinger), תשובות ל-mikrajewelry@gmail.com.
