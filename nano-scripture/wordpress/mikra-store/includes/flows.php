@@ -5,8 +5,9 @@
  *
  *   נטישה    - הזמנה שנוצרה בקופה של mikra.shop ולא שולמה. מחליפה את
  *               "תזכורת לתשלום" ואת מייל "התשלום נכשל" של ווקומרס.
- *               חדש: 20 דק׳ / למחרת 10:00 (10% על ההזמנה) / יומיים
- *               אחרי 10:00 / מכתב שלושה ימים אחרי 19:30.
+ *               חדש: 20 דק׳ / למחרת 10:00 הוכחה (מיקרוסקופ, תשלומים,
+ *               החזרות) / יומיים אחרי 10:00 הנחה (קוד ההצטרפות אם לא
+ *               נוצל, אחרת 10% אישי) / מכתב שלושה ימים אחרי 19:30.
  *               חוזר (כבר קנה): 30 דק׳ / מכתב יומיים אחרי 19:30.
  *   אחרי הזמנה - מסימון "הושלמה" (נשלח): 4 ימים 10:00 איך שומרים /
  *               10 ימים 10:00 עוד ברכה / 14 ימים 19:30 ביקורת.
@@ -330,7 +331,7 @@ function mikra_hi( $name ) {
  * ------------------------------------------------------------------ */
 
 /** ההזמנה נשמרת (לא מתבטלת) עד סוף הזרימה, כדי שהכפתור במייל יעבוד */
-define( 'MIKRA_ABANDON_KEEP_NEW', 4 * DAY_IN_SECONDS );
+define( 'MIKRA_ABANDON_KEEP_NEW', 5 * DAY_IN_SECONDS );
 define( 'MIKRA_ABANDON_KEEP_RETURN', 3 * DAY_IN_SECONDS );
 
 add_action( 'woocommerce_new_order', 'mikra_abandon_start', 20, 2 );
@@ -497,7 +498,7 @@ function mikra_abandon_run( $order_id, $step ) {
 		return;
 	}
 	$plan = 'new' === $kind
-		? array( 1 => array( 2, mikra_day_at( $base, 1, '10:00' ) ), 2 => array( 3, mikra_day_at( $base, 2, '10:00' ) ), 3 => array( 4, mikra_day_at( $base, 3, '19:30' ) ), 4 => array( 9, $base + MIKRA_ABANDON_KEEP_NEW ) )
+		? array( 1 => array( 3, mikra_day_at( $base, 1, '10:00' ) ), 3 => array( 2, mikra_day_at( $base, 2, '10:00' ) ), 2 => array( 4, mikra_day_at( $base, 3, '19:30' ) ), 4 => array( 9, $base + MIKRA_ABANDON_KEEP_NEW ) )
 		: array( 1 => array( 4, mikra_day_at( $base, 2, '19:30' ) ), 4 => array( 9, $base + MIKRA_ABANDON_KEEP_RETURN ) );
 	if ( isset( $plan[ $step ] ) ) {
 		list( $next, $at ) = $plan[ $step ];
@@ -511,21 +512,50 @@ function mikra_abandon_run( $order_id, $step ) {
 }
 
 /**
- * קוד אישי של 10% להזמנה הזו: לשימוש אחד, רק לכתובת של הלקוח, 4 ימים.
- * לא כשכבר יש קופון על ההזמנה (הלקוח כבר קיבל הנחה)
+ * ההנחה של מייל הקוד. אם ללקוח יש עדיין את קוד ההצטרפות (MIKRA20) ולא
+ * השתמש בו - מזכירים אותו, ולא מייצרים קוד נוסף. אחרת: קוד אישי של 10%,
+ * לשימוש אחד, רק לכתובת שלו, עד סוף הזרימה. לא כשכבר יש קופון על ההזמנה.
  */
 function mikra_abandon_coupon( $order ) {
 	if ( $order->get_meta( '_mikra_ab_code' ) || $order->get_coupon_codes() ) {
 		return;
 	}
-	$code = mikra_make_coupon( 'BRACHA', 10, 4, $order->get_billing_email(), 'נטישה · הזמנה #' . $order->get_order_number() );
+	$email = $order->get_billing_email();
+	$until = (int) $order->get_meta( '_mikra_ab_until' );
+	$promo = mikra_promo();
+	if ( $promo && mikra_promo_unused( $email ) ) {
+		$order->update_meta_data( '_mikra_ab_code', $promo['code'] );
+		$order->update_meta_data( '_mikra_ab_pct', (int) $promo['percent'] );
+		$order->update_meta_data( '_mikra_ab_exp', $promo['expires'] ? min( (int) $promo['expires'], $until ) : $until );
+		$order->update_meta_data( '_mikra_ab_promo', 1 );
+		$order->save();
+		return;
+	}
+	$code = mikra_make_coupon( 'BRACHA', 10, $until, $email, 'נטישה · הזמנה #' . $order->get_order_number() );
 	if ( $code ) {
 		$order->update_meta_data( '_mikra_ab_code', $code );
+		$order->update_meta_data( '_mikra_ab_pct', 10 );
+		$order->update_meta_data( '_mikra_ab_exp', $until );
 		$order->save();
 	}
 }
 
-function mikra_make_coupon( $prefix, $percent, $days, $email, $note ) {
+/** נרשם בפופאפ ועוד לא השתמש בקוד ההצטרפות */
+function mikra_promo_unused( $email ) {
+	$user = get_user_by( 'email', $email );
+	if ( ! $user || 'פופאפ מועדון' !== (string) get_user_meta( $user->ID, 'מקור', true ) || ! class_exists( 'WC_Coupon' ) ) {
+		return false;
+	}
+	$c = new WC_Coupon( MIKRA_PROMO_COUPON );
+	if ( ! $c->get_id() ) {
+		return false;
+	}
+	$used = array_map( 'strtolower', array_map( 'strval', (array) $c->get_used_by() ) );
+	return ! in_array( strtolower( $email ), $used, true ) && ! in_array( (string) $user->ID, $used, true );
+}
+
+/** קופון אישי שפג ב-$expires (חותמת זמן) */
+function mikra_make_coupon( $prefix, $percent, $expires, $email, $note ) {
 	if ( ! class_exists( 'WC_Coupon' ) ) {
 		return '';
 	}
@@ -543,7 +573,7 @@ function mikra_make_coupon( $prefix, $percent, $days, $email, $note ) {
 	$c->set_usage_limit( 1 );
 	$c->set_usage_limit_per_user( 1 );
 	$c->set_email_restrictions( array( $email ) );
-	$c->set_date_expires( time() + $days * DAY_IN_SECONDS );
+	$c->set_date_expires( (int) $expires );
 	$c->set_description( $note . ' · נוצר אוטומטית בתוסף mikra-store' );
 	$c->save();
 	return $c->get_id() ? $code : '';
@@ -579,83 +609,113 @@ function mikra_apply_discount() {
 	exit;
 }
 
-/** [נושא, html]. $service = מייל שירות (אין הסכמה): בלי "פרסומת" ובלי הסרה */
+/** "יום ראשון 18.10" */
+function mikra_he_day( $ts ) {
+	$days = array( 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת' );
+	$d    = ( new DateTime( '@' . (int) $ts ) )->setTimezone( mikra_tz() );
+	return 'יום ' . $days[ (int) $d->format( 'w' ) ] . ' ' . $d->format( 'j.n' );
+}
+
+/**
+ * [נושא, html]. $service = מייל שירות (אין הסכמה): עובדתי בלבד - בלי
+ * "פרסומת", בלי הסרה, בלי הנחה ובלי שכנוע. רק שההזמנה שמורה ואיך משלמים.
+ *
+ * סדר המיילים ללקוח חדש (המספרים הם מזהי התוכן, לא הסדר):
+ * 1 תזכורת · 3 הוכחה (בלי הנחה) · 2 הקוד · 4 מכתב
+ */
 function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
-	$hi   = mikra_hi( $order->get_billing_first_name() );
-	$pay  = mikra_store_pay_url( $order );
-	$code = (string) $order->get_meta( '_mikra_ab_code' );
-	$go   = $code ? mikra_apply_url( $order ) : $pay;
-	$kind = (string) $order->get_meta( '_mikra_ab_kind' );
-	$wa   = '<a href="' . esc_url( mikra_store_wa_url( $order ) ) . '" style="color:#96661c;font-weight:500;">בוואטסאפ <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span></a>';
-	$foot = mk_footer( $unsub, 'כי אישרת דיוור', 'קיבלת את המייל כי התחלת הזמנה באתר, הזמנה #' . $order->get_order_number() . '.' );
+	$hi    = mikra_hi( $order->get_billing_first_name() );
+	$name  = esc_html( $order->get_billing_first_name() );
+	$pay   = mikra_store_pay_url( $order );
+	$code  = (string) $order->get_meta( '_mikra_ab_code' );
+	$pct   = (int) $order->get_meta( '_mikra_ab_pct' ) ? (int) $order->get_meta( '_mikra_ab_pct' ) : 10;
+	$exp   = (int) $order->get_meta( '_mikra_ab_exp' );
+	$promo = (bool) $order->get_meta( '_mikra_ab_promo' );
+	$until = $exp ? 'בתוקף עד ' . mikra_he_day( $exp ) : '';
+	$go    = $code ? mikra_apply_url( $order ) : $pay;
+	$kind  = (string) $order->get_meta( '_mikra_ab_kind' );
+	$wa    = '<a href="' . esc_url( mikra_store_wa_url( $order ) ) . '" style="color:#96661c;font-weight:500;">בוואטסאפ <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span></a>';
+	$foot  = mk_footer( $unsub, 'כי אישרת דיוור', 'קיבלת את המייל כי התחלת הזמנה באתר, הזמנה #' . $order->get_order_number() . '.' );
+	$pct_h = '<span dir="ltr">' . $pct . '%</span>';
 
 	switch ( (int) $step ) {
 		case 1:
-			$rows    = mk_photo_hero( 'hero-abandon-1.jpg', '', 'נשאר רק צעד אחד', 'שום דבר לא הלך לאיבוד. התכשיט והברכה שבחרת שמורים לך בדיוק כמו שהשארת.', 'להשלמת ההזמנה', $pay )
+			if ( $service ) {
+				$keep    = (int) $order->get_meta( '_mikra_ab_until' );
+				$rows    = mk_topbar( 'הזמנה #' . $order->get_order_number() )
+					. mk_heading( '', 'ההזמנה שלך', 'ממתינה לתשלום.', $hi . 'ההזמנה עוד לא שולמה, והיא שמורה' . ( $keep ? ' עד ' . esc_html( mikra_he_day( $keep ) ) : '' ) . '. אם כבר שילמת - אפשר להתעלם מהמייל הזה.', 40 )
+					. mk_cart( $order, 'פרטי ההזמנה' )
+					. mk_button( 'לתשלום', $pay );
+				$subject = 'ההזמנה שלך במִקְרָא ממתינה לתשלום';
+				$pre     = 'הזמנה #' . $order->get_order_number() . ' עוד לא שולמה.';
+				break;
+			}
+			$rows    = mk_photo_hero( 'hero-abandon-1.jpg', '', 'נשאר רק צעד אחד', 'התכשיט והברכה שבחרת שמורים לך, בדיוק כמו שהשארת.', 'להשלמת ההזמנה', $pay )
 				. mk_cart( $order )
 				. mk_button( 'להשלמת ההזמנה', $pay )
-				. mk_para( $hi . 'ראינו שהגעת עד התשלום ולא סיימת. קורה - אולי קפצה שיחה, אולי משהו בעבודה, אולי רצית לחשוב על זה עוד רגע. זה בסדר.', '36px 44px 0' )
-				. mk_para( 'ההזמנה שמורה בדיוק כמו שהשארת. ואם יש שאלה על הברכה, המידה או המשלוח - עונים כאן אנשים, לא בוט.', '14px 44px 0' )
-				. mk_note( 'שאלה לפני שמזמינים?', 'כותבים לנו ' . $wa . ', או פשוט עונים למייל הזה.' )
-				. mk_button( 'להשלמת ההזמנה', $pay );
-			$subject = $service ? 'ההזמנה שלך במִקְרָא ממתינה לתשלום' : 'פרסומת: נשאר רק צעד אחד - הברכה שלך מחכה';
-			$pre     = 'return' === $kind ? 'נשאר רק לאשר תשלום.' : 'התכשיט והברכה שבחרת שמורים לך.';
+				. mk_para( $hi . 'ראינו שהגעת עד התשלום ולא סיימת. זה קורה - אולי קפצה שיחה, אולי רצית לחשוב עוד רגע.', '36px 44px 0' )
+				. mk_note( 'שאלה לפני שמזמינים?', 'על הברכה, המידה או המשלוח - כותבים לנו ' . $wa . ', או עונים למייל הזה. עונים אנשים, לא בוט.' );
+			$subject = 'פרסומת: נשאר רק צעד אחד - הברכה שלך מחכה';
+			$pre     = 'return' === $kind ? 'נשאר רק לאשר את התשלום.' : 'התכשיט והברכה שבחרת שמורים לך.';
+			break;
+
+		case 3:
+			$rows    = mk_photo_hero( 'hero-abandon-3.jpg', '', 'עדיין מתלבטים?<br>הנה מה שתקבלו.', 'צילום אמיתי של השבב, ואיך התכשיט נעשה.', 'להשלמת ההזמנה', $go )
+				. mk_lens_block( 'צילום אמיתי, במיקרוסקופ', 'כל מילה בברכה,<br>על שבב של <span dir="ltr">5</span> מ״מ.', 'כל אות בגובה של כחצי עובי שערה. חורטים את השבב לפי ההזמנה, ובודקים אות אחרי אות מול המקור.' )
+				. mk_sq3( 'מה שמגיע אליך' )
+				. mk_fact_boxes( array( array( 'עד 5', 'תשלומים' ), array( '2-4', 'ימי עסקים, מבוטח' ), array( '30 יום', 'להחזרה' ) ) )
+				. mk_cart( $order, 'מה שמחכה לך' )
+				. mk_button( 'להשלמת ההזמנה', $go );
+			$subject = 'פרסומת: ככה נראית ברכה על שבב של 5 מ״מ';
+			$pre     = 'צילום אמיתי מהמיקרוסקופ, לפני שמחליטים.';
 			break;
 
 		case 2:
 			if ( $code ) {
-				$rows = mk_photo_hero( 'hero-abandon-2.jpg', '', '<span dir="ltr">10%</span> על ההזמנה<br>שכמעט סיימת', 'רצינו לתת לך סיבה טובה לסיים. הקוד בתוקף 4 ימים.', 'להשלמת ההזמנה עם ההנחה', $go )
-					. mk_ticket( array( 'code' => $code, 'percent' => 10 ), 'הקוד שלך', 'נכנס להזמנה בלחיצה על הכפתור · בתוקף 4 ימים', 'על ההזמנה' )
-					. mk_para( $hi . 'אם משהו בתהליך התשלום עצר אותך, אנחנו מבינים - זה קורה. חשוב לנו שתקבלו את התכשיט, אז הנה קוד של 10% להזמנה הזו.', '30px 44px 0' );
-				$subject = 'פרסומת: 10% על ההזמנה שכמעט סיימת';
-				$pre     = 'קוד של 10% להזמנה שלך, בפנים.';
+				$sub  = $promo ? 'קוד ההצטרפות שלך עוד לא נוצל. הוא נכנס להזמנה בלחיצה אחת.' : 'רצינו לתת לך סיבה טובה לסיים. ההנחה נכנסת להזמנה בלחיצה אחת.';
+				$rows = mk_photo_hero( 'hero-abandon-2.jpg', '', $pct_h . ' על ההזמנה<br>שכמעט סיימת', $sub, 'להשלמת ההזמנה עם ההנחה', $go )
+					. mk_ticket( array( 'code' => $code, 'percent' => $pct ), $promo ? 'קוד ההצטרפות שלך' : 'הקוד שלך', 'נכנס להזמנה בלחיצה על הכפתור' . ( $until ? ' · ' . $until : '' ), 'על ההזמנה' )
+					. mk_cart( $order )
+					. mk_button( 'להשלמת ההזמנה עם ההנחה', $go );
+				$subject = 'פרסומת: ההזמנה שלך, עם ' . $pct . '% הנחה';
+				$pre     = 'ההנחה נכנסת בלחיצה אחת' . ( $until ? ', ' . $until : '' ) . '.';
 			} else {
 				// כבר יש הנחה על ההזמנה (קוד ההצטרפות) - לא מוסיפים עוד
 				$rows    = mk_photo_hero( 'hero-abandon-2.jpg', '', 'ההנחה שלך<br>כבר על ההזמנה', 'הקוד שהזנת שמור בהזמנה. נשאר רק לשלם.', 'להשלמת ההזמנה', $pay )
-					. mk_para( $hi . 'אם משהו בתהליך התשלום עצר אותך - זה קורה. אפשר לשלם בכרטיס אשראי, bit, Apple Pay או Google Pay, עד 5 תשלומים.', '36px 44px 0' );
+					. mk_para( $hi . 'אפשר לשלם בכרטיס אשראי, bit, Apple Pay או Google Pay, עד 5 תשלומים.', '36px 44px 0' )
+					. mk_cart( $order )
+					. mk_button( 'להשלמת ההזמנה', $pay );
 				$subject = 'פרסומת: ההזמנה שלך, עם ההנחה, עדיין שמורה';
 				$pre     = 'נשאר רק לשלם.';
 			}
-			$rows .= mk_cart( $order ) . mk_button( $code ? 'להשלמת ההזמנה עם ההנחה' : 'להשלמת ההזמנה', $go );
-			break;
-
-		case 3:
-			$rows = mk_photo_hero( 'hero-abandon-3.jpg', '', 'עדיין מתלבטים?<br>הנה מה שתקבלו.', 'צילום אמיתי של השבב, ואיך התכשיט נעשה - לפני שמחליטים.', 'להשלמת ההזמנה', $go )
-				. mk_lens_block( 'צילום אמיתי, במיקרוסקופ', 'כל מילה בברכה,<br>על שבב של <span dir="ltr">5</span> מ״מ.', 'כל אות בגובה של כמחצית מעובי שערה. את השבב חורטים לפי ההזמנה, ובודקים מול הטקסט המקורי, אות אחרי אות.' )
-				. mk_sq3( 'מה שרואים כשמקבלים' )
-				. mk_fact_boxes( array( array( 'עד 5', 'תשלומים' ), array( '2-4', 'ימי עסקים, מבוטח' ), array( '30 יום', 'להחזרה' ) ) )
-				. ( $code ? mk_ticket( array( 'code' => $code, 'percent' => 10 ), 'ה-10% שלך עדיין פעיל', 'נכנס להזמנה בלחיצה על הכפתור', 'על ההזמנה' ) : '' )
-				. mk_cart( $order, 'מה שמחכה לך' )
-				. mk_button( $code ? 'להשלמת ההזמנה עם ההנחה' : 'להשלמת ההזמנה', $go );
-			$subject = 'פרסומת: ככה נראית ברכה על שבב של 5 מ״מ';
-			$pre     = 'לפני שמשלימים, כל התשובות כאן.';
 			break;
 
 		case 4:
-			$name = esc_html( $order->get_billing_first_name() );
+			// מכתב קצר, קישור אחד בתוך הטקסט, ושאלה אחת בסוף
+			$link = '<a href="' . esc_url( $go ) . '" style="color:#96661c;text-decoration:underline;">ההזמנה שמורה כאן</a>';
 			$wa_t = 'בוואטסאפ <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span>';
 			if ( 'return' === $kind ) {
 				$subject = 'פרסומת: תודה, ומילה אחרונה מאיתנו';
+				$first   = 'ראיתי שחזרת אלינו, ושההזמנה נעצרה רגע לפני התשלום. קודם כל - תודה. זה לא מובן מאליו שחוזרים.';
 				$paras   = array(
 					$name ? 'היי ' . $name . ',' : 'היי,',
-					'זה עמית ממִקְרָא.',
-					'ראיתי שחזרת אלינו להזמנה נוספת, ושההזמנה נשארה הפעם בשלב האחרון לפני שהיא הושלמה. קודם כל, רציתי פשוט להגיד תודה. זה לא מובן מאליו שמישהו חוזר אלינו, ואני לא לוקח את זה כמובן מאליו.',
-					'אם היה משהו בתשלום שלא עבד חלק, אפשר לכתוב לי ישירות למייל הזה או ' . $wa_t . ', ואני אדאג שזה יטופל. ואם פשוט עוד לא החלטת סופית, זה גם בסדר - ההזמנה נשארת שמורה בשבילך.',
-					'תודה שבחרת שוב במִקְרָא.',
+					'זה עמית ממִקְרָא. ' . $first,
+					'אם משהו בתשלום לא עבד, אפשר לענות כאן או לכתוב לי ' . $wa_t . ', ואני מטפל בזה. ' . $link . ', למתי שנוח.',
+					'היה משהו שהפריע?',
 					'עמית<br>מִקְרָא',
 				);
 			} else {
 				$subject = 'פרסומת: רציתי לוודא שהכל בסדר';
+				$first   = 'ראיתי שהתחלת הזמנה ונעצרת בתשלום. רציתי רק לוודא שהכל בסדר.';
 				$paras   = array(
 					$name ? 'היי ' . $name . ',' : 'היי,',
-					'זה עמית, מִקְרָא.',
-					'ראיתי שהתחלת הזמנה אצלנו ונעצרת בשלב התשלום. זה קורה, ורציתי רק לוודא שהכל תקין מהצד שלך.',
-					'לפעמים זו תקלה בתשלום, לפעמים שאלה על הברכה או על המידה, ולפעמים פשוט משהו קפץ באמצע. אם יש משהו שאני יכול לעזור בו, אני כאן. אפשר לענות ישירות למייל הזה, או לכתוב לי ' . $wa_t . '.',
-					'ואם עוד מתלבטים - זה בסדר גמור. ההזמנה שמורה, ואפשר לחזור אליה מתי שנוח.',
-					'בברכה,<br>עמית<br>מִקְרָא',
+					'זה עמית ממִקְרָא. ' . $first,
+					'לפעמים זו תקלה בתשלום, לפעמים שאלה על הברכה או על המידה. אפשר לענות כאן, או לכתוב לי ' . $wa_t . '. ' . $link . ', למתי שנוח.',
+					'ושאלה אחת, אם בא לך: מה עצר אותך? גם מילה אחת עוזרת לי.',
+					'עמית<br>מִקְרָא',
 				);
 			}
-			return array( $subject, mk_letter( $subject, 'מילה קצרה ממני, עמית.', $paras, $unsub, 'כי אישרת דיוור', array( 'להמשך ההזמנה', $go ) ) );
+			return array( $subject, mk_letter( $subject, $first, $paras, $unsub ) );
 
 		default:
 			return null;
@@ -774,15 +834,15 @@ function mikra_post_email( $step, $order, $unsub ) {
 		case 0:
 			$name    = esc_html( $order->get_billing_first_name() );
 			$subject = 'פרסומת: תודה שחזרת';
+			$first   = 'ראיתי שהזמנת אצלנו שוב, ורציתי פשוט להגיד תודה. זה לא מובן מאליו שחוזרים.';
 			$paras   = array(
 				$name ? 'היי ' . $name . ',' : 'היי,',
-				'זה עמית, מִקְרָא.',
-				'ראיתי שהזמנת אצלנו שוב, ורציתי פשוט להגיד תודה. זה לא מובן מאליו שמישהו חוזר, ואני לא לוקח את זה כמובן מאליו.',
-				'ההזמנה כבר בטיפול: חורטים את הברכה, בודקים אותה אות אחרי אות, ושולחים. אם יש משהו שצריך - לשנות ברכה, כתובת, או סתם שאלה - עונים למייל הזה, ואני דואג.',
-				'תודה שבחרת שוב במִקְרָא.',
+				'זה עמית ממִקְרָא. ' . $first,
+				'ההזמנה כבר בטיפול: חורטים את הברכה, בודקים אות אחרי אות, ושולחים. צריך לשנות משהו? עונים למייל הזה, ואני מטפל.',
+				'ושאלה קטנה: למי התכשיט הפעם, ולאיזה רגע?',
 				'עמית<br>מִקְרָא',
 			);
-			return array( $subject, mk_letter( $subject, 'מילה קצרה ממני, עמית.', $paras, $unsub ) );
+			return array( $subject, mk_letter( $subject, $first, $paras, $unsub ) );
 
 		case 1:
 			$bid     = mikra_order_blessing( $order );
@@ -825,14 +885,15 @@ function mikra_post_email( $step, $order, $unsub ) {
 		case 3:
 			$rows    = mk_topbar( 'איך התכשיט · מכתב 3' )
 				. mk_image( 'pp-review.jpg', 'זוג עונד תכשיטים של מקרא' )
-				. mk_heading( 'עבר שבועיים מאז שהגיע', 'איך התכשיט?', 'ספרו לנו בכנות.', $hi . 'אנחנו עסק חדש, ועוד אין לנו הרבה ביקורות. שתי דקות שלך יעזרו למישהו אחר להחליט.', 46 )
+				. mk_heading( 'עבר שבועיים מאז שהגיע', 'איך התכשיט?', 'ספרו לנו בכנות.', $hi . 'אנחנו עסק חדש, ועוד אין לנו הרבה ביקורות. שתי דקות שלכם יעזרו למישהו אחר להחליט. אם נתתם במתנה - איך הגיבו?', 46 )
 				. mk_rating( function ( $n ) use ( $order ) {
 					return mikra_review_url( $order, $n );
 				} )
-				. mk_note( 'ואם משהו לא היה בסדר', 'ספרו לנו קודם, בתשובה למייל הזה. נסדר את זה.' )
+				. mk_note( 'יש תמונה של התכשיט?', 'נשמח לראות. שולחים בתשובה למייל הזה, וכותבים "מותר" אם אפשר להראות אותה באתר.' )
+				. mk_note( 'ואם משהו לא היה בסדר', 'ספרו לנו קודם, בתשובה למייל הזה. נסדר את זה.', '14px 36px 0' )
 				. mk_button( 'לכתיבת ביקורת', mikra_review_url( $order ) )
 				. mk_signoff( 'תודה שבחרת בנו.' );
-			$subject = 'פרסומת: איך התכשיט? 2 דקות שיעזרו לאחרים לבחור';
+			$subject = 'פרסומת: איך התכשיט? נשמח לשמוע';
 			$pre     = 'נשמח לשמוע, בכנות.';
 			break;
 
@@ -906,7 +967,7 @@ function mikra_winback_run( $email, $step ) {
 		return;
 	}
 	if ( 2 === $step && empty( $state[ $k ]['code'] ) ) {
-		$state[ $k ]['code'] = mikra_make_coupon( 'BACK10', 10, 7, $email, 'חזרה' );
+		$state[ $k ]['code'] = mikra_make_coupon( 'BACK10', 10, time() + 7 * DAY_IN_SECONDS, $email, 'חזרה' );
 	}
 	$unsub = mikra_unsub_email_url( $email );
 	$mail  = mikra_winback_email( $step, (string) $state[ $k ]['name'], $unsub, (string) ( $state[ $k ]['code'] ?? '' ) );
@@ -989,7 +1050,7 @@ function mikra_winback_email( $step, $name, $unsub, $code = '' ) {
 				'אני קורא כל תשובה בעצמי. גם אם זו שורה אחת.',
 				'תודה,<br>עמית<br>מִקְרָא',
 			);
-			return array( $subject, mk_letter( $subject, 'שאלה קטנה ממני, עמית.', $paras, $unsub ) );
+			return array( $subject, mk_letter( $subject, 'אני כותב לך בעצמי.', $paras, $unsub ) );
 
 		default:
 			return null;
