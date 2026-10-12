@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { formatPrice } from '@/lib/catalog';
+import { POLICY } from '@/lib/policy';
 
 /**
  * חלון התשלום של Grow, מעל העמוד שלנו.
@@ -11,7 +13,9 @@ import { formatPrice } from '@/lib/catalog';
  * הכרטיס לא עוברים דרכנו. כשהתשלום עובר Grow מודיעים לתוסף בווקומרס,
  * והוא מסמן את ההזמנה כשולמה; אנחנו רק מעבירים את הלקוח לעמוד התודה.
  *
- * אם הלקוח סוגר את החלון, נשארים כאן עם כפתור שפותח אותו שוב.
+ * מאחורי החלון יש סיכום הזמנה אמיתי (עמית, 12.10.2026: "שיציג סיכום
+ * הזמנה ... ולא דף מעפן"): מה נקנה, משלוח, הנחה, סה"כ ולאן זה נשלח.
+ * אם הלקוח סוגר את החלון, הסיכום נשאר עם כפתור שפותח אותו שוב.
  */
 declare global {
   interface Window {
@@ -34,7 +38,19 @@ function reasonOf(r: unknown): string {
   return '';
 }
 
-export default function GrowSheet({ token, number, total }: { token: string; number: string; total: number }) {
+export type PaySummary = {
+  lines: { name: string; image: string | null; blessing: string | null; qty: number; amount: number }[];
+  fees: { name: string; amount: number }[];
+  shipping: { label: string; amount: number } | null;
+  discount: number;
+  total: number;
+  shipTo: { name: string; address: string } | null;
+};
+
+const row = { fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' } as const;
+
+export default function GrowSheet({ token, number, summary }: { token: string; number: string; summary: PaySummary }) {
+  const total = summary.total;
   const [state, setState] = useState<'loading' | 'open' | 'closed' | 'error'>('loading');
   const ready = useRef(false);
 
@@ -84,34 +100,92 @@ export default function GrowSheet({ token, number, total }: { token: string; num
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // טעינה מחדש = אסימון חדש מהתוסף, ולא אסימון שכבר נוצל
+  const reopen = () => (state === 'loading' ? undefined : state === 'open' ? open() : window.location.reload());
+
   return (
-    <div className="mx-auto max-w-lg text-center">
-      <h1 className="display t-2">תשלום מאובטח</h1>
-      <p className="lede mt-4">
-        הזמנה <span className="num">#{number}</span> · <span className="num">{formatPrice(total)}</span>
+    <div className="mx-auto max-w-xl">
+      <h1 className="display t-2 text-center">תשלום מאובטח</h1>
+      <p className="mt-2 text-center" style={row}>
+        הזמנה <span className="num">#{number}</span> נשמרה. נשאר רק לשלם.
       </p>
-      <p className="mt-2" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+
+      <div
+        className="mt-8 p-5 md:p-6"
+        style={{ border: '1px solid var(--line)', borderRadius: 'var(--radius-lg)', background: 'var(--surface)' }}
+      >
+        <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
+          סיכום ההזמנה
+        </p>
+        <ul className="mt-3 flex flex-col">
+          {summary.lines.map((l, i) => (
+            <li key={i} className="flex items-center gap-3 py-3" style={{ borderTop: i ? '1px solid var(--line)' : undefined }}>
+              <span className="tile relative shrink-0 overflow-hidden" style={{ width: 60, height: 60, borderRadius: 'var(--radius)' }}>
+                {l.image && <Image src={l.image} alt="" fill sizes="60px" className="object-contain p-1" />}
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>
+                  {l.name}
+                  {l.qty > 1 && <span className="num" style={{ color: 'var(--ink-3)' }}> × {l.qty}</span>}
+                </span>
+                {l.blessing && (
+                  <span className="block truncate" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
+                    {l.blessing}
+                  </span>
+                )}
+              </span>
+              <span className="num shrink-0" style={{ fontSize: 'var(--fs-sm)' }}>
+                {formatPrice(l.amount)}
+              </span>
+            </li>
+          ))}
+        </ul>
+
+        <div className="flex flex-col gap-2 pt-3" style={{ borderTop: '1px solid var(--line)' }}>
+          {summary.fees.map((f) => (
+            <div key={f.name} className="flex justify-between" style={row}>
+              <span>{f.name}</span>
+              <span className="num">{formatPrice(f.amount)}</span>
+            </div>
+          ))}
+          {summary.shipping && (
+            <div className="flex justify-between" style={row}>
+              <span>{summary.shipping.label}</span>
+              <span className="num">{summary.shipping.amount > 0 ? formatPrice(summary.shipping.amount) : 'חינם'}</span>
+            </div>
+          )}
+          {summary.discount > 0 && (
+            <div className="flex justify-between" style={{ ...row, color: 'var(--accent)' }}>
+              <span>הנחה</span>
+              <span className="num">−{formatPrice(summary.discount)}</span>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-3 flex items-baseline justify-between pt-3" style={{ borderTop: '1px solid var(--line-strong)' }}>
+          <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>סה״כ לתשלום</span>
+          <span className="num display" style={{ fontSize: 'var(--fs-lg)' }}>
+            {formatPrice(total)}
+          </span>
+        </div>
+
+        {summary.shipTo && (
+          <p className="mt-4" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
+            נשלח אל: {summary.shipTo.name}
+            {summary.shipTo.name && summary.shipTo.address ? ', ' : ''}
+            {summary.shipTo.address}
+          </p>
+        )}
+      </div>
+
+      <button type="button" className="btn btn-solid mt-6 w-full" onClick={reopen} disabled={state === 'loading'}>
+        {state === 'loading' ? 'פותחים את התשלום…' : `לתשלום · ${formatPrice(total)}`}
+      </button>
+      <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: state === 'error' ? 'var(--accent)' : 'var(--ink-3)' }}>
         {state === 'error'
           ? 'חלון התשלום לא נטען. בדקו את החיבור לאינטרנט ונסו שוב.'
-          : state === 'closed'
-            ? 'חלון התשלום נסגר. ההזמנה שמורה, ואפשר לפתוח אותו שוב.'
-            : 'התשלום מתבצע אצל Grow. פרטי הכרטיס לא נשמרים אצלנו.'}
+          : `כרטיס אשראי, bit, Apple Pay או Google Pay · עד ${POLICY.maxInstallments} תשלומים · התשלום מאובטח אצל Grow, ופרטי הכרטיס לא נשמרים אצלנו.`}
       </p>
-      {(state === 'closed' || state === 'error') && (
-        <button
-          type="button"
-          className="btn btn-solid mt-8"
-          // טעינה מחדש = אסימון חדש מהתוסף, ולא אסימון שכבר נוצל
-          onClick={() => window.location.reload()}
-        >
-          לפתוח את התשלום
-        </button>
-      )}
-      {state === 'loading' && (
-        <p className="mt-8" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-3)' }}>
-          פותחים את חלון התשלום…
-        </p>
-      )}
     </div>
   );
 }
