@@ -10,6 +10,7 @@ defined( 'ABSPATH' ) || exit;
 
 $mikra_email    = mikra_store_current_email( isset( $email ) ? $email : null );
 $mikra_customer = $mikra_email && isset( $mikra_email->id ) && 0 === strpos( (string) $mikra_email->id, 'customer_' );
+$mikra_unpaid   = $mikra_email && isset( $mikra_email->id ) && 'customer_pending_reminder' === $mikra_email->id;
 $mikra_order    = ( $mikra_email && isset( $mikra_email->object ) && $mikra_email->object instanceof WC_Order ) ? $mikra_email->object : null;
 ?>
 			</td></tr>
@@ -18,8 +19,8 @@ $mikra_order    = ( $mikra_email && isset( $mikra_email->object ) && $mikra_emai
 			<tr><td class="mikra-pad" style="padding:30px 40px 36px;">
 				<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#fbf8f1;border-radius:10px;">
 					<tr><td style="padding:20px 22px;font-family:Heebo,Arial,Helvetica,sans-serif;text-align:right;">
-						<p style="margin:0;font-size:15px;font-weight:700;color:#16150f;">שאלה? רוצים להחליף ברכה?</p>
-						<p style="margin:4px 0 14px;font-size:14px;line-height:1.6;color:#4a4840;">אפשר להחליף כל עוד ההזמנה לא נשלחה. פשוט כתבו לנו, או השיבו למייל הזה.</p>
+						<p style="margin:0;font-size:15px;font-weight:700;color:#16150f;"><?php echo $mikra_unpaid ? 'יש שאלה לפני שמשלמים?' : 'שאלה? רוצים להחליף ברכה?'; ?></p>
+						<p style="margin:4px 0 14px;font-size:14px;line-height:1.6;color:#4a4840;"><?php echo $mikra_unpaid ? 'על הברכה, המידה או המשלוח - כתבו לנו ונענה מהר.' : 'אפשר להחליף כל עוד ההזמנה לא נשלחה. פשוט כתבו לנו, או השיבו למייל הזה.'; ?></p>
 						<a href="<?php echo esc_url( mikra_store_wa_url( $mikra_order ) ); ?>" style="display:inline-block;background:#25d366;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:12px 22px;border-radius:8px;font-family:Heebo,Arial,Helvetica,sans-serif;"><img src="<?php echo esc_url( MIKRA_SITE . '/brand/whatsapp-white.png' ); ?>" width="18" height="18" alt="" style="vertical-align:-3px;margin-left:6px;border:0;" />כתבו לנו בוואטסאפ</a>
 					</td></tr>
 				</table>
