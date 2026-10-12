@@ -110,7 +110,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
+    // _ga נראה כמו GA1.1.123456789.1700000000 - מזהה הלקוח הוא שני המספרים האחרונים
+    const gaCookie = req.cookies.get('_ga')?.value ?? '';
+    const gaCid = gaCookie.split('.').slice(-2).join('.');
     const order = await createOrder({
+      tracking: {
+        fbp: req.cookies.get('_fbp')?.value,
+        fbc: req.cookies.get('_fbc')?.value,
+        gaCid: /^\d+\.\d+$/.test(gaCid) ? gaCid : undefined,
+        ip: (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || undefined,
+        ua: req.headers.get('user-agent') ?? undefined,
+      },
       lines,
       gift,
       code,

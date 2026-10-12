@@ -66,6 +66,12 @@ export type OrderInput = {
   status?: 'pending' | 'on-hold';
   /** אמצעי התשלום בווקומרס. ברירת המחדל: Grow דרך ה-API */
   paymentMethod?: { id: string; title: string };
+  /**
+   * פרטי ההתאמה לדיווח הרכישה מהשרת (lib/serverConversions.ts): עוגיות
+   * הפיקסל וגוגל, כתובת IP ודפדפן. נשמרים בהזמנה כדי שכשהיא תשולם -
+   * אפילו בלי שהלקוח חזר לאתר - מטא תוכל לשייך את הרכישה למודעה.
+   */
+  tracking?: { fbp?: string; fbc?: string; gaCid?: string; ip?: string; ua?: string };
 };
 
 export type WcOrder = {
@@ -205,6 +211,15 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
       ...(toRecipient
         ? [{ key: 'משלוח לנמען', value: `${c.toName} · ${c.toPhone}` }]
         : []),
+      ...Object.entries({
+        mikra_fbp: input.tracking?.fbp,
+        mikra_fbc: input.tracking?.fbc,
+        mikra_ga_cid: input.tracking?.gaCid,
+        mikra_ip: input.tracking?.ip,
+        mikra_ua: input.tracking?.ua,
+      })
+        .filter(([, v]) => typeof v === 'string' && v)
+        .map(([key, value]) => ({ key, value: String(value).slice(0, 400) })),
     ],
   };
 }

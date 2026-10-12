@@ -176,7 +176,13 @@ uniformly sized at 5x5 mm." לכן "קטן מראש סיכה" (ראש סיכה �
 
 | משתנה | מה נדלק |
 |---|---|
-| `GROW_USER_ID` + `GROW_PAGE_CODE` | סליקה אוטומטית |
+| `GROW_USER_ID` + `GROW_PAGE_CODE` | סליקה דרך ה-API (לא בשימוש: 500 ש"ח בחודש; הסליקה עובדת דרך התוסף של Grow) |
+| `META_CAPI_TOKEN` | דיווח רכישה מהשרת למטא (Conversions API) - `lib/serverConversions.ts` |
+| `GA4_API_SECRET` | דיווח רכישה מהשרת לגוגל אנליטיקס (Measurement Protocol) |
+| `META_TEST_EVENT_CODE` | אופציונלי: הזמנות בדיקה (מק"ט TEST) נשלחות ל"אירועי בדיקה" במטא |
+
+הדיווח מהשרת נורה מוובהוק `order.updated` בווקומרס אל `/api/wc/order-event`
+(הוגדר ב-12.10.2026), פעם אחת לכל הזמנה ששולמה (סימון `mikra_conversion_sent`).
 
 GA4 (`G-PYHMXSGQF9`) והפיקסל (`1582172286454803`) **מוגדרים וחיים**,
 ואומתו על האתר: השער עובד, האירועים יוצאים בשקלים, ואין ספירה כפולה
