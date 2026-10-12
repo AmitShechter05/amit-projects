@@ -61,9 +61,15 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
   /* ---------- אין סיכום: כניסה ישירה, או לשונית חדשה ---------- */
   if (!done) {
     return number ? (
-      <p className="mt-6" style={{ fontSize: 'var(--fs-md)', color: 'var(--ink-2)' }}>
-        מספר ההזמנה שלך: <span className="num" style={{ color: 'var(--ink)' }}>#{number}</span>
-      </p>
+      <div
+        className="mt-8 flex flex-wrap items-baseline justify-between gap-2 p-4"
+        style={{ borderRadius: 'var(--radius)', border: '1px solid var(--line-strong)', background: 'var(--surface-2)' }}
+      >
+        <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>מספר ההזמנה</span>
+        <span className="num" style={{ fontSize: 'var(--fs-lg)', fontWeight: 500 }}>
+          #{number}
+        </span>
+      </div>
     ) : null;
   }
 
