@@ -225,6 +225,15 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
       }
 
       if (data.payment) {
+        // לעמוד "התשלום לא עבר": משם "נסו שוב" חוזר לאותו דף תשלום
+        try {
+          sessionStorage.setItem(
+            'mikra-last-payment',
+            JSON.stringify({ url: data.payment, number: String(data.orderNumber) }),
+          );
+        } catch {
+          /* אין אחסון */
+        }
         window.location.href = data.payment;
         return;
       }
