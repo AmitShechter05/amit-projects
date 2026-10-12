@@ -111,9 +111,40 @@ export default function GrowSheet({
       setTimeout(open, 600);
     };
 
+    // bit ותשלומים שנפתחים באפליקציה: כשחוזרים לדפדפן, האירוע של Grow לא
+    // תמיד מגיע. אז שואלים את ווקומרס בעצמנו - כל כמה שניות, ומיד כשחוזרים
+    // ללשונית - ואם ההזמנה שולמה, עוברים לעמוד התודה
+    let gone = false;
+    const check = async () => {
+      if (gone) return;
+      try {
+        const r = await fetch(`/api/checkout/status?${path.split('?')[1] ?? ''}`, { cache: 'no-store' });
+        const d = (await r.json()) as { paid?: boolean };
+        if (d.paid && !gone) {
+          gone = true;
+          window.location.href = `/checkout/success?order=${encodeURIComponent(number)}&sum=${total.toFixed(2)}`;
+        }
+      } catch {
+        /* ננסה בפעם הבאה */
+      }
+    };
+    const poll = window.setInterval(check, 4000);
+    const onVisible = () => {
+      if (document.visibilityState === 'visible') check();
+    };
+    document.addEventListener('visibilitychange', onVisible);
+    window.addEventListener('focus', onVisible);
+    window.addEventListener('pageshow', onVisible);
+    const stop = () => {
+      window.clearInterval(poll);
+      document.removeEventListener('visibilitychange', onVisible);
+      window.removeEventListener('focus', onVisible);
+      window.removeEventListener('pageshow', onVisible);
+    };
+
     if (window.growPayment) {
       start();
-      return;
+      return stop;
     }
     const s = document.createElement('script');
     s.src = SDK;
@@ -121,6 +152,7 @@ export default function GrowSheet({
     s.onload = start;
     s.onerror = () => setState('error');
     document.head.appendChild(s);
+    return stop;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
