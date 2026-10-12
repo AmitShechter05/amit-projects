@@ -47,10 +47,11 @@ export const paymentSandbox = SANDBOX;
  * לדף "שלם עבור ההזמנה" של ווקומרס - שם התוסף מציג כרטיס, ארנק ו-bit,
  * גובה, ומעדכן את ההזמנה בעצמו.
  *
- * כבוי עד שאתר הוורדפרס יעבור ממצב "בקרוב" ל-Live: עד אז הדף הזה מציג
- * "החנות תושק בקרוב" במקום טופס תשלום, והלקוח היה נתקע שם.
+ * הודלק ב-12.10.2026, אחרי שהוורדפרס עבר ל-Live ועמית מילא את הגדרות שלושת
+ * אמצעי התשלום (כותרות, דף תודה, דף כישלון, פופאפ). נבדק עם הזמנת בדיקה:
+ * הדף מציג את ההזמנה ואת בלוק Grow (כרטיס, ארנק, bit). לכבות = false.
  */
-const PAY_VIA_WC_PLUGIN = false;
+const PAY_VIA_WC_PLUGIN = true;
 export const payViaWc = !paymentReady && PAY_VIA_WC_PLUGIN;
 /** יש תשלום אונליין, באחד משני המסלולים */
 export const onlinePayment = paymentReady || payViaWc;
