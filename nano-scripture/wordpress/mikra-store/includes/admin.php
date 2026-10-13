@@ -119,6 +119,22 @@ function mikra_admin_page() {
 
 	echo '<div class="wrap" dir="rtl" style="max-width:1200px">';
 	echo '<h1>מקרא · אוטומציות</h1>';
+
+	// הסרה ידנית: מי שענה "הסר" במייל - מדביקים את הכתובת, והיא יוצאת מכל הזרימות
+	if ( isset( $_POST['mikra_remove'] ) && check_admin_referer( 'mikra_remove' ) ) {
+		$rm = sanitize_email( wp_unslash( (string) $_POST['mikra_remove'] ) );
+		if ( $rm ) {
+			mikra_suppress( $rm );
+			mikra_unschedule( 'winback', $rm, array( 1, 2, 3, 4 ) );
+			echo '<div class="notice notice-success"><p>הוסר: <span dir="ltr">' . esc_html( $rm ) . '</span>. לא יקבל יותר מיילים שיווקיים מאף זרימה.</p></div>';
+		} else {
+			echo '<div class="notice notice-error"><p>הכתובת לא תקינה.</p></div>';
+		}
+	}
+	echo '<form method="post" style="margin:12px 0;background:#fff;border:1px solid #dcdcde;padding:12px 16px">';
+	wp_nonce_field( 'mikra_remove' );
+	echo '<label><b>להסיר כתובת</b> (מי שענה "הסר" במייל): <input type="email" name="mikra_remove" dir="ltr" style="width:280px" required></label> ';
+	echo '<button class="button button-primary">להסיר</button></form>';
 	echo '<style>.mk-cards{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.mk-card{background:#fff;border:1px solid #dcdcde;padding:14px 18px;min-width:150px}.mk-card b{display:block;font-size:24px;line-height:1.3}.mk-tag{display:inline-block;padding:1px 8px;border-radius:10px;font-size:12px}.mk-enter{background:#e7f0fb}.mk-sent{background:#e8f5e9}.mk-exit{background:#fff4e5}.mk-unsub{background:#fde8e8}.mk-fail{background:#fde8e8}.mk-warn{background:#fff4e5;border-right:4px solid #dba617;padding:10px 14px;margin:10px 0}</style>';
 
 	// מצב שליחה
