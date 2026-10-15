@@ -132,7 +132,7 @@ export function validate(c: Customer): FieldErrors {
     }
   }
 
-  if (!c.terms) e.terms = 'צריך לאשר את תנאי השימוש';
+  if (!c.terms) e.terms = 'צריך לאשר את התקנון';
 
   // מיקוד אינו חובה בישראל לצורך משלוח, ולכן נבדק רק אם הוזן
   const zip = t(c.postcode);
