@@ -33,7 +33,7 @@ export function hasFinishSibling(p: Product) {
 
 /** השם כפי שהוא מזוהה בין אחים: "בְּסֵתֶר זהב" רק כשיש בְּסֵתֶר אחר */
 export function distinctName(p: Product) {
-  return hasFinishSibling(p) ? `${p.name} ${FINISHES[p.finish]}` : p.name;
+  return hasFinishSibling(p) ? `${p.name} בצבע ${FINISHES[p.finish]}` : p.name;
 }
 
 /** כותרת עמוד מוצר: שם · מה זה. המותג מתווסף בתבנית של ה-layout */

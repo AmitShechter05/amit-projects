@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals, lineKey } from '@/lib/cart';
-import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS, packshotFit } from '@/lib/catalog';
+import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS, FINISHES, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { PROMO, saleOf, isPromoCode, normalizeCode } from '@/lib/promo';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
 import { POLICY, shippingNote, freeShippingGap, shippingCost } from '@/lib/policy';
 import PaymentMarks from '@/components/PaymentMarks';
-import { distinctName } from '@/lib/seo';
+import { hasFinishSibling } from '@/lib/seo';
 
 /**
  * שדה קוד ההנחה.
@@ -332,8 +332,18 @@ export default function CartDrawer() {
                       className="display link-u"
                       style={{ fontSize: 'var(--fs-md)' }}
                     >
-                      {/* בְּסֵתֶר בכסף ובְּסֵתֶר בזהב היו שתי שורות באותו שם */}
-                      {distinctName(p)}
+                      {/* בְּסֵתֶר בכסף ובְּסֵתֶר בזהב היו שתי שורות באותו שם. הצבע
+                          יושב בשורה קטנה נפרדת - צמוד לשם, "שִׁוִּיתִי כסף" נקרא
+                          כאילו זה שם התכשיט (עמית, 15.10.2026) */}
+                      {p.name}
+                      {hasFinishSibling(p) && (
+                        <span
+                          className="mt-0.5 block"
+                          style={{ fontSize: 'var(--fs-xs)', fontWeight: 400, color: 'var(--ink-3)', letterSpacing: 0 }}
+                        >
+                          בצבע {FINISHES[p.finish]}
+                        </span>
+                      )}
                     </Link>
                     <button
                       onClick={() => remove(key)}
