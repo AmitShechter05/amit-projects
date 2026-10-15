@@ -2,6 +2,7 @@
 
 import type { ReactNode } from 'react';
 import { applyPrices, applyStock, type PriceMap, type StockMap } from '@/lib/catalog';
+import { applyRatings, type RatingMap } from '@/lib/ratings';
 
 /**
  * מחיל את מחירי ווקומרס על הקטלוג שבדפדפן.
@@ -18,14 +19,18 @@ import { applyPrices, applyStock, type PriceMap, type StockMap } from '@/lib/cat
 export default function LivePrices({
   prices,
   stock,
+  ratings,
   children,
 }: {
   prices: PriceMap;
   /** המלאי לפי ברכה - מוחל באותו אופן, מאותה סיבה */
   stock: StockMap;
+  /** ממוצע ומספר הביקורות לכל דגם - לכוכבים בכרטיסים */
+  ratings?: RatingMap;
   children: ReactNode;
 }) {
   applyPrices(prices);
   applyStock(stock);
+  applyRatings(ratings ?? {});
   return <>{children}</>;
 }

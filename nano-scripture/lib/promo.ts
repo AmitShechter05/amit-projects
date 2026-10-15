@@ -56,8 +56,30 @@ export function isPromoCode(input: string) {
   return promoOn && normalizeCode(input) === PROMO.code;
 }
 
+/**
+ * קודים אחרים מווקומרס (16.10.2026): קוד אישי מזרימת החזרה, קוד נטישה,
+ * כרטיס מתנה. הקופה בודקת אותם מול ווקומרס (app/api/coupon) ורושמת כאן
+ * את הסוג והסכום, כדי שהעגלה, הקופה והשרת יחשבו את אותה הנחה.
+ * percent - אחוז מהפריטים; fixed_cart - סכום קבוע, עד גובה הפריטים.
+ */
+export type CouponInfo = { code: string; type: 'percent' | 'fixed_cart'; amount: number };
+
+const COUPONS: Record<string, CouponInfo> = {};
+
+export function registerCoupon(c: CouponInfo) {
+  COUPONS[normalizeCode(c.code)] = { ...c, code: normalizeCode(c.code) };
+}
+
+export function couponFor(code: string | null): CouponInfo | null {
+  if (!code) return null;
+  if (isPromoCode(code)) return { code: PROMO.code, type: 'percent', amount: PROMO.percent };
+  return COUPONS[normalizeCode(code)] ?? null;
+}
+
 /** ההנחה יורדת מסכום הפריטים בלבד, לא מהמשלוח ולא מאריזת המתנה */
 export function codeDiscount(itemsSubtotal: number, code: string | null) {
-  if (!code || !isPromoCode(code)) return 0;
-  return Math.round(itemsSubtotal * (PROMO.percent / 100));
+  const c = couponFor(code);
+  if (!c) return 0;
+  if (c.type === 'fixed_cart') return Math.min(Math.round(c.amount), itemsSubtotal);
+  return Math.round(itemsSubtotal * (c.amount / 100));
 }

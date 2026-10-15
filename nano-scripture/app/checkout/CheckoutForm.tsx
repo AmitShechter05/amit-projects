@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { rememberShopper } from '@/lib/shopper';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals } from '@/lib/cart';
@@ -99,6 +100,11 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
     begun.current = true;
     trackBeginCheckout(lines);
   }, [ready, lines]);
+
+  // מי שאישר דיוור בקופה וחזר לגלוש - העגלה שלו נשמרת לעגלה נטושה (CartSync)
+  useEffect(() => {
+    if (customer.marketing) rememberShopper({ email: customer.email, name: customer.firstName });
+  }, [customer.marketing, customer.email, customer.firstName]);
 
   const totals = cartTotals(lines, code);
   const giftFee = gift ? GIFT_BOX.price : 0;

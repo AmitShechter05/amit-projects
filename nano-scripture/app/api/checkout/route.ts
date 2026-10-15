@@ -7,6 +7,8 @@ import { isBlessingId, getBlessing } from '@/lib/blessings';
 import { getProduct, blessingStock } from '@/lib/catalog';
 import { SITE_URL } from '@/lib/site';
 import { syncPrices } from '@/lib/livePrices';
+import { checkCoupon } from '@/lib/coupons';
+import { isPromoCode } from '@/lib/promo';
 
 export const dynamic = 'force-dynamic';
 
@@ -120,6 +122,13 @@ export async function POST(req: NextRequest) {
         { status: 409 },
       );
     }
+  }
+
+  // קוד שאינו קוד ההצטרפות נבדק מול ווקומרס - גם מול כתובת המייל של
+  // הלקוח, אם הקוד אישי - ונרשם, כדי שהסכום כאן יהיה הסכום שבעגלה
+  if (code && !isPromoCode(code)) {
+    const c = await checkCoupon(code, customer.email);
+    if (!c.ok) return NextResponse.json({ error: `${c.error} אפשר להסיר את הקוד בעגלה ולהמשיך בלעדיו.` }, { status: 400 });
   }
 
   const totals = orderTotal({ lines, gift, code, shipping: customer.shipping });
@@ -251,7 +260,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            'קוד ההנחה כבר נוצל - הוא תקף להזמנה הראשונה בלבד. אפשר להסיר אותו בעגלה ולהמשיך בלעדיו.',
+            code && isPromoCode(code)
+            ? 'קוד ההנחה כבר נוצל - הוא תקף להזמנה הראשונה בלבד. אפשר להסיר אותו בעגלה ולהמשיך בלעדיו.'
+            : 'קוד ההנחה לא תקף להזמנה הזו (אולי כבר נוצל או שפג תוקפו). אפשר להסיר אותו בעגלה ולהמשיך בלעדיו.',
         },
         { status: 400 },
       );

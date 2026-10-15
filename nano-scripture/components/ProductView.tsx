@@ -36,6 +36,8 @@ import { SITE_URL } from '@/lib/site';
 import { productFaq } from '@/lib/faq';
 import { trackViewItem } from '@/lib/analytics';
 import PaymentMarks from '@/components/PaymentMarks';
+import NotifyRestock from '@/components/NotifyRestock';
+import OccasionDeadline from '@/components/OccasionDeadline';
 
 type View = 'jewel' | 'worn' | 'chip' | `scene-${number}`;
 
@@ -118,6 +120,21 @@ export default function ProductView({ product }: { product: Product }) {
    * במצב פיתוח React מריץ כל אפקט פעמיים, וזה נמדד ונראה בבירור.
    * החלפת ברכה משנה את המפתח, ולכן היא כן נספרת.
    */
+  /**
+   * ?b=<ברכה> בקישור (מייל "חזר למלאי", השאלון "איזו ברכה מתאימה") בוחר
+   * את הברכה מראש - אם היא שייכת לדגם ויש ממנה במלאי
+   */
+  useEffect(() => {
+    const want = new URLSearchParams(window.location.search).get('b');
+    const hit = stocked.find((x) => x.id === want);
+    if (hit) {
+      setBlessing(hit.id);
+      setPicked(true);
+    }
+    // רק בטעינה. הבחירה של הלקוח אחר כך היא שקובעת
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const seen = useRef('');
   useEffect(() => {
     const key = `${product.slug}::${blessing}`;
@@ -633,6 +650,8 @@ export default function ProductView({ product }: { product: Product }) {
             })}
           </div>
 
+          <NotifyRestock slug={product.slug} out={available.filter((x) => !blessingInStock(product, x.id))} />
+
           {/* שורת הפתיחה של הנוסח שנבחר. הטעימה שנשארת, במקום קופסה
               שלמה עם מקורות, מונים ושלושה קישורים. בטלפון - מתחת לכפתור */}
           <div className="mt-4 hidden sm:block">{taste}</div>
@@ -676,7 +695,18 @@ export default function ProductView({ product }: { product: Product }) {
           </button>
         </div>
 
+        {/* מלאי נמוך - רק כשזה נכון, מהמלאי האמיתי של הברכה שנבחרה. בלי
+            ספירה לאחור ובלי "רק היום": דחיפות שאינה אמת שוחקת אמון */}
+        {!soldOut && left !== null && left > 0 && left <= 3 && (
+          <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-sm)', color: 'var(--sale-deep)', fontWeight: 500 }}>
+            {left === 1 ? 'נשארה יחידה אחת' : `נשארו רק ${left} יחידות`} עם {b.plain}
+          </p>
+        )}
+
         <DeliveryEstimate color={b.accentInk} />
+        <div className="mt-1 text-center">
+          <OccasionDeadline />
+        </div>
         <p className="mt-1.5 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
           {SHIPPING_LINE}
         </p>

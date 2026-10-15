@@ -8,7 +8,9 @@
  * ------------------------------------------------------------------
  * מה שאין כאן, ולא במקרה.
  *
- * אין aggregateRating ואין review. שדות הכוכבים הם הפיתוי הגדול של
+ * עד 16.10.2026 לא היו כאן aggregateRating ו-review. עכשיו הם נכנסים רק
+ * כשיש ביקורות אמיתיות שאושרו (lib/reviews.ts), ורק בעמוד של אותו דגם.
+ * הנימוק המקורי נשאר נכון: שדות הכוכבים הם הפיתוי הגדול של
  * הסימון המובנה - הם מה שמצייר את הכוכבים הצהובים בתוצאות החיפוש -
  * ולחנות הזו אין ולו ביקורת אחת. סימון דירוג בלי דירוג אמיתי הוא
  * הפרה מפורשת של הנחיות גוגל, והעונש עליה הוא הסרת כל התוצאות
@@ -121,8 +123,14 @@ function shippingDetails(product: Product) {
   };
 }
 
-export function productSchema(product: Product, photos: string[] = []) {
+export function productSchema(
+  product: Product,
+  photos: string[] = [],
+  reviews?: { avg: number; count: number; items: { name: string; rating: number; text: string; date: string }[] },
+) {
   const images = [product.image, ...photos].filter(Boolean).map(abs);
+  // דירוג נכנס רק כשיש ביקורות אמיתיות שאושרו (lib/reviews.ts). ראו למעלה
+  const rated = reviews && reviews.count > 0;
 
   return {
     '@context': 'https://schema.org',
@@ -154,6 +162,18 @@ export function productSchema(product: Product, photos: string[] = []) {
       hasMerchantReturnPolicy: returnPolicy(),
       shippingDetails: shippingDetails(product),
     },
+    ...(rated
+      ? {
+          aggregateRating: { '@type': 'AggregateRating', ratingValue: reviews!.avg, reviewCount: reviews!.count, bestRating: 5, worstRating: 1 },
+          review: reviews!.items.slice(0, 10).map((r) => ({
+            '@type': 'Review',
+            author: { '@type': 'Person', name: r.name },
+            datePublished: r.date.slice(0, 10),
+            reviewBody: r.text,
+            reviewRating: { '@type': 'Rating', ratingValue: r.rating, bestRating: 5, worstRating: 1 },
+          })),
+        }
+      : {}),
   };
 }
 

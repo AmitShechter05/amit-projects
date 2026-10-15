@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { useCart, cartTotals, lineKey } from '@/lib/cart';
 import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS, FINISHES, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
-import { PROMO, saleOf, isPromoCode, normalizeCode } from '@/lib/promo';
+import { PROMO, saleOf, isPromoCode, normalizeCode, type CouponInfo } from '@/lib/promo';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
 import { POLICY, shippingNote, freeShippingGap, shippingCost } from '@/lib/policy';
 import PaymentMarks from '@/components/PaymentMarks';
@@ -22,7 +22,9 @@ import { hasFinishSibling } from '@/lib/seo';
 function CodeField() {
   const { code, setCode } = useCart();
   const [draft, setDraft] = useState('');
-  const [error, setError] = useState(false);
+  // הודעת השגיאה עצמה: "הקוד פג", "הקוד אישי"... - לא רק "לא מוכר"
+  const [error, setError] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
   const applied = Boolean(code);
 
   if (applied) {
@@ -50,12 +52,32 @@ function CodeField() {
     );
   }
 
-  const submit = () => {
+  // קוד ההצטרפות מוכר מקומית. כל קוד אחר (קוד אישי, כרטיס מתנה) נבדק מול
+  // ווקומרס, שמחזיר את הסוג והסכום (app/api/coupon)
+  const submit = async () => {
     if (isPromoCode(draft)) {
       setCode(normalizeCode(draft));
-      setError(false);
-    } else {
-      setError(true);
+      setError(null);
+      return;
+    }
+    setBusy(true);
+    try {
+      const r = await fetch('/api/coupon', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code: draft }),
+      });
+      const data = (await r.json()) as { ok: boolean; error?: string; coupon?: CouponInfo };
+      if (data.ok && data.coupon) {
+        setCode(data.coupon.code, data.coupon);
+        setError(null);
+      } else {
+        setError(data.error ?? 'הקוד לא מוכר. בדקו שהקלדתם נכון ונסו שוב.');
+      }
+    } catch {
+      setError('לא הצלחנו לבדוק את הקוד. נסו שוב בעוד רגע.');
+    } finally {
+      setBusy(false);
     }
   };
 
@@ -64,11 +86,11 @@ function CodeField() {
       <div className="flex gap-2">
         <input
           value={draft}
-          onChange={(e) => { setDraft(e.target.value); setError(false); }}
+          onChange={(e) => { setDraft(e.target.value); setError(null); }}
           onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } }}
           placeholder="קוד הנחה"
           aria-label="קוד הנחה"
-          aria-invalid={error || undefined}
+          aria-invalid={error ? true : undefined}
           className="num min-w-0 flex-1 px-3"
           style={{
             height: 44,
@@ -84,16 +106,16 @@ function CodeField() {
         <button
           type="button"
           onClick={submit}
-          disabled={!draft.trim()}
+          disabled={!draft.trim() || busy}
           className="btn tap"
-          style={{ ['--pad' as string]: '0 1.1rem', height: 44, fontSize: 'var(--fs-sm)', opacity: draft.trim() ? 1 : 0.45 }}
+          style={{ ['--pad' as string]: '0 1.1rem', height: 44, fontSize: 'var(--fs-sm)', opacity: draft.trim() && !busy ? 1 : 0.45 }}
         >
-          החלה
+          {busy ? 'בודק…' : 'החלה'}
         </button>
       </div>
 
       <p className="mt-1.5" style={{ fontSize: 'var(--fs-xs)', color: error ? 'var(--sale)' : 'var(--ink-3)' }}>
-        {error ? 'הקוד לא מוכר. בדקו שהקלדתם נכון ונסו שוב.' : 'חברי המועדון מקבלים קוד להזמנה הראשונה'}
+        {error ?? 'קוד הנחה או כרטיס מתנה'}
       </p>
     </div>
   );

@@ -3,7 +3,7 @@ import { getProduct } from './catalog';
 import { getBlessing, isBlessingId, type BlessingId } from './blessings';
 import { GIFT_BOX } from './extras';
 import { shippingMethod, shippingCost } from './policy';
-import { PROMO, isPromoCode, codeDiscount } from './promo';
+import { PROMO, isPromoCode, codeDiscount, normalizeCode } from './promo';
 
 /**
  * בניית הזמנה בווקומרס מתוך העגלה.
@@ -125,8 +125,10 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
   // הסף נמדד על המחירון לפני ההנחה, דרך אותה פונקציה שהעגלה
   // והצ'קאאוט קוראים לה - אחרת השלושה חלוקים על אותה הזמנה
   const shipTotal = shippingCost(input.customer.shipping, itemsTotal);
-  const coupon_lines =
-    input.code && isPromoCode(input.code) ? [{ code: PROMO.code.toLowerCase() }] : [];
+  // קוד ההצטרפות, או כל קופון אחר של ווקומרס שנבדק בקופה (lib/coupons.ts)
+  const coupon_lines = input.code
+    ? [{ code: (isPromoCode(input.code) ? PROMO.code : normalizeCode(input.code)).toLowerCase() }]
+    : [];
 
   const c = input.customer;
   const billing = {

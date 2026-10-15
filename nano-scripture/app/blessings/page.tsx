@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 import BlessingCard from '@/components/BlessingCard';
 import NanoLoupe from '@/components/NanoLoupe';
@@ -38,6 +39,12 @@ export default function BlessingsPage() {
             על כל תכשיט אפשר לבחור ברכה אחת או יותר מתוך ה{BLESSING_COUNT}. אילו ברכות - כתוב
             בעמוד של התכשיט, ושם גם בוחרים. את השבב חורטים אחרי ההזמנה. הברכות
             מופיעות כאן במלואן, מילה במילה, בלי קיצורים ובלי שינויים.
+          </p>
+          <p className="reveal load mt-6" style={{ ['--d' as string]: '360ms', fontSize: 'var(--fs-base)', color: 'var(--ink-2)' }}>
+            לא בטוחים איזו לבחור?{' '}
+            <Link href="/match" className="link-u" style={{ color: 'var(--accent)', fontWeight: 600 }}>
+              לענות על שלוש שאלות ←
+            </Link>
           </p>
         </div>
       </section>

@@ -96,6 +96,12 @@ export default function Footer() {
             <Link href="/guides" className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
               מדריכי מתנה
             </Link>
+            <Link href="/gift-card" className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+              כרטיס מתנה
+            </Link>
+            <Link href="/match" className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+              איזו ברכה מתאימה?
+            </Link>
           </nav>
 
           <nav className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:flex md:flex-col md:gap-3">

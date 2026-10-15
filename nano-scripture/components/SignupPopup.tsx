@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { rememberShopper } from '@/lib/shopper';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/lib/cart';
 import { PROMO, promoOn } from '@/lib/promo';
@@ -176,6 +177,7 @@ export default function SignupPopup() {
         return;
       }
       setCode(data.code);
+      rememberShopper({ email: lead.email, name: lead.name.split(' ')[0] });
       trackLead();
       try {
         localStorage.setItem(SEEN, '1');

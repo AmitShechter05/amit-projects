@@ -19,8 +19,11 @@ const CAT_NAV = [
 ];
 const PAGE_NAV = [
   { href: '/blessings', label: 'הברכות' },
+  // מי שלא יודע איזו ברכה לבחור מתחיל משלוש שאלות, לא מחמש ברכות מלאות
+  { href: '/match', label: 'איזו ברכה מתאימה?' },
   // המדריכים ישבו רק בפוטר. מי שקונה מתנה מתחיל מ"למי", לא מ"מה"
   { href: '/guides', label: 'מדריכי מתנה' },
+  { href: '/gift-card', label: 'כרטיס מתנה' },
   { href: '/craft', label: 'איך זה עובד' },
 ];
 const NAV = [...CAT_NAV, ...PAGE_NAV];
@@ -296,6 +299,13 @@ export default function Header() {
 
           <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>{BLESSING_COUNT} הברכות</p>
           <div className="mt-3 flex flex-col">
+            <Link
+              href="/match"
+              className="tap-row"
+              style={{ color: 'var(--accent)', fontSize: 'var(--fs-base)', fontWeight: 600, padding: '.34rem 0' }}
+            >
+              איזו ברכה מתאימה? ←
+            </Link>
             {BLESSINGS.map((b) => (
               <Link
                 key={b.id}

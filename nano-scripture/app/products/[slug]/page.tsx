@@ -1,4 +1,6 @@
 import type { Metadata } from 'next';
+import ProductReviews from '@/components/ProductReviews';
+import { getReviews } from '@/lib/reviews';
 import { notFound } from 'next/navigation';
 import ProductView from '@/components/ProductView';
 import ProductCard from '@/components/ProductCard';
@@ -57,12 +59,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   // הנוסח הראשון הוא מה שהעמוד מציג בטעינה, ולכן הוא מה שהסכימה
   // מצטטת. סימון שמתאר מצב אחר מזה שהמבקר רואה הוא סימון שגוי
   const defaultBlessing = getBlessing(product.blessings[0]);
+  const reviews = await getReviews();
 
   return (
     <>
       <JsonLd
         data={[
-          productSchema(product, product.scenes ?? []),
+          productSchema(product, product.scenes ?? [], reviews[product.name]),
           faqSchema(productFaq(product, defaultBlessing)),
           breadcrumbSchema([
             { name: 'מִקְרָא', path: '/' },
@@ -72,6 +75,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         ]}
       />
       <ProductView product={product} />
+
+      <ProductReviews summary={reviews[product.name]} />
 
       {/* איך זה עובד, עם מסכים מוקטנים וצילום השבב במיקרוסקופ.
           עבר מעמוד הבית לכאן (עמית, 11.10.2026) */}

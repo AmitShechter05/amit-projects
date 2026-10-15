@@ -1,6 +1,7 @@
 import { PROMO, promoOn } from '@/lib/promo';
 import { POLICY, deliveryLine } from '@/lib/policy';
 import { GIFT_BOX, INSTALLMENTS } from '@/lib/extras';
+import OccasionDeadline from './OccasionDeadline';
 
 /**
  * רצועת ההצעות — שורה רצה בראש כל עמוד.
@@ -28,6 +29,8 @@ const OFFERS = [
 function Row({ dim = false, hidden = false }: { dim?: boolean; hidden?: boolean }) {
   return (
     <div className="flex shrink-0 items-center" aria-hidden={hidden || undefined}>
+      {/* "עד מתי להזמין לחג" - מחושב בדפדפן בלבד, וריק כשאין מועד קרוב */}
+      <OccasionDeadline variant="bar" />
       {OFFERS.map((offer, i) => (
         <span key={`${i}-${offer}`} className="flex items-center">
           <span aria-hidden style={{ opacity: 0.45, padding: '0 1.15rem' }}>

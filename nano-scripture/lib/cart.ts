@@ -3,7 +3,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { getProduct } from './catalog';
-import { codeDiscount } from './promo';
+import { codeDiscount, registerCoupon, type CouponInfo } from './promo';
 import { isBlessingId } from './blessings';
 import type { BlessingId } from './blessings';
 import { trackAddToCart } from './analytics';
@@ -19,12 +19,14 @@ type CartState = {
   gift: boolean;
   /** קוד ההנחה כפי שהוזן. נשמר כדי שלא יאבד ברענון באמצע הקנייה */
   code: string | null;
+  /** הסוג והסכום של קוד מווקומרס (לא קוד ההצטרפות), כפי שנבדק בשרת */
+  coupon: CouponInfo | null;
   open: boolean;
   add: (slug: string, blessing: BlessingId, qty?: number) => void;
   remove: (key: string) => void;
   setQty: (key: string, qty: number) => void;
   setGift: (gift: boolean) => void;
-  setCode: (code: string | null) => void;
+  setCode: (code: string | null, coupon?: CouponInfo | null) => void;
   setOpen: (open: boolean) => void;
   /** ריקון אחרי תשלום מוצלח. עגלה ששורדת קנייה מזמינה קנייה כפולה */
   clear: () => void;
@@ -36,6 +38,7 @@ export const useCart = create<CartState>()(
       lines: [],
       gift: false,
       code: null,
+      coupon: null,
       open: false,
       add: (slug, blessing, qty = 1) => {
         // שער אחרון לפני העגלה.
@@ -82,14 +85,21 @@ export const useCart = create<CartState>()(
                 ),
         })),
       setGift: (gift) => set({ gift }),
-      setCode: (code) => set({ code }),
+      setCode: (code, coupon = null) => {
+        if (coupon) registerCoupon(coupon);
+        set({ code, coupon });
+      },
       setOpen: (open) => set({ open }),
-      clear: () => set({ lines: [], gift: false, code: null, open: false }),
+      clear: () => set({ lines: [], gift: false, code: null, coupon: null, open: false }),
     }),
     {
       name: 'ns-cart',
       version: 4,
-      partialize: (s) => ({ lines: s.lines, gift: s.gift, code: s.code }) as CartState,
+      partialize: (s) => ({ lines: s.lines, gift: s.gift, code: s.code, coupon: s.coupon }) as CartState,
+      // קוד מווקומרס שנשמר בעגלה נרשם מחדש אחרי רענון, אחרת ההנחה נעלמת מהסכום
+      onRehydrateStorage: () => (s) => {
+        if (s?.coupon) registerCoupon(s.coupon);
+      },
       // ההידרציה נדחית לאפקט כדי שהשרת והלקוח יצבעו אותו דבר בסיבוב הראשון
       skipHydration: true,
       // גרסה 1 לא הכילה ברכה — עגלות ישנות נזרקות במקום לשבור את התצוגה

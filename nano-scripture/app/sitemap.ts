@@ -17,6 +17,7 @@ const UPDATED = {
   home: '2026-09-15',
   catalog: '2026-09-15',
   blessings: '2026-09-08',
+  match: '2026-10-16',
   craft: '2026-09-14',
   legal: '2026-09-15',
 };
@@ -31,6 +32,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
   return [
     url('', 1, UPDATED.home),
     url('/blessings', 0.9, UPDATED.blessings),
+    url('/match', 0.7, UPDATED.match),
+    url('/gift-card', 0.6, UPDATED.match),
     url('/craft', 0.7, UPDATED.craft),
     url('/guides', 0.6, GUIDES.reduce((m, g) => (g.published > m ? g.published : m), UPDATED.home)),
     url('/catalog', 0.9, UPDATED.catalog),

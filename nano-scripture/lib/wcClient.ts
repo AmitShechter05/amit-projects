@@ -79,6 +79,26 @@ export async function wcGetCached<T>(
   return res.json() as Promise<T>;
 }
 export const wcPost = <T>(path: string, body: unknown) => call<T>('POST', path, body);
+
+/**
+ * נקודות הקצה של התוסף mikra-store (מרחב wc/mikra). אותם מפתחות של
+ * ווקומרס - ווקומרס מאמת כל בקשה שמתחילה ב-/wp-json/wc/.
+ */
+export async function mikraPost<T>(path: string, body: unknown): Promise<T> {
+  if (!wcReady) throw new Error('WooCommerce אינו מוגדר');
+  const res = await fetch(`${WC_URL}/wp-json/wc/mikra${path}`, {
+    method: 'POST',
+    headers: { Authorization: auth(), 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15_000),
+    cache: 'no-store',
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`mikra POST ${path} → ${res.status} ${text.slice(0, 300)}`);
+  }
+  return res.json() as Promise<T>;
+}
 export const wcPut = <T>(path: string, body: unknown) => call<T>('PUT', path, body);
 
 /* ---------- מיפוי מק״ט למזהה ווקומרס ---------- */

@@ -11,6 +11,8 @@ import {
   type Product,
 } from "@/lib/catalog";
 import { BLESSINGS } from "@/lib/blessings";
+import { ratingFor } from "@/lib/ratings";
+import { Stars } from "@/components/ProductReviews";
 import { PROMO, saleOf } from "@/lib/promo";
 
 export default function ProductCard({
@@ -209,6 +211,13 @@ export default function ProductCard({
               </span>
             </span>
           </div>
+
+          {ratingFor(product) && (
+            <p className="mt-1 flex items-center gap-1.5" style={{ fontSize: "var(--fs-xs)", color: "var(--ink-3)" }}>
+              <Stars value={ratingFor(product)!.avg} size={12} />
+              <span className="num">({ratingFor(product)!.count})</span>
+            </p>
+          )}
 
           {product.source && (
             <p

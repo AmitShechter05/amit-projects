@@ -18,7 +18,9 @@ import WhatsAppFab from '@/components/WhatsAppFab';
 import PendingPayment from '@/components/PendingPayment';
 import { organizationSchema, websiteSchema } from '@/lib/schema';
 import LivePrices from '@/components/LivePrices';
+import CartSync from '@/components/CartSync';
 import { stockSnapshot } from '@/lib/catalog';
+import { getRatings } from '@/lib/reviews';
 import { syncPrices } from '@/lib/livePrices';
 
 // Heebo לכל האתר - בחירת בעל החנות (14 בספטמבר 2026). לפניו היו
@@ -78,6 +80,8 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // המחירים מווקומרס. המפה עוברת ל-LivePrices, שמחיל אותה על הקטלוג
   // שבדפדפן - העגלה ועמוד המוצר קוראים ממנו ולא מהשרת
   const prices = await syncPrices();
+  // ממוצע הביקורות לכל דגם (רק ביקורות שאושרו בווקומרס) - לכוכבים בכרטיסים
+  const ratings = await getRatings();
 
   return (
     <html
@@ -93,11 +97,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a href="#main" className="sr-only focus:not-sr-only">
           דילוג לתוכן
         </a>
-        <LivePrices prices={prices} stock={stockSnapshot()}>
+        <LivePrices prices={prices} stock={stockSnapshot()} ratings={ratings}>
           <Header />
           <main id="main">{children}</main>
           <Footer />
           <CartDrawer />
+          <CartSync />
         </LivePrices>
         <WhatsAppFab />
         <PendingPayment />

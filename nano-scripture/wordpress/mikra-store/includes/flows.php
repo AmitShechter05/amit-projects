@@ -28,17 +28,16 @@ define( 'MIKRA_WINBACK_DAYS', 90 );
 /** לא נכנסים לזרימת החזרה שוב לפני שעבר הזמן הזה */
 define( 'MIKRA_WINBACK_REPEAT', 180 * DAY_IN_SECONDS );
 /**
- * מכתבים 2-3 של החזרה (קוד אישי 10%). כבוי: הקופה של mikra.shop מקבלת
- * היום רק את קוד ההצטרפות, ולכן קוד אחר שיוקלד שם יידחה. להדליק
- * כשהקופה תדע לבדוק קופונים של ווקומרס.
+ * מכתבים 2-3 של החזרה (קוד אישי 10%). דולק מ-16.10.2026, כשהקופה של
+ * mikra.shop התחילה לבדוק קופונים של ווקומרס (lib/coupons.ts).
  */
-define( 'MIKRA_WINBACK_COUPONS', false );
+define( 'MIKRA_WINBACK_COUPONS', true );
 /**
  * מכתב החזרה האחרון ("שאלה קטנה ממני") צריך 2-3 שורות אמיתיות על איך
  * התחילה מקרא. ריק = המכתב לא נשלח. לא ממציאים סיפור.
  */
 define( 'MIKRA_FOUNDER_STORY', '' );
-/** לאן מובילים כפתורי הביקורת. ריק = תשובה במייל, עם הציון בנושא */
+/** לאן מובילים כפתורי הביקורת. ריק = עמוד הביקורת באתר (/review) */
 define( 'MIKRA_REVIEW_URL', '' );
 
 /* ------------------------------------------------------------------
@@ -731,7 +730,7 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 add_action( 'woocommerce_order_status_processing', 'mikra_post_paid', 20, 2 );
 function mikra_post_paid( $order_id, $order = null ) {
 	$order = ( $order instanceof WC_Order ) ? $order : wc_get_order( $order_id );
-	if ( ! $order || $order->get_meta( '_mikra_pp_paid' ) || ! $order->get_billing_email() ) {
+	if ( ! $order || $order->get_meta( '_mikra_pp_paid' ) || ! $order->get_billing_email() || ( function_exists( 'mikra_is_gift_order' ) && mikra_is_gift_order( $order ) ) ) {
 		return;
 	}
 	$order->update_meta_data( '_mikra_pp_paid', time() );
@@ -745,7 +744,8 @@ function mikra_post_paid( $order_id, $order = null ) {
 add_action( 'woocommerce_order_status_completed', 'mikra_post_shipped', 20, 2 );
 function mikra_post_shipped( $order_id, $order = null ) {
 	$order = ( $order instanceof WC_Order ) ? $order : wc_get_order( $order_id );
-	if ( ! $order || $order->get_meta( '_mikra_pp_shipped' ) || ! $order->get_billing_email() ) {
+	// כרטיס מתנה לא נשלח בדואר - אין "לפני שעונדים" ואין ביקורת עליו
+	if ( ! $order || $order->get_meta( '_mikra_pp_shipped' ) || ! $order->get_billing_email() || ( function_exists( 'mikra_is_gift_order' ) && mikra_is_gift_order( $order ) ) ) {
 		return;
 	}
 	$t = time();
@@ -822,8 +822,12 @@ function mikra_review_url( $order, $stars = 0 ) {
 	if ( MIKRA_REVIEW_URL ) {
 		return MIKRA_REVIEW_URL;
 	}
-	$s = 'ביקורת על הזמנה #' . $order->get_order_number() . ( $stars ? ' · ' . $stars . ' כוכבים' : '' );
-	return 'mailto:' . MIKRA_EMAIL . '?subject=' . rawurlencode( $s );
+	// עמוד הביקורת באתר (16.10.2026): מספר ההזמנה ומפתחה מוכיחים שזה קונה,
+	// והכוכבים שנלחצו במייל כבר מסומנים שם
+	return add_query_arg(
+		array_filter( array( 'o' => $order->get_id(), 'k' => $order->get_order_key(), 's' => $stars ? (int) $stars : null, 'utm_source' => 'email', 'utm_medium' => 'review' ) ),
+		MIKRA_SITE . '/review'
+	);
 }
 
 function mikra_post_email( $step, $order, $unsub ) {

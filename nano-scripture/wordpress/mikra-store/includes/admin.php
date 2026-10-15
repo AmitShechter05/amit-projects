@@ -27,13 +27,14 @@ function mikra_step_label( $flow, $step ) {
 		'abandon' => array( 1 => 'נשאר רק צעד אחד', 3 => 'הוכחה: ככה נראית ברכה על שבב', 2 => 'ההנחה (קוד)', 4 => 'מכתב מעמית', 9 => 'סיום (ביטול אם לא שולמה)' ),
 		'post'    => array( 0 => 'מכתב תודה (לקוח חוזר)', 1 => 'לפני שעונדים', 2 => 'עוד ברכה למישהו', 3 => 'איך התכשיט? (ביקורת)' ),
 		'winback' => array( 1 => 'מה חדש אצלך?', 2 => 'משהו קטן בשבילך', 3 => 'ההטבה נגמרת מחר', 4 => 'שאלה קטנה ממני' ),
+		'cart'    => array( 1 => 'משהו נשאר בעגלה', 2 => 'העגלה עדיין מחכה' ),
 		'series'  => array( 1 => 'ברוכים הבאים', 3 => 'למי המתנה', 2 => 'ככה נראית ברכה', 4 => 'ככה זה נראה עליכם', 5 => 'ההנחה מסתיימת מחר' ),
 	);
 	return isset( $labels[ $flow ][ $step ] ) ? $labels[ $flow ][ $step ] : ( 'שלב ' . $step );
 }
 
 function mikra_flow_label( $flow ) {
-	$l = array( 'abandon' => 'נטישה', 'post' => 'אחרי הזמנה', 'winback' => 'חזרה', 'series' => 'הצטרפות' );
+	$l = array( 'abandon' => 'נטישה', 'cart' => 'עגלה', 'post' => 'אחרי הזמנה', 'winback' => 'חזרה', 'series' => 'הצטרפות' );
 	return isset( $l[ $flow ] ) ? $l[ $flow ] : $flow;
 }
 
@@ -78,6 +79,10 @@ function mikra_who( $flow, $key ) {
 		$u = get_userdata( (int) $key );
 		return array( $u ? $u->user_email : '', $u ? (string) get_user_meta( $u->ID, 'first_name', true ) : '', '' );
 	}
+	if ( 'cart' === $flow ) {
+		$c = mikra_carts();
+		return array( isset( $c[ $key ]['e'] ) ? $c[ $key ]['e'] : '', isset( $c[ $key ]['n'] ) ? $c[ $key ]['n'] : '', '' );
+	}
 	$state = get_option( 'mikra_winback', array() );
 	$k     = mikra_ekey( (string) $key );
 	return array( (string) $key, isset( $state[ $k ]['name'] ) ? $state[ $k ]['name'] : '', '' );
@@ -109,7 +114,7 @@ function mikra_admin_page() {
 	foreach ( $sched as $s ) {
 		$people[ $s['flow'] . '|' . $s['key'] ] = true;
 	}
-	$counts = array( 'abandon' => 0, 'post' => 0, 'winback' => 0, 'series' => 0 );
+	$counts = array( 'abandon' => 0, 'cart' => 0, 'post' => 0, 'winback' => 0, 'series' => 0 );
 	foreach ( array_keys( $people ) as $p ) {
 		$f = strstr( $p, '|', true );
 		if ( isset( $counts[ $f ] ) ) {
