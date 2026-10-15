@@ -293,6 +293,9 @@ export default function Header() {
                 {CATEGORIES[id].title}
               </Link>
             ))}
+            <Link href="/gift-card" className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
+              כרטיס מתנה
+            </Link>
           </div>
 
           <hr className="rule my-7" />
