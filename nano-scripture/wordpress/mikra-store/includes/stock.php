@@ -23,7 +23,7 @@ defined( 'ABSPATH' ) || exit;
 function mikra_stock_blessings() {
 	return array(
 		'parnasa'      => 'ברכת הפרנסה',
-		'bracha'       => 'הברכה שלך',
+		'bracha'       => 'אשריך וטוב לך',
 		'shmira'       => 'שמירה והגנה',
 		'eshet-chayil' => 'אשת חיל',
 		'tinok'        => 'ברכת התינוק',

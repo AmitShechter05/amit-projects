@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.4.0
+ * Version: 1.4.1
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store

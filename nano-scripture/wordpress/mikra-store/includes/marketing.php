@@ -189,7 +189,7 @@ function mk_blessing_index( $campaign ) {
 		array( 'ברכת התינוק', 'לתינוק שנולד', 'tinok' ),
 		array( 'שמירה והגנה', 'למי שיוצא לדרך', 'shmira' ),
 		array( 'ברכת הפרנסה', 'למי שבונה משהו', 'parnasa' ),
-		array( 'הברכה שלך', 'לכל רגע של התחלה', 'bracha' ),
+		array( 'אשריך וטוב לך', 'לכל רגע של התחלה', 'bracha' ),
 	);
 	$list = array_values( array_filter( $list, function ( $b ) {
 		return ! in_array( $b[2], MIKRA_HIDDEN_BLESSINGS, true );
@@ -419,7 +419,7 @@ function mikra_blessing_picks() {
 		'tinok'        => array( 'לתינוק שנולד', 'ברכת התינוק', 'יְבָרֶכְךָ ה׳<br>וְיִשְׁמְרֶךָ', 'tzel-knafayim', 'BABYPIN01', 'צֵל כְּנָפַיִם', 'm3-tzel.jpg' ),
 		'shmira'       => array( 'למי שיוצא לדרך', 'שמירה והגנה', 'יֹשֵׁב בְּסֵתֶר עֶלְיוֹן,<br>בְּצֵל שַׁדַּי יִתְלוֹנָן', 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm3-beseter.jpg' ),
 		'parnasa'      => array( 'למי שבונה משהו', 'ברכת הפרנסה', 'לַה׳ הָאָרֶץ וּמְלוֹאָהּ,<br>תֵּבֵל וְיֹשְׁבֵי בָהּ', 'avot', 'OYANB007RS', 'עֲבוֹת', 'm3-avot.jpg' ),
-		'bracha'       => array( 'לכל רגע של התחלה', 'הברכה שלך', 'וּבָאוּ עָלֶיךָ כָּל הַבְּרָכוֹת<br>הָאֵלֶּה וְהִשִּׂיגֻךָ', 'toldot', 'YASNN004W', 'תּוֹלְדוֹת', 'm3-toldot.jpg' ),
+		'bracha'       => array( 'לכל רגע של התחלה', 'אשריך וטוב לך', 'וּבָאוּ עָלֶיךָ כָּל הַבְּרָכוֹת<br>הָאֵלֶּה וְהִשִּׂיגֻךָ', 'toldot', 'YASNN004W', 'תּוֹלְדוֹת', 'm3-toldot.jpg' ),
 	);
 	return array_diff_key( $all, array_flip( MIKRA_HIDDEN_BLESSINGS ) );
 }
