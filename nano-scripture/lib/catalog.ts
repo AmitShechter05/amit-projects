@@ -491,6 +491,55 @@ const ALL_PRODUCTS: Product[] = [
       { label: 'מתכת', value: 'פלדת אל־חלד במראה מט, עם קצוות מבריקים' },
     ],
   },
+  /*
+   * שִׁוִּיתִי - התליון הפשוט: רק השבב, במסגרת ריבוע עם אבני שיבוץ, על
+   * שרשרת דקה. נוסף 15.10.2026 לפי ספירת המלאי של עמית (כסף 21, זהב 25).
+   * המק״ט שלנו (אין שורה ב־PI); תמונות מהדרייב "תמונות מוצר לאתר".
+   */
+  {
+    sku: 'CHIPN01S',
+    slug: 'shiviti',
+    name: 'שִׁוִּיתִי',
+    nameLatin: 'SHIVITI',
+    source: { phrase: 'שִׁוִּיתִי ה׳ לְנֶגְדִּי תָמִיד', ref: 'תהילים ט״ז, ח׳' },
+    category: 'necklaces',
+    material: 'steel',
+    finish: 'silver',
+    audience: 'women',
+    price: 349,
+    image: '/products/CHIPN01S.webp',
+    blessings: ['eshet-chayil', 'bracha'],
+    short: 'תליון פשוט: השבב בתוך ריבוע עם אבנים קטנות',
+    story:
+      'התליון הכי פשוט שלנו: רק השבב, בתוך ריבוע קטן עם אבנים מסביב, על שרשרת דקה. בלי סמל ובלי צורה - הברכה היא העיקר.',
+    specs: [
+      { label: 'צורה', value: 'ריבוע על הפינה, השבב במרכז' },
+      { label: 'מסגרת השבב', value: 'אבנים קטנות מסביב' },
+      { label: 'מתכת', value: 'פלדת אל־חלד בציפוי בצבע כסף' },
+    ],
+  },
+  {
+    sku: 'CHIPN01G',
+    slug: 'shiviti-gold',
+    name: 'שִׁוִּיתִי',
+    nameLatin: 'SHIVITI',
+    source: { phrase: 'שִׁוִּיתִי ה׳ לְנֶגְדִּי תָמִיד', ref: 'תהילים ט״ז, ח׳' },
+    category: 'necklaces',
+    material: 'steel',
+    finish: 'gold',
+    audience: 'women',
+    price: 469,
+    image: '/products/CHIPN01G.webp',
+    blessings: ['eshet-chayil', 'bracha', 'shmira'],
+    short: 'אותו תליון, בצבע זהב',
+    story: 'אותו תליון פשוט - השבב בתוך ריבוע עם אבנים קטנות - בציפוי בצבע זהב.',
+    specs: [
+      { label: 'צורה', value: 'ריבוע על הפינה, השבב במרכז' },
+      { label: 'מסגרת השבב', value: 'אבנים קטנות מסביב' },
+      { label: 'ציפוי', value: 'בצבע זהב' },
+      { label: 'מתכת', value: 'פלדת אל־חלד' },
+    ],
+  },
   {
     // אין עדיין שורה ב־PI לפריט הזה — המק״ט והעלות ממתינים לספק
     sku: 'BABYPIN01',
