@@ -6,6 +6,7 @@ import {
   formatPrice,
   photoFor,
   sizeCue,
+  productInStock,
   type Product,
 } from "@/lib/catalog";
 import { BLESSINGS } from "@/lib/blessings";
@@ -98,7 +99,23 @@ export default function ProductCard({
             </span>
           )}
 
-          {product.badge && (
+          {!productInStock(product) ? (
+            <span
+              style={{
+                position: "absolute",
+                insetInlineStart: 14,
+                top: 14,
+                fontSize: "var(--fs-xs)",
+                fontWeight: 600,
+                padding: ".3rem .6rem",
+                borderRadius: "var(--radius)",
+                color: "var(--surface)",
+                background: "var(--ink-2)",
+              }}
+            >
+              אזל מהמלאי
+            </span>
+          ) : product.badge && (
             <span
               style={{
                 position: "absolute",

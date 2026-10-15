@@ -1,4 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { revalidateTag } from 'next/cache';
+import { PRICES_TAG } from '@/lib/livePrices';
 import { wcGet, wcPost, wcPut, wcReady } from '@/lib/wc';
 import { reportPurchase, metaCapiOn, ga4MpOn, type PaidOrder } from '@/lib/serverConversions';
 
@@ -24,6 +26,15 @@ export async function POST(req: NextRequest) {
     id = Number((JSON.parse(raw) as { id?: unknown }).id) || 0;
   } catch {
     // הפינג של ווקומרס כשיוצרים וובהוק נשלח כטופס (webhook_id=...)
+  }
+  // הזמנה שהשתנתה (שולמה, בוטלה) שינתה גם מלאי. המטמון של המחירים
+  // והמלאי מתרענן מיד, במקום לחכות עד חמש דקות
+  if (id) {
+    try {
+      revalidateTag(PRICES_TAG, { expire: 0 });
+    } catch (e) {
+      console.error('revalidate prices/stock failed', e);
+    }
   }
   if (!id || !wcReady || !(metaCapiOn || ga4MpOn)) return NextResponse.json({ ok: true, skipped: true });
 

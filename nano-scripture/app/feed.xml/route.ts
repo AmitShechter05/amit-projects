@@ -1,6 +1,6 @@
 import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { PRODUCTS, CATEGORIES, MATERIALS, FINISHES, type Product, type Audience } from '@/lib/catalog';
+import { PRODUCTS, CATEGORIES, MATERIALS, FINISHES, productInStock, type Product, type Audience } from '@/lib/catalog';
 import { BLESSING_BY_ID } from '@/lib/blessings';
 import { BRAND } from '@/lib/brand';
 import { SITE_URL } from '@/lib/site';
@@ -135,7 +135,8 @@ function item(p: Product) {
     ['description', description(p)],
     ['link', `${SITE_URL}/products/${p.slug}`],
     ['g:image_link', abs(feedImage(p))],
-    ['g:availability', 'in_stock'],
+    // מהמלאי לפי ברכה: דגם שכל הברכות שלו אזלו - אזל (גוגל ומטא מסירים מודעה שמוכרת מה שאין)
+    ['g:availability', productInStock(p) ? 'in_stock' : 'out_of_stock'],
     ['g:condition', 'new'],
     ['g:price', `${p.price.toFixed(2)} ILS`],
     ['g:brand', BRAND.plain],

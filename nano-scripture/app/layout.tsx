@@ -18,6 +18,7 @@ import WhatsAppFab from '@/components/WhatsAppFab';
 import PendingPayment from '@/components/PendingPayment';
 import { organizationSchema, websiteSchema } from '@/lib/schema';
 import LivePrices from '@/components/LivePrices';
+import { stockSnapshot } from '@/lib/catalog';
 import { syncPrices } from '@/lib/livePrices';
 
 // Heebo לכל האתר - בחירת בעל החנות (14 בספטמבר 2026). לפניו היו
@@ -92,7 +93,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <a href="#main" className="sr-only focus:not-sr-only">
           דילוג לתוכן
         </a>
-        <LivePrices prices={prices}>
+        <LivePrices prices={prices} stock={stockSnapshot()}>
           <Header />
           <main id="main">{children}</main>
           <Footer />

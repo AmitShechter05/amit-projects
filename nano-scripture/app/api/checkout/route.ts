@@ -3,8 +3,8 @@ import { validate, normalizePhone, type Customer } from '@/lib/checkout';
 import { createOrder, orderTotal, type OrderLine } from '@/lib/wcOrder';
 import { wcReady } from '@/lib/wc';
 import { paymentReady, payViaWc, onlinePayment, createPayment, WC_GROW_METHOD } from '@/lib/grow';
-import { isBlessingId } from '@/lib/blessings';
-import { getProduct } from '@/lib/catalog';
+import { isBlessingId, getBlessing } from '@/lib/blessings';
+import { getProduct, blessingStock } from '@/lib/catalog';
 import { SITE_URL } from '@/lib/site';
 import { syncPrices } from '@/lib/livePrices';
 
@@ -94,6 +94,34 @@ export async function POST(req: NextRequest) {
   // שלו, ולכן הסכום שנשלח לתשלום חייב לצאת מאותו מספר ולא ממחיר
   // שנקרא לפני חמש דקות
   await syncPrices({ fresh: true });
+
+  // מלאי לפי ברכה, מאותה קריאה טרייה. העמוד אולי הציג "יש" לפני חמש
+  // דקות, ובינתיים היחידה האחרונה נמכרה. בודקים לפי סך הכמות של אותו
+  // דגם ואותה ברכה בכל השורות. 409 כמו מחיר שהשתנה - המצב השתנה
+  const want = new Map<string, number>();
+  for (const l of lines) {
+    const k = `${l.slug}::${l.blessing}`;
+    want.set(k, (want.get(k) ?? 0) + Math.max(1, Math.round(l.qty)));
+  }
+  for (const [k, qty] of want) {
+    const [slug, bid] = k.split('::');
+    const product = getProduct(slug);
+    if (!product || !isBlessingId(bid)) continue;
+    const left = blessingStock(product, bid);
+    if (left !== null && qty > left) {
+      const what = `${product.name} עם ${getBlessing(bid).plain}`;
+      return NextResponse.json(
+        {
+          error:
+            left > 0
+              ? `נשארו רק ${left} יחידות של ${what}. עדכנו את הכמות בעגלה ושלחו שוב.`
+              : `${what} אזל מהמלאי. אפשר להסיר אותו מהעגלה, או לבחור ברכה אחרת לאותו תכשיט.`,
+        },
+        { status: 409 },
+      );
+    }
+  }
+
   const totals = orderTotal({ lines, gift, code, shipping: customer.shipping });
 
   // מחיר שהשתנה בווקומרס בזמן שהעמוד היה פתוח: הלקוח רואה סכום אחד

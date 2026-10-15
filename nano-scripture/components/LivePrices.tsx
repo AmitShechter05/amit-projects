@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { applyPrices, type PriceMap } from '@/lib/catalog';
+import { applyPrices, applyStock, type PriceMap, type StockMap } from '@/lib/catalog';
 
 /**
  * מחיל את מחירי ווקומרס על הקטלוג שבדפדפן.
@@ -15,7 +15,17 @@ import { applyPrices, type PriceMap } from '@/lib/catalog';
  * את המחיר הישן, והיה נוצר הבדל בין ה-HTML מהשרת לבין הדפדפן. הכתיבה
  * חוזרת על עצמה בלי נזק - אותה מפה נותנת אותה תוצאה.
  */
-export default function LivePrices({ prices, children }: { prices: PriceMap; children: ReactNode }) {
+export default function LivePrices({
+  prices,
+  stock,
+  children,
+}: {
+  prices: PriceMap;
+  /** המלאי לפי ברכה - מוחל באותו אופן, מאותה סיבה */
+  stock: StockMap;
+  children: ReactNode;
+}) {
   applyPrices(prices);
+  applyStock(stock);
   return <>{children}</>;
 }

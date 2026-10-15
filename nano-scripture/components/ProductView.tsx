@@ -17,6 +17,8 @@ import {
   finishSiblings,
   formatPrice,
   sceneFocus,
+  blessingInStock,
+  blessingStock,
   type Product,
 } from '@/lib/catalog';
 import { useCart } from '@/lib/cart';
@@ -61,8 +63,11 @@ const SHIPPING_LINE = [
 
 export default function ProductView({ product }: { product: Product }) {
   const available = BLESSINGS.filter((b) => product.blessings.includes(b.id));
+  // ברכה שאזלה מוצגת, אבל אי אפשר לבחור אותה. ברירת המחדל - הראשונה שיש
+  const stocked = available.filter((b) => blessingInStock(product, b.id));
+  const soldOut = stocked.length === 0;
 
-  const [blessing, setBlessing] = useState<BlessingId>(available[0].id);
+  const [blessing, setBlessing] = useState<BlessingId>((stocked[0] ?? available[0]).id);
   /**
    * האם הברכה נבחרה בפועל, ולא רק ברירת המחדל.
    *
@@ -72,7 +77,7 @@ export default function ProductView({ product }: { product: Product }) {
    */
   const [picked, setPicked] = useState(false);
   const chooserRef = useRef<HTMLDivElement>(null);
-  const mustChoose = available.length > 1 && !picked;
+  const mustChoose = stocked.length > 1 && !picked;
   const [view, setView] = useState<View>('jewel');
   const [qty, setQty] = useState(1);
   const [openSpec, setOpenSpec] = useState<number | null>(null);
@@ -96,6 +101,12 @@ export default function ProductView({ product }: { product: Product }) {
 
   const one = available.length === 1;
   const b = getBlessing(blessing);
+  // אי אפשר להזמין יותר ממה שיש מהברכה הזו. null = המלאי לא מנוהל
+  const left = blessingStock(product, blessing);
+  const maxQty = left === null ? 20 : Math.max(1, left);
+  useEffect(() => {
+    setQty((q) => Math.min(q, maxQty));
+  }, [maxQty]);
 
   /**
    * צפייה בדגם. נורה גם כשמחליפים ברכה, כי זו בחירה אחרת של
@@ -553,14 +564,16 @@ export default function ProductView({ product }: { product: Product }) {
             aria-label="בחירת הברכה"
           >
             {available.map((item) => {
-              const on = item.id === blessing;
+              const on = item.id === blessing && !soldOut;
+              const out = !blessingInStock(product, item.id);
               return (
                 <button
                   key={item.id}
                   type="button"
                   role={one ? undefined : 'radio'}
                   aria-checked={one ? undefined : on}
-                  disabled={one}
+                  aria-disabled={out || undefined}
+                  disabled={one || out}
                   onClick={() => {
                     setBlessing(item.id);
                     setPicked(true);
@@ -575,7 +588,8 @@ export default function ProductView({ product }: { product: Product }) {
                     boxShadow: on ? `0 0 0 3px color-mix(in oklab, ${item.accent} 18%, transparent)` : 'none',
                     transition:
                       'border-color .25s var(--ease), background-color .25s var(--ease), box-shadow .25s var(--ease)',
-                    cursor: one ? 'default' : 'pointer',
+                    cursor: out ? 'not-allowed' : one ? 'default' : 'pointer',
+                    opacity: out ? 0.5 : 1,
                   }}
                 >
                   {/* הצבע הוא הסימן הראשון, לפני המילה. הוא יושב לצד
@@ -602,7 +616,7 @@ export default function ProductView({ product }: { product: Product }) {
                       className="mt-0.5 block"
                       style={{ fontSize: 'var(--fs-2xs)', lineHeight: 1.45, color: 'var(--ink-3)' }}
                     >
-                      {item.forWhom}
+                      {out ? 'אזל מהמלאי' : item.forWhom}
                     </span>
                   </span>
                   {on && !one && (
@@ -641,7 +655,8 @@ export default function ProductView({ product }: { product: Product }) {
               {qty}
             </span>
             <button
-              onClick={() => setQty((q) => q + 1)}
+              onClick={() => setQty((q) => Math.min(maxQty, q + 1))}
+              disabled={soldOut || qty >= maxQty}
               aria-label="הוספת כמות"
               className="tap"
               style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-md)' }}
@@ -649,8 +664,13 @@ export default function ProductView({ product }: { product: Product }) {
               +
             </button>
           </div>
-          <button onClick={() => add(product.slug, blessing, qty)} className="btn btn-solid flex-1">
-            הוספה לעגלה · {formatPrice(sale.now * qty)}
+          <button
+            onClick={() => add(product.slug, blessing, qty)}
+            disabled={soldOut}
+            className="btn btn-solid flex-1"
+            style={soldOut ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
+          >
+            {soldOut ? 'אזל מהמלאי' : `הוספה לעגלה · ${formatPrice(sale.now * qty)}`}
           </button>
         </div>
 
@@ -958,16 +978,18 @@ export default function ProductView({ product }: { product: Product }) {
               // בלי בחירה מודעת הפס לא קונה - הוא מגלגל אל הבורר.
               // צריבה של נוסח שלא נבחר אינה שגיאה שאפשר לתקן אחרי
               // המשלוח, כי התכשיט כבר נצרב
+              if (soldOut) return;
               if (mustChoose) {
                 chooserRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 return;
               }
               add(product.slug, blessing, qty);
             }}
+            disabled={soldOut}
             className="btn btn-solid shrink-0 sm:max-w-xs sm:flex-1"
-            style={{ ['--pad' as string]: '.85rem 1.1rem', fontSize: 'var(--fs-sm)' }}
+            style={{ ['--pad' as string]: '.85rem 1.1rem', fontSize: 'var(--fs-sm)', ...(soldOut ? { opacity: 0.55, cursor: 'not-allowed' } : {}) }}
           >
-            {mustChoose ? 'בחירת ברכה' : 'הוספה לעגלה'}
+            {soldOut ? 'אזל מהמלאי' : mustChoose ? 'בחירת ברכה' : 'הוספה לעגלה'}
           </button>
         </div>
       </div>

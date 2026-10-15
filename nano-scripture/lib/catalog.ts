@@ -613,6 +613,50 @@ export const HIDDEN_PRODUCTS: Product[] = [
 
 export const isHiddenProduct = (slug: string) => HIDDEN_PRODUCTS.some((p) => p.slug === slug);
 
+/* ---------- מלאי לפי ברכה ---------- */
+
+/**
+ * כמה יחידות יש מכל ברכה, לכל מק״ט.
+ *
+ * המלאי נספר לפי ברכה, כי כך הוא קיים במחסן: שבב עם "אשת חיל" אינו
+ * שבב עם "שמירה והגנה" (ספירה של עמית, 15.10.2026: 415 יחידות). המקור
+ * הוא ווקומרס - המפתח `_mikra_stock` על המוצר, שהתוסף mikra-store
+ * מוריד בכל הזמנה ששולמה ומחזיר בביטול. האתר קורא אותו יחד עם המחירים
+ * (lib/livePrices.ts) ומחיל כאן, כמו `applyPrices`.
+ *
+ * מק״ט שאין לו רשומה כאן - המלאי שלו לא מנוהל, ואין לו הגבלה (כך גם
+ * כשווקומרס לא זמין). `*` = מלאי כולל, למוצר מנוהל בלי פירוט לברכות.
+ */
+export type StockMap = Record<string, Record<string, number>>;
+
+const STOCK: StockMap = {};
+
+export function applyStock(map: StockMap) {
+  for (const k of Object.keys(STOCK)) delete STOCK[k];
+  Object.assign(STOCK, map);
+}
+
+export function stockSnapshot(): StockMap {
+  return { ...STOCK };
+}
+
+/** כמה יחידות יש מהברכה הזו לדגם. null = המלאי לא מנוהל (אין הגבלה) */
+export function blessingStock(p: Product, id: BlessingId): number | null {
+  const s = STOCK[p.sku];
+  if (!s) return null;
+  return s[id] ?? s['*'] ?? 0;
+}
+
+export function blessingInStock(p: Product, id: BlessingId) {
+  const n = blessingStock(p, id);
+  return n === null || n > 0;
+}
+
+/** יש לפחות ברכה אחת במלאי */
+export function productInStock(p: Product) {
+  return p.blessings.some((id) => blessingInStock(p, id));
+}
+
 /* ---------- מחירים חיים ---------- */
 
 /** מק״ט → המחיר שבתוקף בווקומרס */
