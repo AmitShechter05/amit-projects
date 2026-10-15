@@ -22,11 +22,13 @@ const PAGE_NAV = [
   // מי שלא יודע איזו ברכה לבחור מתחיל משלוש שאלות, לא מחמש ברכות מלאות
   { href: '/match', label: 'איזו ברכה מתאימה?' },
   // המדריכים ישבו רק בפוטר. מי שקונה מתנה מתחיל מ"למי", לא מ"מה"
-  { href: '/guides', label: 'מדריכי מתנה' },
-  { href: '/gift-card', label: 'כרטיס מתנה' },
-  { href: '/craft', label: 'איך זה עובד' },
+  // wide: רק במסך רחב (xl). במחשב צר שבע שורות לא נכנסות סביב הלוגו
+  { href: '/guides', label: 'מדריכי מתנה', wide: true },
+  { href: '/craft', label: 'איך זה עובד', wide: true },
 ];
-const NAV = [...CAT_NAV, ...PAGE_NAV];
+// כרטיס מתנה יושב בצד של הקטלוג - זה עוד דבר לקנות, לא עמוד מידע
+const SHOP_NAV = [...CAT_NAV, { href: '/gift-card', label: 'כרטיס מתנה' }];
+const NAV = [...SHOP_NAV, ...PAGE_NAV];
 
 /**
  * קישור בניווט העליון.
@@ -35,13 +37,13 @@ const NAV = [...CAT_NAV, ...PAGE_NAV];
  * הן בגודל טקסט, במשקל בינוני, והעמוד הנוכחי נושא קו בצבע המבטא -
  * כך שרואים איפה נמצאים גם בלי לקרוא.
  */
-function navLink(n: { href: string; label: string }, active: boolean) {
+function navLink(n: { href: string; label: string; wide?: boolean }, active: boolean) {
   return (
     <Link
       key={n.href}
       href={n.href}
       aria-current={active ? 'page' : undefined}
-      className="relative py-1"
+      className={`relative whitespace-nowrap py-1 ${n.wide ? 'hidden xl:inline-block' : ''}`}
       style={{
         fontSize: 'var(--fs-base)',
         fontWeight: 500,
@@ -176,8 +178,8 @@ export default function Header() {
                 </svg>
               </button>
             </span>
-            <nav className="hidden items-center gap-9 lg:flex" aria-label="קטגוריות">
-              {CAT_NAV.map((n) => navLink(n, pathname === n.href))}
+            <nav className="hidden items-center gap-7 lg:flex xl:gap-9" aria-label="קטגוריות">
+              {SHOP_NAV.map((n) => navLink(n, pathname === n.href))}
             </nav>
           </div>
 
@@ -188,7 +190,7 @@ export default function Header() {
 
           {/* שמאל: עמודי התוכן, ואז העגלה בקצה */}
           <div className="flex items-center justify-end gap-9">
-            <nav className="hidden items-center gap-9 lg:flex" aria-label="עמודים">
+            <nav className="hidden items-center gap-7 lg:flex xl:gap-9" aria-label="עמודים">
               {PAGE_NAV.map((n) => navLink(n, pathname === n.href))}
             </nav>
 
