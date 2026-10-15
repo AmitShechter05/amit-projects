@@ -613,6 +613,18 @@ export const HIDDEN_PRODUCTS: Product[] = [
 
 export const isHiddenProduct = (slug: string) => HIDDEN_PRODUCTS.some((p) => p.slug === slug);
 
+/**
+ * צילומי מוצר שנחתכו על רקע שקוף. הם "צפים" על הקרם, עם שוליים וצל.
+ *
+ * כל השאר צולמו על לבן ובקומפוזיציה מלאה - השרשרת נכנסת מהקצה העליון
+ * של הפריים. עם שוליים הם נראו כריבוע לבן קטן בתוך משבצת קרם, עם שרשרת
+ * קטועה (15.10.2026), ולכן הם ממלאים את המשבצת כמו שצולמו.
+ * להוסיף לכאן רק תמונה עם שקיפות אמיתית.
+ */
+const CUTOUT_SKUS = ['OYANB007B', 'OYANN003G', 'OYANN003S', 'BABYPIN01'];
+export const isCutout = (p: Product) => CUTOUT_SKUS.includes(p.sku);
+
+
 /* ---------- מלאי לפי ברכה ---------- */
 
 /**

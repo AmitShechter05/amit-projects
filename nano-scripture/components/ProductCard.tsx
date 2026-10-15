@@ -7,6 +7,7 @@ import {
   photoFor,
   sizeCue,
   productInStock,
+  isCutout,
   type Product,
 } from "@/lib/catalog";
 import { BLESSINGS } from "@/lib/blessings";
@@ -73,8 +74,12 @@ export default function ProductCard({
               fill
               sizes="(max-width: 640px) 46vw, (max-width: 1024px) 44vw, 28vw"
               priority={priority}
-              className="object-contain p-[16%] transition-transform duration-[850ms] group-hover:scale-[1.07]"
-              style={{ filter: "drop-shadow(0 14px 18px rgb(70 55 20 / .16))" }}
+              className={
+                isCutout(product)
+                  ? "object-contain p-[16%] transition-transform duration-[850ms] group-hover:scale-[1.07]"
+                  : "object-cover transition-transform duration-[850ms] group-hover:scale-[1.05]"
+              }
+              style={isCutout(product) ? { filter: "drop-shadow(0 14px 18px rgb(70 55 20 / .16))" } : undefined}
             />
           )}
 
@@ -91,10 +96,12 @@ export default function ProductCard({
                 alt=""
                 fill
                 sizes="(max-width: 640px) 46vw, (max-width: 1024px) 44vw, 28vw"
-                className="object-contain p-[16%]"
-                style={{
-                  filter: "drop-shadow(0 14px 18px rgb(70 55 20 / .16))",
-                }}
+                className={isCutout(product) ? "object-contain p-[16%]" : "object-cover"}
+                style={
+                  isCutout(product)
+                    ? { filter: "drop-shadow(0 14px 18px rgb(70 55 20 / .16))" }
+                    : undefined
+                }
               />
             </span>
           )}

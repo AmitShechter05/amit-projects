@@ -19,6 +19,7 @@ import {
   sceneFocus,
   blessingInStock,
   blessingStock,
+  isCutout,
   type Product,
 } from '@/lib/catalog';
 import { useCart } from '@/lib/cart';
@@ -275,8 +276,8 @@ export default function ProductView({ product }: { product: Product }) {
               fill
               sizes="(max-width: 1024px) 92vw, 46vw"
               priority
-              className="object-contain p-[18%]"
-              style={{ filter: 'drop-shadow(0 18px 24px rgb(70 55 20 / .14))' }}
+              className={isCutout(product) ? 'object-contain p-[18%]' : 'object-cover'}
+              style={isCutout(product) ? { filter: 'drop-shadow(0 18px 24px rgb(70 55 20 / .14))' } : undefined}
             />
           )}
           {view === 'worn' && worn && (

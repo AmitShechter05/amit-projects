@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { FINISHES, MATERIALS, formatPrice, type Product } from '@/lib/catalog';
+import { FINISHES, MATERIALS, formatPrice, type Product, isCutout } from '@/lib/catalog';
 import { PROMO, saleOf } from '@/lib/promo';
 import { BLESSINGS } from '@/lib/blessings';
 
@@ -32,7 +32,7 @@ export default function FeaturedCard({ product }: { product: Product }) {
             sizes="(max-width: 640px) 92vw, 46vw"
             priority
             className={
-              photo
+              photo || !isCutout(product)
                 ? 'object-cover transition-transform duration-[900ms] group-hover:scale-[1.04]'
                 : 'object-contain p-[14%]'
             }
