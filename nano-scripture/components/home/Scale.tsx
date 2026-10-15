@@ -1,5 +1,5 @@
 import NanoLoupe from '@/components/NanoLoupe';
-import { BLESSINGS, TOTAL_BLESSING_WORDS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT, TOTAL_BLESSING_WORDS } from '@/lib/blessings';
 
 /**
  * המספרים עומדים. קודם הם נספרו מאפס בכניסה למסך, בגרדיאנט זהב
@@ -7,7 +7,7 @@ import { BLESSINGS, TOTAL_BLESSING_WORDS } from '@/lib/blessings';
  * עד שהוא נעצר. מספר עומד נקרא מיד.
  */
 const STATS = [
-  { value: TOTAL_BLESSING_WORDS.toLocaleString('he-IL'), label: 'מילים בחמש הברכות' },
+  { value: TOTAL_BLESSING_WORDS.toLocaleString('he-IL'), label: `מילים ב${BLESSING_COUNT} הברכות` },
   { value: '5', label: 'מ״מ - שטח החריטה' },
   { value: '0.035', label: 'מ״מ - גובה האות' },
   { value: '0.1', label: 'מ״מ - האות הגדולה ביותר, בכותרות' },

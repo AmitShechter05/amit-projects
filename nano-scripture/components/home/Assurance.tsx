@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { BLESSING_COUNT } from '@/lib/blessings';
 
 /**
  * שלוש הבטחות, כשלוש שורות.
@@ -40,7 +41,7 @@ export default function Assurance() {
               className="link-u"
               style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-deep)' }}
             >
-              לקריאת חמש הברכות ←
+              לקריאת {BLESSING_COUNT} הברכות ←
             </Link>
           </figcaption>
         </figure>

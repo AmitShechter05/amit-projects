@@ -1,9 +1,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { deliveryLine } from '@/lib/policy';
-import { getProduct, formatPrice } from '@/lib/catalog';
+import { getProduct, formatPrice, ACTIVE_CATEGORIES } from '@/lib/catalog';
 import { saleOf } from '@/lib/promo';
-import { BLESSINGS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 
 /**
  * איך זה עובד, בשלושה צעדים - מיד אחרי ההירו.
@@ -19,8 +19,8 @@ import { BLESSINGS } from '@/lib/blessings';
  * צילום אמיתי של השבב במיקרוסקופ, מאותו יום צילום כמו בעמוד "איך זה עובד".
  */
 const STEPS = [
-  { title: 'בוחרים תכשיט', body: 'שרשרת או צמיד, לאישה או לגבר, או סיכה לתינוק.' },
-  { title: 'בוחרים ברכה', body: 'אחת מחמש. אפשר לקרוא כל אחת במלואה לפני שקונים.' },
+  { title: 'בוחרים תכשיט', body: ACTIVE_CATEGORIES.includes('pins') ? 'שרשרת או צמיד, לאישה או לגבר, או סיכה לתינוק.' : 'שרשרת או צמיד, לאישה או לגבר.' },
+  { title: 'בוחרים ברכה', body: `אחת מ${BLESSING_COUNT}. אפשר לקרוא כל אחת במלואה לפני שקונים.` },
   { title: 'אנחנו חורטים ושולחים', body: `הברכה נחרטת על שבב קטן בתוך התכשיט, ומגיעה אליכם תוך ${deliveryLine}.` },
 ];
 const LETTERS = ['א', 'ב', 'ג'];

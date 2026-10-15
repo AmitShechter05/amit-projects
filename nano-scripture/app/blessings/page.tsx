@@ -1,18 +1,18 @@
 import type { Metadata } from 'next';
-import { BLESSINGS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 import BlessingCard from '@/components/BlessingCard';
 import NanoLoupe from '@/components/NanoLoupe';
 
 export const metadata: Metadata = {
-  title: 'חמש הברכות',
+  title: `${BLESSING_COUNT} הברכות`,
   alternates: { canonical: '/blessings' },
   description:
-    'חמש הברכות שאפשר לבחור לשבב: ברכת התינוק, ברכת הפרנסה, הברכה שלך, שמירה והגנה, ואשת חיל. כל ברכה מופיעה כאן במלואה, בלי קיצורים.',
+    `${BLESSING_COUNT} הברכות שאפשר לבחור לשבב: ${BLESSINGS.map((b) => b.plain).join(', ')}. כל ברכה מופיעה כאן במלואה, בלי קיצורים.`,
   openGraph: {
     type: 'website',
     url: '/blessings',
-    title: 'חמש הברכות · מִקְרָא',
-    description: 'חמש ברכות לבחירה, כל אחת במלואה. את הברכה בוחרים בעמוד של התכשיט.',
+    title: `${BLESSING_COUNT} הברכות · מִקְרָא`,
+    description: `${BLESSING_COUNT} ברכות לבחירה, כל אחת במלואה. את הברכה בוחרים בעמוד של התכשיט.`,
     images: [{ url: '/scene/pair-trio.jpg', alt: 'שלושה תליונים של מִקְרָא' }],
   },
 };
@@ -24,7 +24,7 @@ export default function BlessingsPage() {
         <div className="shell">
           <h1 className="display t-hero">
             <span className="mask-line load">
-              <span>חמש ברכות.</span>
+              <span>{BLESSING_COUNT} ברכות.</span>
             </span>
             <span className="mask-line load">
               <span className="accent-text" style={{ ['--d' as string]: '130ms' }}>
@@ -35,7 +35,7 @@ export default function BlessingsPage() {
           {/* בלי שורת מספרים. "5 נוסחים" הוא מה שהכותרת אומרת, וסך המילים
               ושטח הצריבה כבר יושבים בעמוד הבית - כאן זו הייתה חזרה בתבנית */}
           <p className="lede reveal load mt-8 max-w-2xl" style={{ ['--d' as string]: '280ms' }}>
-            על כל תכשיט אפשר לבחור ברכה אחת או יותר מתוך החמש. אילו ברכות - כתוב
+            על כל תכשיט אפשר לבחור ברכה אחת או יותר מתוך ה{BLESSING_COUNT}. אילו ברכות - כתוב
             בעמוד של התכשיט, ושם גם בוחרים. את השבב חורטים אחרי ההזמנה. הברכות
             מופיעות כאן במלואן, מילה במילה, בלי קיצורים ובלי שינויים.
           </p>

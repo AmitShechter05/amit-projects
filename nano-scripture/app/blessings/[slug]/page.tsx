@@ -4,7 +4,7 @@ import { notFound } from 'next/navigation';
 import NanoLoupe from '@/components/NanoLoupe';
 import ProductCard from '@/components/ProductCard';
 import BlessingCard from '@/components/BlessingCard';
-import { BLESSINGS, getBlessing, isBlessingId } from '@/lib/blessings';
+import { BLESSINGS, getBlessing, isVisibleBlessing } from '@/lib/blessings';
 import { PRODUCTS, blessingPhotos } from '@/lib/catalog';
 import ScriptureText from '@/components/ScriptureText';
 import { clampWords } from '@/lib/seo';
@@ -20,7 +20,7 @@ export async function generateMetadata({
   params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
   const { slug } = await params;
-  if (!isBlessingId(slug)) return {};
+  if (!isVisibleBlessing(slug)) return {};
   const b = getBlessing(slug);
   return {
     title: `${b.plain} · הברכה המלאה שחרוטה על השבב`,
@@ -52,7 +52,7 @@ export async function generateMetadata({
 export default async function BlessingPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   await syncPrices();
-  if (!isBlessingId(slug)) notFound();
+  if (!isVisibleBlessing(slug)) notFound();
 
   const b = getBlessing(slug);
   const carriers = PRODUCTS.filter((p) => p.blessings.includes(b.id));

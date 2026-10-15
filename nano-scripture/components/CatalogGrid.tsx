@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import ProductCard from '@/components/ProductCard';
-import { PRODUCTS, uniqueDesigns, type Product } from '@/lib/catalog';
+import { PRODUCTS, ACTIVE_CATEGORIES, uniqueDesigns, type Product } from '@/lib/catalog';
 
 /**
  * כל התכשיטים, עם סינון.
@@ -24,7 +24,7 @@ const FOR: { id: For; label: string }[] = [
   { id: 'women', label: 'לאישה' },
   { id: 'men', label: 'לגבר' },
   { id: 'baby', label: 'לתינוק' },
-];
+].filter((x) => x.id !== 'baby' || ACTIVE_CATEGORIES.includes('pins')) as { id: For; label: string }[];
 const KIND: { id: Kind; label: string }[] = [
   { id: 'all', label: 'כל הסוגים' },
   { id: 'necklaces', label: 'שרשראות' },

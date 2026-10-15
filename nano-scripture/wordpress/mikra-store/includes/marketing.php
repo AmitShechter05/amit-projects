@@ -24,6 +24,18 @@ defined( 'ABSPATH' ) || exit;
 define( 'MIKRA_PROMO_COUPON', 'mikra20' );
 define( 'MIKRA_FROM', 'orders@mikra.shop' );
 define( 'MIKRA_IMG', MIKRA_SITE . '/brand/email/' );
+/**
+ * ברכות שאין להן כרגע תכשיט (15.10.2026: ברכת התינוק - הסיכה הוסתרה, אין
+ * מלאי). כמו HIDDEN_BLESSINGS באתר: לא מופיעות באף מייל. להחזיר = למחוק.
+ */
+define( 'MIKRA_HIDDEN_BLESSINGS', array( 'tinok' ) );
+
+/** "חמש" / "ארבע" - כמה ברכות יש לבחירה */
+function mikra_blessing_count() {
+	$n     = 5 - count( MIKRA_HIDDEN_BLESSINGS );
+	$words = array( 1 => 'אחת', 2 => 'שתיים', 3 => 'שלוש', 4 => 'ארבע', 5 => 'חמש' );
+	return isset( $words[ $n ] ) ? $words[ $n ] : (string) $n;
+}
 
 /* ------------------------------------------------------------------
  * נתונים
@@ -170,7 +182,7 @@ function mk_products( $title, $items, $campaign, $center = true ) {
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr>' . $cols . '</tr></table></td></tr>';
 }
 
-/** אינדקס חמש הברכות, ליד תמונה גבוהה של השרשראות */
+/** אינדקס הברכות, ליד תמונה גבוהה של השרשראות */
 function mk_blessing_index( $campaign ) {
 	$list = array(
 		array( 'אשת חיל', 'לאמא, לאישה, לסבתא', 'eshet-chayil' ),
@@ -179,6 +191,9 @@ function mk_blessing_index( $campaign ) {
 		array( 'ברכת הפרנסה', 'למי שבונה משהו', 'parnasa' ),
 		array( 'הברכה שלך', 'לכל רגע של התחלה', 'bracha' ),
 	);
+	$list = array_values( array_filter( $list, function ( $b ) {
+		return ! in_array( $b[2], MIKRA_HIDDEN_BLESSINGS, true );
+	} ) );
 	$rows = '';
 	foreach ( $list as $i => $b ) {
 		$rows .= '<tr><td style="padding:14px 0;border-bottom:1px solid #d9c7a3;' . ( 0 === $i ? 'border-top:1px solid #d9c7a3;' : '' ) . '">'
@@ -189,7 +204,7 @@ function mk_blessing_index( $campaign ) {
 			. '</td><td align="left" width="24" style="' . MIKRA_FONT . 'font-size:16px;color:#96661c;text-align:left;">←</td></tr></table></a></td></tr>';
 	}
 	return '<tr><td class="mk-pad" style="padding:56px 36px 0;">'
-		. mk_text( 'חמש ברכות לבחירה', 12, 700, '#96661c' )
+		. mk_text( mikra_blessing_count() . ' ברכות לבחירה', 12, 700, '#96661c' )
 		. mk_text( 'לכל רגע, ברכה משלו', 30, 800, '#16150f', 'line-height:1.2;margin:6px 0 26px;' )
 		. '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" dir="rtl"><tr>'
 		. '<td class="mk-col" align="right" style="vertical-align:top;">'
@@ -212,7 +227,7 @@ function mk_trust() {
 /** שלושה שלבים בעיגולים, עם אות זהב בתג שחור */
 function mk_steps() {
 	$s = array(
-		array( 'א', 'בוחרים', 'תכשיט, ואחת מחמש ברכות. אפשר לקרוא כל ברכה לפני שקונים.', 'step-choose-c.png' ),
+		array( 'א', 'בוחרים', 'תכשיט, ואחת מ' . mikra_blessing_count() . ' ברכות. אפשר לקרוא כל ברכה לפני שקונים.', 'step-choose-c.png' ),
 		array( 'ב', 'חורטים ובודקים', 'את השבב חורטים לפי ההזמנה, ובודקים מול הטקסט המקורי.', 'step-engrave-c.png' ),
 		array( 'ג', 'אורזים ושולחים', 'בקופסה מרופדת, עם כרטיס הברכה. מגיע תוך 2-4 ימי עסקים.', 'step-pack-c.png' ),
 	);
@@ -330,12 +345,12 @@ function mikra_series_email( $step, $first_name, $unsub ) {
 
 		case 3:
 			$rows = mk_topbar( 'למי המתנה · מכתב 2' )
-				. mk_heading( 'חמש ברכות, חמישה רגעים', 'למי', 'המתנה?', $hi . 'כל ברכה נכתבה לרגע אחר בחיים. ככה בוחרים: מתחילים ממי שמקבל.', 56 )
+				. mk_heading( mikra_blessing_count() . ' ברכות, ולכל אחת רגע משלה', 'למי', 'המתנה?', $hi . 'כל ברכה נכתבה לרגע אחר בחיים. ככה בוחרים: מתחילים ממי שמקבל.', 56 )
 				. mk_blessing_rows( array( 'eshet-chayil', 'tinok', 'shmira', 'parnasa', 'bracha' ), $camp );
 			$rows .= mk_ticket( $p ) . mk_button( 'לכל התכשיטים', mikra_utm( '/catalog', $camp ) )
 				. mk_signoff( 'עדיין לא בטוחים? עונים למייל הזה וכותבים למי המתנה ולאיזה רגע. נציע ברכה ותכשיט.' );
 			$subject = 'פרסומת: למי המתנה? ככה בוחרים ברכה';
-			$pre     = 'חמש ברכות, חמישה רגעים - ותכשיט לכל אחת.';
+			$pre     = mikra_blessing_count() . ' ברכות, ולכל אחת רגע משלה - ותכשיט לכל אחת.';
 			break;
 
 		case 4:
@@ -399,13 +414,14 @@ function mk_gallery4( $camp ) {
 
 /** הברכות שמופיעות בשורות "למי המתנה": למי, שם, פסוק, תכשיט לדוגמה */
 function mikra_blessing_picks() {
-	return array(
+	$all = array(
 		'eshet-chayil' => array( 'לאמא, לאישה, לסבתא', 'אשת חיל', 'אֵשֶׁת חַיִל מִי יִמְצָא,<br>וְרָחֹק מִפְּנִינִים מִכְרָהּ', 'kachotam', 'OYANN001G', 'כַּחוֹתָם', 'm3-kachotam.jpg' ),
 		'tinok'        => array( 'לתינוק שנולד', 'ברכת התינוק', 'יְבָרֶכְךָ ה׳<br>וְיִשְׁמְרֶךָ', 'tzel-knafayim', 'BABYPIN01', 'צֵל כְּנָפַיִם', 'm3-tzel.jpg' ),
 		'shmira'       => array( 'למי שיוצא לדרך', 'שמירה והגנה', 'יֹשֵׁב בְּסֵתֶר עֶלְיוֹן,<br>בְּצֵל שַׁדַּי יִתְלוֹנָן', 'beseter', 'OYANN003S', 'בְּסֵתֶר', 'm3-beseter.jpg' ),
 		'parnasa'      => array( 'למי שבונה משהו', 'ברכת הפרנסה', 'לַה׳ הָאָרֶץ וּמְלוֹאָהּ,<br>תֵּבֵל וְיֹשְׁבֵי בָהּ', 'avot', 'OYANB007RS', 'עֲבוֹת', 'm3-avot.jpg' ),
 		'bracha'       => array( 'לכל רגע של התחלה', 'הברכה שלך', 'וּבָאוּ עָלֶיךָ כָּל הַבְּרָכוֹת<br>הָאֵלֶּה וְהִשִּׂיגֻךָ', 'toldot', 'YASNN004W', 'תּוֹלְדוֹת', 'm3-toldot.jpg' ),
 	);
+	return array_diff_key( $all, array_flip( MIKRA_HIDDEN_BLESSINGS ) );
 }
 
 /** שורות לבנות של תמונה וברכה, מתחלפות צד */

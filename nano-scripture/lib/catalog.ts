@@ -123,7 +123,7 @@ export type Product = {
   featured?: boolean;
 };
 
-export const PRODUCTS: Product[] = [
+const ALL_PRODUCTS: Product[] = [
   /* ---------- כסף 925 ---------- */
   {
     sku: 'YASNN004W',
@@ -521,6 +521,16 @@ export const PRODUCTS: Product[] = [
     featured: true,
   },
 ];
+
+/**
+ * דגמים מוסתרים - אין להם מלאי (15.10.2026: סיכת התינוק, ספירה של 415
+ * יחידות בלי אף סיכה). הם יוצאים מכל מקום: רשימות, קטגוריות, מפת האתר,
+ * הפיד, עמוד המוצר (404) והקופה. להחזיר דגם = למחוק אותו מהרשימה.
+ * ברכה שאין לה יותר אף תכשיט נעלמת יחד איתו (lib/blessings.ts).
+ */
+export const RETIRED_SLUGS: string[] = ['tzel-knafayim'];
+
+export const PRODUCTS: Product[] = ALL_PRODUCTS.filter((p) => !RETIRED_SLUGS.includes(p.slug));
 
 /**
  * דגמים חבויים: יש להם עמוד מוצר ואפשר לקנות אותם, אבל הם לא מופיעים

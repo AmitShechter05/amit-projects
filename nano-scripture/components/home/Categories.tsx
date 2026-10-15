@@ -33,7 +33,7 @@ export default function Categories() {
             </h2>
           </div>
           <p className="lede reveal max-w-sm" style={{ ['--d' as string]: '110ms' }}>
-            אותו שבב ואותה ברכה: על שרשרת, על צמיד או על סיכה לתינוק.
+            אותו שבב ואותה ברכה: {ACTIVE_CATEGORIES.includes('pins') ? 'על שרשרת, על צמיד או על סיכה לתינוק.' : 'על שרשרת או על צמיד.'}
             בחרו מה שנוח לכם.
           </p>
         </div>

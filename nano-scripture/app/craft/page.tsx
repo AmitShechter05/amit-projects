@@ -5,7 +5,7 @@ import Process from '@/components/home/Process';
 import NanoLoupe from '@/components/NanoLoupe';
 import ZoomLadder from '@/components/ZoomLadder';
 import { wornFor, wornFocus } from '@/lib/worn';
-import { BLESSINGS, LONGEST_BLESSING_CHARS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT, LONGEST_BLESSING_CHARS } from '@/lib/blessings';
 import Accordion, { type QA } from '@/components/Accordion';
 import { deliveryLine, dispatchLine } from '@/lib/policy';
 
@@ -277,7 +277,7 @@ export default function CraftPage() {
             </ol>
             <div className="mt-10 flex flex-wrap gap-4">
               <Link href="/catalog" className="btn btn-solid">לקטלוג</Link>
-              <Link href="/blessings" className="btn">חמש הברכות</Link>
+              <Link href="/blessings" className="btn">{BLESSING_COUNT} הברכות</Link>
             </div>
           </div>
         </div>

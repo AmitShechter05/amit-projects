@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import CatalogGrid from '@/components/CatalogGrid';
 import JsonLd from '@/components/JsonLd';
-import { PRODUCTS, uniqueDesigns, formatPrice } from '@/lib/catalog';
+import { PRODUCTS, uniqueDesigns, formatPrice, ACTIVE_CATEGORIES } from '@/lib/catalog';
 import { saleOf } from '@/lib/promo';
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema';
 import { syncPrices } from '@/lib/livePrices';
@@ -10,7 +10,7 @@ import { syncPrices } from '@/lib/livePrices';
 export const metadata: Metadata = {
   title: 'כל התכשיטים',
   description:
-    'כל התכשיטים של מִקְרָא בעמוד אחד: שרשראות וצמידים לאישה ולגבר, וסיכה לתינוק. בכל אחד שבב קטן עם ברכה שלמה.',
+    `כל התכשיטים של מִקְרָא בעמוד אחד: שרשראות וצמידים לאישה ולגבר${ACTIVE_CATEGORIES.includes('pins') ? ', וסיכה לתינוק' : ''}. בכל אחד שבב קטן עם ברכה שלמה.`,
   alternates: { canonical: '/catalog' },
 };
 

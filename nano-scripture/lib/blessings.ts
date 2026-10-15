@@ -136,16 +136,35 @@ const RAW: Omit<Blessing, 'chars'>[] = [
  * הוא היה שדה שמור, ובמקביל היה חישוב שרץ על אותו טקסט - שני
  * מספרים לאותה עובדה, שנבדלו זה מזה. עכשיו יש אחד.
  */
-export const BLESSINGS: Blessing[] = RAW.map((b) => ({
+const ALL_BLESSINGS: Blessing[] = RAW.map((b) => ({
   ...b,
   chars: burnedChars(b.text),
 }));
 
+/**
+ * ברכות שאין כרגע אף תכשיט שנושא אותן (15.10.2026: ברכת התינוק, יחד עם
+ * הסיכה - ראו RETIRED_SLUGS ב-lib/catalog.ts). הן לא מוצגות באתר ואין
+ * להן עמוד, אבל עדיין מזוהות, כדי שהזמנה ישנה איתן תוצג נכון. להחזיר =
+ * למחוק מכאן.
+ */
+export const HIDDEN_BLESSINGS: BlessingId[] = ['tinok'];
+
+/** הברכות שמוצגות באתר */
+export const BLESSINGS: Blessing[] = ALL_BLESSINGS.filter((b) => !HIDDEN_BLESSINGS.includes(b.id));
+
+/** "חמש" / "ארבע" - כמה ברכות יש לבחירה. כל טקסט באתר שסופר אותן נשען על זה */
+export const BLESSING_COUNT: string = ['אפס', 'אחת', 'שתיים', 'שלוש', 'ארבע', 'חמש', 'שש', 'שבע'][BLESSINGS.length] ?? String(BLESSINGS.length);
+
 export const BLESSING_ORDER: BlessingId[] = BLESSINGS.map((b) => b.id);
 
 export const BLESSING_BY_ID = Object.fromEntries(
-  BLESSINGS.map((b) => [b.id, b]),
+  ALL_BLESSINGS.map((b) => [b.id, b]),
 ) as Record<BlessingId, Blessing>;
+
+/** ברכה שמוצגת באתר (לא מוסתרת) */
+export function isVisibleBlessing(value: unknown): value is BlessingId {
+  return isBlessingId(value) && !HIDDEN_BLESSINGS.includes(value);
+}
 
 export function getBlessing(id: BlessingId) {
   return BLESSING_BY_ID[id];
@@ -155,7 +174,7 @@ export function isBlessingId(value: unknown): value is BlessingId {
   return typeof value === 'string' && value in BLESSING_BY_ID;
 }
 
-/** סך המילים בכל חמשת השבבים */
+/** סך המילים בכל הברכות שמוצגות */
 export const TOTAL_BLESSING_WORDS = BLESSINGS.reduce((sum, b) => sum + b.words, 0);
 
 /**

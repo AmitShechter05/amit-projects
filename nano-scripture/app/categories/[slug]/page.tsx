@@ -16,7 +16,7 @@ import {
   formatPrice,
   type CategoryId,
 } from '@/lib/catalog';
-import { BLESSINGS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 import JsonLd from '@/components/JsonLd';
 import { itemListSchema, breadcrumbSchema } from '@/lib/schema';
 import { syncPrices } from '@/lib/livePrices';
@@ -199,7 +199,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                 className="link-u mt-6 inline-block"
                 style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent-deep)' }}
               >
-                לחמש הברכות ←
+                ל{BLESSING_COUNT} הברכות ←
               </Link>
             </div>
 

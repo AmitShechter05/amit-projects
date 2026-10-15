@@ -7,7 +7,7 @@ import Logo from './Logo';
 import PromoBar from './PromoBar';
 import { useCart, cartTotals } from '@/lib/cart';
 import { CATEGORIES, ACTIVE_CATEGORIES } from '@/lib/catalog';
-import { BLESSINGS } from '@/lib/blessings';
+import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 
 // הניווט נגזר מהקטגוריות הפעילות — קטגוריה ריקה נעלמת מכאן מאליה
 const CAT_NAV = [
@@ -294,7 +294,7 @@ export default function Header() {
 
           <hr className="rule my-7" />
 
-          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>חמש הברכות</p>
+          <p className="eyebrow" style={{ color: 'var(--ink-3)' }}>{BLESSING_COUNT} הברכות</p>
           <div className="mt-3 flex flex-col">
             {BLESSINGS.map((b) => (
               <Link

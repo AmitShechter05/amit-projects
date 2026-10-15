@@ -1001,7 +1001,7 @@ function mikra_winback_email( $step, $name, $unsub, $code = '' ) {
 			$rows    = mk_photo_hero( 'hero-winback-1.jpg', 'עבר קצת זמן', 'מה חדש אצלך?', 'מקווים שהתכשיט עדיין עליך, והברכה איתך.' )
 				. mk_para( $hi . 'עברו כמה חודשים מאז שהזמנת אצלנו. אם יש אירוע בדרך - לידה, חתונה, יום הולדת - אנחנו כאן בשביל הברכה הבאה.', '40px 44px 0' )
 				. mk_subhead( 'לרגעים שבדרך' )
-				. mk_blessing_rows( array( 'eshet-chayil', 'tinok', 'parnasa' ), $camp )
+				. mk_blessing_rows( array( 'eshet-chayil', 'shmira', 'parnasa' ), $camp )
 				. mk_button( 'לכל התכשיטים', mikra_utm( '/catalog', $camp ), '36px 40px 0' )
 				. mk_signoff( 'רוצים עזרה לבחור? עונים למייל הזה וכותבים למי ולאיזה רגע.' );
 			$subject = 'פרסומת: עבר קצת זמן. מה חדש אצלך?';
