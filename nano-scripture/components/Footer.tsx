@@ -160,7 +160,7 @@ export default function Footer() {
 
         <hr className="rule mt-16" />
 
-        <PaymentMarks size={26} className="pt-6" />
+        <PaymentMarks tone="cards" gap={6} className="pt-6" />
 
         <div
           className="mt-5 flex flex-col gap-3 md:flex-row md:items-center md:justify-between"

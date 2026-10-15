@@ -750,7 +750,7 @@ export default function ProductView({ product }: { product: Product }) {
         >
           {ASSURANCE.join(' · ')}
         </p>
-        <PaymentMarks size={26} className="mt-3 justify-center" />
+        <PaymentMarks tone="cards" gap={6} className="mt-3 justify-center" />
 
         {/* ---------- "איך אני יודע שזה באמת שם" ---------- */}
         {/*

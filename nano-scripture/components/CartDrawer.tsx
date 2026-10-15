@@ -587,7 +587,7 @@ export default function CartDrawer() {
             <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
               קופסה מרופדת וכרטיס ברכה - כלולים בכל הזמנה
             </p>
-            <PaymentMarks size={22} gap={10} className="mt-3 justify-center" />
+            <PaymentMarks tone="cards" gap={6} className="mt-3 justify-center" />
           </div>
         )}
       </aside>
