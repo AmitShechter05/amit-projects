@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals } from '@/lib/cart';
-import { getProduct, formatPrice } from '@/lib/catalog';
+import { getProduct, formatPrice, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { GIFT_BOX } from '@/lib/extras';
 import { PROMO } from '@/lib/promo';
@@ -273,7 +273,7 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
                     style={{ borderTop: '1px solid var(--line)' }}
                   >
                     <span className="tile relative shrink-0" style={{ width: 54, height: 54, borderRadius: 'var(--radius)' }}>
-                      <Image src={p.image} alt="" fill sizes="54px" className="object-contain p-1" />
+                      <Image src={p.image} alt="" fill sizes="54px" className={packshotFit(p.image, 'p-1')} />
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="display block" style={{ fontSize: 'var(--fs-sm)' }}>{p.name}</span>

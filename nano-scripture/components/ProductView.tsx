@@ -21,6 +21,7 @@ import {
   blessingStock,
   isCutout,
   type Product,
+  packshotFit,
 } from '@/lib/catalog';
 import { useCart } from '@/lib/cart';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
@@ -337,7 +338,7 @@ export default function ProductView({ product }: { product: Product }) {
                 }}
               >
                 {v.id === 'jewel' && (
-                  <Image src={product.image} alt="" fill sizes="84px" className="object-contain p-1.5" />
+                  <Image src={product.image} alt="" fill sizes="84px" className={packshotFit(product.image, 'p-1.5')} />
                 )}
                 {v.id === 'worn' && worn && (
                   <Image
@@ -944,7 +945,7 @@ export default function ProductView({ product }: { product: Product }) {
               overflow: 'hidden',
             }}
           >
-            <Image src={product.image} alt="" fill sizes="52px" className="object-contain p-1.5" />
+            <Image src={product.image} alt="" fill sizes="52px" className={packshotFit(product.image, 'p-1.5')} />
           </span>
 
           <span className="block min-w-0 flex-1">

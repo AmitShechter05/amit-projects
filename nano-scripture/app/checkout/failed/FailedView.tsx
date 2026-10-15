@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { waHref } from '@/lib/company';
 import { readOrderDone, type OrderDone } from '@/lib/orderDone';
-import { getProduct, formatPrice } from '@/lib/catalog';
+import { getProduct, formatPrice, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import type { PaySummary } from '../pay/GrowSheet';
 import { WhatsAppIcon } from '@/components/WhatsAppFab';
@@ -110,7 +110,7 @@ export default function FailedView({ fromOrder = null }: { fromOrder?: FromOrder
             {summary.lines.map((l, i) => (
               <li key={i} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid var(--line)' }}>
                 <span className="tile relative shrink-0 overflow-hidden" style={{ width: 56, height: 56, borderRadius: 'var(--radius)' }}>
-                  {l.image && <Image src={l.image} alt="" fill sizes="56px" className="object-contain p-1" />}
+                  {l.image && <Image src={l.image} alt="" fill sizes="56px" className={packshotFit(l.image, 'p-1')} />}
                 </span>
                 <span className="min-w-0 flex-1">
                   <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>
@@ -150,7 +150,7 @@ export default function FailedView({ fromOrder = null }: { fromOrder?: FromOrder
               return [
                 <li key={`${l.slug}::${l.blessing}`} className="flex items-center gap-3 py-3" style={{ borderTop: '1px solid var(--line)' }}>
                   <span className="tile relative shrink-0 overflow-hidden" style={{ width: 56, height: 56, borderRadius: 'var(--radius)' }}>
-                    <Image src={p.image} alt="" fill sizes="56px" className="object-contain p-1" />
+                    <Image src={p.image} alt="" fill sizes="56px" className={packshotFit(p.image, 'p-1')} />
                   </span>
                   <span className="min-w-0 flex-1">
                     <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>

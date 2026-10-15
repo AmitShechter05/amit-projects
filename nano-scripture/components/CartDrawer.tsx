@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals, lineKey } from '@/lib/cart';
-import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS } from '@/lib/catalog';
+import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { PROMO, saleOf, isPromoCode, normalizeCode } from '@/lib/promo';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
@@ -321,7 +321,7 @@ export default function CartDrawer() {
                     overflow: 'hidden',
                   }}
                 >
-                  <Image src={p.image} alt={p.name} fill sizes="96px" className="object-contain p-2" />
+                  <Image src={p.image} alt={p.name} fill sizes="96px" className={packshotFit(p.image, 'p-2')} />
                 </Link>
 
                 <div className="flex flex-1 flex-col">
@@ -460,7 +460,7 @@ export default function CartDrawer() {
                         className="tile relative"
                         style={{ width: 52, height: 52, flexShrink: 0, borderRadius: 3, overflow: 'hidden' }}
                       >
-                        <Image src={p.image} alt="" fill sizes="52px" className="object-contain p-1" />
+                        <Image src={p.image} alt="" fill sizes="52px" className={packshotFit(p.image, 'p-1')} />
                       </span>
 
                       <span className="flex-1">

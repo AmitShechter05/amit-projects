@@ -624,6 +624,14 @@ export const isHiddenProduct = (slug: string) => HIDDEN_PRODUCTS.some((p) => p.s
 const CUTOUT_SKUS = ['OYANB007B', 'OYANN003G', 'OYANN003S', 'BABYPIN01'];
 export const isCutout = (p: Product) => CUTOUT_SKUS.includes(p.sku);
 
+/**
+ * הכיתות לצילום מוצר בכל מקום שהוא מוצג (עגלה, קופה, תמונות ממוזערות):
+ * חיתוך שקוף - צף עם שוליים; צילום על לבן - ממלא את המשבצת.
+ */
+export function packshotFit(src: string | null | undefined, pad: string) {
+  return src && CUTOUT_SKUS.some((s) => src.includes(`/${s}.`)) ? `object-contain ${pad}` : 'object-cover';
+}
+
 
 /* ---------- מלאי לפי ברכה ---------- */
 

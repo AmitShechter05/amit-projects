@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { formatPrice } from '@/lib/catalog';
+import { formatPrice, packshotFit } from '@/lib/catalog';
 import { POLICY } from '@/lib/policy';
 import PaymentMarks from '@/components/PaymentMarks';
 import { savePending, clearPending } from '@/components/PendingPayment';
@@ -185,7 +185,7 @@ export default function GrowSheet({
           {summary.lines.map((l, i) => (
             <li key={i} className="flex items-center gap-3 py-3" style={{ borderTop: i ? '1px solid var(--line)' : undefined }}>
               <span className="tile relative shrink-0 overflow-hidden" style={{ width: 60, height: 60, borderRadius: 'var(--radius)' }}>
-                {l.image && <Image src={l.image} alt="" fill sizes="60px" className="object-contain p-1" />}
+                {l.image && <Image src={l.image} alt="" fill sizes="60px" className={packshotFit(l.image, 'p-1')} />}
               </span>
               <span className="min-w-0 flex-1">
                 <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>

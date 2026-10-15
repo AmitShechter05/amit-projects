@@ -6,6 +6,7 @@ import {
   productsByCategory,
   priceRange,
   formatPrice,
+  packshotFit,
 } from '@/lib/catalog';
 
 /**
@@ -62,7 +63,7 @@ export default function Categories() {
                       alt={cat.title}
                       fill
                       sizes="(max-width: 768px) 112px, 46vw"
-                      className="object-contain p-[7%] transition-transform duration-700 group-hover:scale-[1.05]"
+                      className={`${packshotFit(hero.image, 'p-[7%]')} transition-transform duration-700 group-hover:scale-[1.05]`}
                     />
                   )}
                 </div>

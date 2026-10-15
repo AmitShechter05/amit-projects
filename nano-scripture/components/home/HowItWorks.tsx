@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { deliveryLine } from '@/lib/policy';
-import { getProduct, formatPrice, ACTIVE_CATEGORIES } from '@/lib/catalog';
+import { getProduct, formatPrice, ACTIVE_CATEGORIES, packshotFit } from '@/lib/catalog';
 import { saleOf } from '@/lib/promo';
 import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 
@@ -76,7 +76,7 @@ function CatalogMock() {
         {picks.map((p) => (
           <div key={p.slug} style={{ border: '1px solid var(--line)', borderRadius: 4, background: 'var(--surface)' }}>
             <div className="tile relative" style={{ aspectRatio: '1', borderRadius: '4px 4px 0 0' }}>
-              <Image src={p.image} alt="" fill sizes="70px" className="object-contain p-1.5" />
+              <Image src={p.image} alt="" fill sizes="70px" className={packshotFit(p.image, 'p-1.5')} />
             </div>
             <div className="px-1 py-1" style={{ lineHeight: 1.3 }}>
               <div className="display truncate" style={{ fontSize: 8.5 }}>{p.name}</div>

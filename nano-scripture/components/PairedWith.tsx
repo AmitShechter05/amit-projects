@@ -2,7 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { FINISHES, formatPrice, getProduct } from '@/lib/catalog';
+import { FINISHES, formatPrice, getProduct, packshotFit } from '@/lib/catalog';
 import { pairFor } from '@/lib/pairs';
 import { POLICY } from '@/lib/policy';
 import { saleOf } from '@/lib/promo';
@@ -72,7 +72,7 @@ export default function PairedWith({ slug }: { slug: string }) {
                       className="tile relative shrink-0"
                       style={{ width: 62, height: 62, borderRadius: 'var(--radius)' }}
                     >
-                      <Image src={p.image} alt={p.name} fill sizes="62px" className="object-contain p-1.5" />
+                      <Image src={p.image} alt={p.name} fill sizes="62px" className={packshotFit(p.image, 'p-1.5')} />
                     </Link>
 
                     <span className="min-w-0 flex-1">
