@@ -5,11 +5,21 @@ import { allGuides } from '@/lib/guides';
 import { syncPrices } from '@/lib/livePrices';
 import { breadcrumbSchema } from '@/lib/schema';
 
+const DESCRIPTION =
+  'למי מתאימה כל ברכה, איזה דגם לבחור, ומה מגיע בקופסה - מדריכים קצרים למי שמחפש מתנה עם מילים בפנים: לאמא, לחייל, ליולדת, לפתיחת עסק.';
+
 export const metadata: Metadata = {
   title: 'מדריכי מתנה',
-  description:
-    'למי מתאימה כל ברכה, איזה דגם לבחור, ומה מגיע בקופסה - מדריכים קצרים למי שמחפש מתנה עם מילים בפנים: לאמא, לחייל, ליולדת, לפתיחת עסק.',
+  description: DESCRIPTION,
   alternates: { canonical: '/guides' },
+  // בלי זה העמוד ירש את og:url של הבית, ושיתוף שלו נראה כמו שיתוף של הבית
+  openGraph: {
+    type: 'website',
+    url: '/guides',
+    title: 'מדריכי מתנה · מִקְרָא',
+    description: DESCRIPTION,
+    images: [{ url: '/hero/share.jpg', width: 1200, height: 630, alt: 'דוגמן ודוגמנית עונדים תכשיטי מִקְרָא עם השבב הכחול' }],
+  },
 };
 
 export default async function GuidesIndex() {

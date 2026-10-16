@@ -1,5 +1,3 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
 import { PRODUCTS, CATEGORIES, MATERIALS, FINISHES, productInStock, type Product, type Audience } from '@/lib/catalog';
 import { BLESSING_BY_ID } from '@/lib/blessings';
 import { BRAND } from '@/lib/brand';
@@ -7,6 +5,7 @@ import { SITE_URL } from '@/lib/site';
 import { POLICY, SHIPPING, shippingCost } from '@/lib/policy';
 import { productTitle } from '@/lib/seo';
 import { syncPrices } from '@/lib/livePrices';
+import { jpegImage } from '@/lib/jpegImage';
 
 /**
  * פיד מוצרים — /feed.xml
@@ -80,19 +79,6 @@ function groupId(p: Product) {
 }
 
 /**
- * תמונת הפיד: JPEG על רקע לבן, לא ה-WebP השקוף של האתר.
- *
- * מטא מקבל לפיד רק JPEG או PNG, וגוגל מזהיר על חיתוכים בהירים על
- * רקע שקוף. ה-JPEG נוצר מה-WebP ב-`scripts/feed-images.py` (רקע
- * `#ffffff`, כמו מאחורי הכרטיסים באתר). דגם חדש בלי JPEG נופל
- * ל-WebP במקום להישבר - וזו התזכורת להריץ את הסקריפט.
- */
-function feedImage(p: Product) {
-  const jpg = p.image.replace(/\.webp$/, '.jpg');
-  return existsSync(join(process.cwd(), 'public', jpg)) ? jpg : p.image;
-}
-
-/**
  * התיאור אומר שהנוסח נבחר. גוגל מבקש להצהיר על מוצר מותאם אישית
  * בכותרת ובתיאור, וזה מה שהתכשיט הוא. הרשימה מהקטלוג, לא טקסט חדש.
  */
@@ -134,7 +120,7 @@ function item(p: Product) {
     ['title', title],
     ['description', description(p)],
     ['link', `${SITE_URL}/products/${p.slug}`],
-    ['g:image_link', abs(feedImage(p))],
+    ['g:image_link', abs(jpegImage(p))],
     // מהמלאי לפי ברכה: דגם שכל הברכות שלו אזלו - אזל (גוגל ומטא מסירים מודעה שמוכרת מה שאין)
     ['g:availability', productInStock(p) ? 'in_stock' : 'out_of_stock'],
     ['g:condition', 'new'],

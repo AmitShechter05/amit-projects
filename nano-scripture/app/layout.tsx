@@ -65,9 +65,20 @@ export const metadata: Metadata = {
     title: 'מִקְרָא · ברכה שלמה על שבב קטן בתוך תכשיט',
     images: ['/hero/share.jpg'],
   },
-  // אימות Search Console: הטוקן יושב בוורסל (NEXT_PUBLIC_GSC_TOKEN),
-  // לא בקוד. בלי הטוקן התג פשוט לא מרונדר
-  verification: process.env.NEXT_PUBLIC_GSC_TOKEN ? { google: process.env.NEXT_PUBLIC_GSC_TOKEN } : undefined,
+  // תגי אימות אתר: הערכים יושבים בוורסל, לא בקוד. בלי ערך התג לא מרונדר.
+  // Search Console כבר מאומת בקובץ public/google8ca56fd686d8d735.html;
+  // פינטרסט (תביעת אתר) ומטא (דומיין ב-Business Manager) - כשייפתחו
+  verification: {
+    ...(process.env.NEXT_PUBLIC_GSC_TOKEN ? { google: process.env.NEXT_PUBLIC_GSC_TOKEN } : {}),
+    other: {
+      ...(process.env.NEXT_PUBLIC_PINTEREST_VERIFY
+        ? { 'p:domain_verify': process.env.NEXT_PUBLIC_PINTEREST_VERIFY }
+        : {}),
+      ...(process.env.NEXT_PUBLIC_META_DOMAIN_VERIFY
+        ? { 'facebook-domain-verification': process.env.NEXT_PUBLIC_META_DOMAIN_VERIFY }
+        : {}),
+    },
+  },
 };
 
 export const viewport: Viewport = {

@@ -12,6 +12,7 @@ import JsonLd from '@/components/JsonLd';
 import { productSchema, faqSchema, breadcrumbSchema } from '@/lib/schema';
 import { productTitle, productDescription, distinctName } from '@/lib/seo';
 import { syncPrices } from '@/lib/livePrices';
+import { jpegImage } from '@/lib/jpegImage';
 
 export function generateStaticParams() {
   return PRODUCTS.map((p) => ({ slug: p.slug }));
@@ -27,6 +28,8 @@ export async function generateMetadata({
   if (!p) return {};
   // דגם חבוי (מוצר הבדיקה) - לא לגוגל
   if (isHiddenProduct(p.slug)) return { title: p.name, robots: { index: false, follow: false } };
+  // JPEG על לבן ולא ה-WebP: וואטסאפ לא מציג WebP בתצוגת קישור באופן אמין
+  const og = jpegImage(p);
   return {
     title: productTitle(p),
     description: productDescription(p),
@@ -38,9 +41,9 @@ export async function generateMetadata({
       url: `/products/${p.slug}`,
       title: `${distinctName(p)} · מִקְרָא`,
       description: p.short,
-      images: [{ url: p.image, alt: p.name }],
+      images: [{ url: og, alt: p.name }],
     },
-    twitter: { card: 'summary_large_image', title: `${distinctName(p)} · מִקְרָא`, images: [p.image] },
+    twitter: { card: 'summary_large_image', title: `${distinctName(p)} · מִקְרָא`, images: [og] },
   };
 }
 

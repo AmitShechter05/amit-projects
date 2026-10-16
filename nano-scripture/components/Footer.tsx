@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import Logo from './Logo';
 import { BRAND } from '@/lib/brand';
-import { COMPANY, telHref, waHref } from '@/lib/company';
+import { COMPANY, SOCIAL, telHref, waHref } from '@/lib/company';
 import { CATEGORIES, ACTIVE_CATEGORIES } from '@/lib/catalog';
 import { BLESSINGS } from '@/lib/blessings';
 import PaymentMarks from '@/components/PaymentMarks';
@@ -79,11 +79,21 @@ export default function Footer() {
               <Link href="/contact" className="tap-row link-u" style={CONTACT}>
                 כל דרכי ההתקשרות
               </Link>
+              {/* רק חשבונות שקיימים (SOCIAL ב-lib/company.ts). פעם היו כאן
+                  שלושה קישורים ל-#, וקישור מת אומר לקונה שאין כאן אף אחד */}
+              {SOCIAL.map((s) => (
+                <a
+                  key={s.url}
+                  href={s.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="tap-row link-u"
+                  style={CONTACT}
+                >
+                  {s.label}
+                </a>
+              ))}
             </div>
-
-            {/* אין כאן קישורים לרשתות. היו שלושה - אינסטגרם, טיקטוק,
-                פינטרסט - וכולם הובילו ל-#. לחנות אין עדיין חשבון באף אחת,
-                וקישור מת לרשת חברתית אומר לקונה בדיוק את זה */}
           </div>
 
           <nav className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:flex md:flex-col md:gap-3">

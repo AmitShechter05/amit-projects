@@ -27,8 +27,8 @@
 import { BRAND } from './brand';
 import { SITE_URL } from './site';
 import { POLICY, shippingCost } from './policy';
-import { MATERIALS, FINISHES, CATEGORIES, type Product } from './catalog';
-import { COMPANY } from './company';
+import { MATERIALS, FINISHES, CATEGORIES, productInStock, type Product } from './catalog';
+import { COMPANY, SOCIAL } from './company';
 import { distinctName } from './seo';
 import type { QA } from './faq';
 
@@ -53,6 +53,8 @@ export function organizationSchema() {
     description: BRAND.manifesto,
     slogan: BRAND.tagline,
     areaServed: { '@type': 'Country', name: 'IL' },
+    // החשבונות שבפוטר - אותה רשימה. גוגל מחבר דרכם את פאנל המותג
+    ...(SOCIAL.length ? { sameAs: SOCIAL.map((s) => s.url) } : {}),
     // יש עכשיו טלפון ודוא"ל פומביים (lib/company.ts), אז מסמנים אותם
     ...(COMPANY.phone
       ? {
@@ -156,7 +158,9 @@ export function productSchema(
       url: `${SITE_URL}/products/${product.slug}`,
       priceCurrency: 'ILS',
       price: product.price,
-      availability: 'https://schema.org/InStock',
+      // מהמלאי בווקומרס, כמו g:availability בפיד. דגם שאזל ומוצהר InStock
+      // הוא אי-התאמה שגוגל פוסל עליה ב-Merchant Center
+      availability: productInStock(product) ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       itemCondition: 'https://schema.org/NewCondition',
       seller: { '@id': ORG_ID },
       hasMerchantReturnPolicy: returnPolicy(),
