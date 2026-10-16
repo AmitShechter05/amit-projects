@@ -76,6 +76,9 @@ export default function Footer() {
                 {COMPANY.email}
               </a>
               <span style={{ ...CONTACT, color: 'var(--ink-3)' }}>{COMPANY.address}</span>
+              <Link href="/contact" className="tap-row link-u" style={CONTACT}>
+                כל דרכי ההתקשרות
+              </Link>
             </div>
 
             {/* אין כאן קישורים לרשתות. היו שלושה - אינסטגרם, טיקטוק,
