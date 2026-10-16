@@ -48,7 +48,7 @@ export async function GET() {
         .filter(Boolean)
         .join(', ');
       const stock = productInStock(p) ? '' : ' · אזל מהמלאי';
-      out(`- [${distinctName(p)}](${u(`/products/${p.slug}`)}): ₪${p.price}${stock}. ${p.short.replace(/[.s]+$/, "")}. ברכות: ${blessings}.`);
+      out(`- [${distinctName(p)}](${u(`/products/${p.slug}`)}): ₪${p.price}${stock}. ${p.short.replace(/[.\s]+$/, '')}. ברכות: ${blessings}.`);
     }
     out();
   }
