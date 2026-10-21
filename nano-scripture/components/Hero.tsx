@@ -62,13 +62,13 @@ const DESKTOP: ShotSpec = {
   lens: { x: 1010, y: 930, d: 330 },
 };
 const MOBILE: ShotSpec = {
-  src: '/hero/couple-tall-v2.webp',
+  src: '/hero/couple-tall-v3.webp',
   w: 1350,
-  h: 2200,
+  h: 2340,
   sizes: '(max-width: 767px) 100vw, 1px',
-  chip: { x: 442, y: 1832 },
+  chip: { x: 442, y: 1972 },
   ring: 90,
-  lens: { x: 1038, y: 1989, d: 416 },
+  lens: { x: 1038, y: 2129, d: 416 },
 };
 
 /** הקובץ של העדשה כולל צל; העיגול עצמו הוא 0.877 מרוחבו */
@@ -196,17 +196,21 @@ export default function Hero() {
         <Badge />
       </section>
 
-      {/* טלפון: הצילום האנכי, והכותרת על הקיר שמעל הראשים */}
+      {/* טלפון: הצילום האנכי, הכותרת על הקיר שמעל הראשים, והכפתור על
+          הצילום עצמו - בלי פסקה וכפתור מתחתיו. עמית (21.10.2026) על
+          הגרסה הקודמת: "מלא שטח מת בתחילת האתר!" */}
       <section className="relative overflow-hidden pt-24 md:hidden">
         <Shot shot={MOBILE} className="relative w-full">
           <div className="absolute inset-x-0 top-[5%] mx-auto w-[var(--shell)] text-center">
             <Title facts={facts} />
+            <div className="reveal load mt-4 flex justify-center" style={{ ['--d' as string]: '360ms' }}>
+              <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '.85rem 2.4rem', fontSize: 'var(--fs-base)' }}>
+                לקטלוג
+              </Link>
+            </div>
           </div>
           <Badge side="left" />
         </Shot>
-        <div className="shell pb-12 pt-6 text-center">
-          <Action />
-        </div>
       </section>
     </>
   );
