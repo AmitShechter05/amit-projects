@@ -1,4 +1,5 @@
 import Hero from '@/components/Hero';
+import ShootDay from '@/components/home/ShootDay';
 import Bestsellers from '@/components/home/Bestsellers';
 import Worn from '@/components/home/Worn';
 import Scale from '@/components/home/Scale';
@@ -26,6 +27,7 @@ export default async function HomePage() {
     <>
       <Hero />
       <Bestsellers />
+      <ShootDay />
       <Interlude shot={j2} />
       <Worn />
       <Interlude shot={j3} className="hidden md:block" />

@@ -1,174 +1,213 @@
+import Image from 'next/image';
 import Link from 'next/link';
-import { preload } from 'react-dom';
-import HeroVideo from '@/components/HeroVideo';
-import { BRAND } from '@/lib/brand';
+import type { CSSProperties, ReactNode } from 'react';
 import { BLESSINGS } from '@/lib/blessings';
+import { POLICY } from '@/lib/policy';
 import { PROMO } from '@/lib/promo';
 
 /**
- * המקורות, ולא המדיניות.
+ * הירו: הזוג עונד את התכשיטים, הכותרת יושבת על הקיר שבצילום, וזום אל
+ * השבב שבמדליון שלה.
  *
- * כאן ישבו קודם משלוח, אחריות והחזרה - בדיוק שלושת הפריטים שרצועת
- * האמון שמתחת להירו כבר אומרת, כלומר חזרה ולא תוספת. הסקיל דורש
- * אלמנט של הוכחה מעל הקיפול, ולמותג בלי לקוחות עדיין אין ביקורות.
- * מה שכן יש הוא סמכות המקור: הנוסחים אינם כתובים כאן, הם מצוטטים.
+ * ------------------------------------------------------------------
+ * 21.10.2026 - עמית: "אני רוצה תמונה עם דוגמנים... שהדוגמנים יהיו עם
+ * התכשיט", במקום סרטון יום הצילום. ואחרי הגרסה הראשונה: "מרגיש כאילו
+ * הרקע בנפרד, אני רוצה שהכיתוב יהיה כחלק מהתמונה". לכן הצילום אינו
+ * ריבוע בצד שנמס לרקע של האתר, אלא הרקע עצמו: במחשב הצילום הרחב
+ * (hero-landscape) שבו הזוג משמאל וקיר בצבע חול מימין, והטקסט על הקיר.
+ * בטלפון הצילום האנכי, שהקיר שמעל הראשים הוארך בעיבוד (couple-tall),
+ * והכותרת יושבת על הקיר הזה.
+ *
+ * העיצוב בפיגמה "מקרא - מודעות", עמוד "W · אתר – הירו חדש". הסרטון
+ * לא ירד: הוא עבר למקטע משלו מתחת להירו (components/home/ShootDay.tsx).
+ *
+ * העדשה היא הצילום האמיתי של שבב "אשת חיל" במיקרוסקופ - אותה עדשה
+ * שבמודעות. המדליון עליה הוא תולדות, ואפשר להזמין אותו עם אשת חיל.
+ *
+ * מעל הכותרת אין "אלפי ביקורות" כמו אצל המתחרים - אין לנו כאלה.
+ * במקומן עובדות מהמדיניות. "כסף 925" לא נכנס: חלק מהתכשיטים מפלדה.
+ *
+ * כפתור אחד, לקטלוג (עמית, 6.10.2026: "לבחירת הברכה" הוביל לעמוד
+ * שבו קוראים ולא קונים, והלקוח לא הבין מאיפה מתחילים).
+ * ------------------------------------------------------------------
  */
-const SOURCES = BLESSINGS.map((b) => {
-  const parts = b.sources.split(' · ');
-  // המקור הראשון אינו תמיד ציטוט. בברכת התינוק הוא "ברכה לתינוק",
-  // תיאור ולא מקור, וברצועה שכל תפקידה סמכות זה מחליש. נבחר החלק
-  // שנושא מספר פרק בגרשיים - כלומר הפניה אמיתית
-  return parts.find((x) => /[׳״]/.test(x)) ?? parts[parts.length - 1];
-});
+
+/** ארבע הברכות שאפשר להזמין. ברכת התינוק שייכת לסיכה המוסתרת */
+const FOUR = BLESSINGS.filter((b) => b.id !== 'tinok').map((b) => b.plain);
+
+/** צבע הקיר בצילום הרחב, לשוליים במסכים רחבים במיוחד */
+const WALL = '#d6c2aa';
+
+type ShotSpec = {
+  src: string;
+  w: number;
+  h: number;
+  sizes: string;
+  chip: { x: number; y: number };
+  ring: number;
+  lens: { x: number; y: number; d: number };
+};
 
 /**
- * הירו: סרטון "יום צילום" בצד שמאל, והטקסט מימין על הרקע.
- *
- * ------------------------------------------------------------------
- * 4.10.2026 - עמית ביקש שסרטון יום הצילום (סטודיו, דוגמן ודוגמנית,
- * ארבעה תכשיטים) יהיה ההירו, ב-16:9.
- *
- * כאן ישב קודם צילום רחב מאוד (2.5:1) שבו הזוג עומד בקצה השמאלי
- * והטקסט יושב על קיר ריק. בסרטון הדוגמנים במרכז הפריים, ולכן הוא
- * אינו ממלא את כל הרוחב: צעיף הטקסט היה מכסה אותם. במקום זה הסרטון
- * תופס את 62% השמאליים, נחתך סביב מרכזו, והקצה הימני שלו נמס אל הרקע
- * מתחת לעמודת הטקסט. מרכז הסרטון יושב ב-31% מהרוחב - נקי לגמרי.
- *
- * לפני הצילום ישב כאן סרטון אחר, דחיפה אל תוך השבב, והוא הוחלף כי
- * מעבר לשנייה השלישית לא היה לו חומר. הסרטון הנוכחי הוא חומר אחר:
- * אנשים שעונדים את המוצרים, ארבעה שוטים, 15 שניות בלולאה.
- *
- * בטלפון הכותרת יושבת על החלק התחתון של הסרטון, ושאר הטקסט מתחתיו.
- *
- * עד 4.10.2026 הסרטון היה ריבוע והכול ישב מתחתיו - החלטה מתקופת
- * הצילום, שבו טקסט על התמונה כיסה פנים ותכשיטים. עמית ביקש לחבר את
- * הכותרת לסרטון. כדי שהיא לא תכסה את מה שבאים להראות, הסרטון גבוה
- * יותר (4:5 במקום ריבוע). רק הכותרת עולה על הסרטון; הכפתורים והמקורות
- * נשארים על הרקע, שם הם נקראים בלי הכהיה.
- *
- * מאותו יום הכותרת היא בלוק מעוצב (ראו ליד ה-h1) והפסקה שמתחתיה ירדה.
- * הבלוק גבוה מהכותרת הקודמת: 28% התחתונים של הסרטון במקום 18%. נמדד על
- * כל הסרטון, בפריים הבהיר ביותר מאחורי כל שורה: הלבן ב-5:1 לפחות
- * והזהב ב-3.4:1, מעל הסף של טקסט גדול (3:1). ההכהיה לא השתנתה.
- * ------------------------------------------------------------------
+ * מיקומים בפיקסלים של קובץ המקור. השבב נמדד בגילוי הכחול בקובץ. מכאן
+ * נגזרים העיגול, הקו והעדשה, כך שהם נעים יחד עם התמונה בכל רוחב.
  */
-export default function Hero() {
-  // תמונת הפתיחה היא האלמנט הגדול הראשון שנצבע; בלי זה היא מחכה לסרטון
-  preload('/hero/shoot-day-poster.jpg', { as: 'image', fetchPriority: 'high' });
+const DESKTOP: ShotSpec = {
+  src: '/hero/couple-wide.webp',
+  w: 3000,
+  h: 1191,
+  sizes: '(min-width: 768px) 140vw, 1px',
+  chip: { x: 348, y: 797 },
+  ring: 62,
+  lens: { x: 1010, y: 930, d: 330 },
+};
+const MOBILE: ShotSpec = {
+  src: '/hero/couple-tall-v2.webp',
+  w: 1350,
+  h: 2200,
+  sizes: '(max-width: 767px) 100vw, 1px',
+  chip: { x: 442, y: 1832 },
+  ring: 90,
+  lens: { x: 1038, y: 1989, d: 416 },
+};
+
+/** הקובץ של העדשה כולל צל; העיגול עצמו הוא 0.877 מרוחבו */
+const LENS_CIRCLE = 0.877;
+
+function Shot({ shot, className, style, children }: { shot: ShotSpec; className: string; style?: CSSProperties; children?: ReactNode }) {
+  const { w, h, chip, lens, ring } = shot;
+  const dx = lens.x - chip.x;
+  const dy = lens.y - chip.y;
+  const len = Math.hypot(dx, dy);
+  const ux = dx / len;
+  const uy = dy / len;
+  const a = { x: chip.x + ux * (ring / 2 + 4), y: chip.y + uy * (ring / 2 + 4) };
+  const b = { x: lens.x - ux * (lens.d / 2), y: lens.y - uy * (lens.d / 2) };
+  const pct = (v: number, of: number) => `${(v / of) * 100}%`;
+  const box = lens.d / LENS_CIRCLE;
 
   return (
-    <section
-      // pt-24 בטלפון: הכותרת הקבועה (96px) יושבת מעל התוכן, ובלי הריווח
-      // היא מכסה בדיוק את הפנים. במסך רחב הצילום ממלא הכול וזה רצוי
-      className="relative grid overflow-hidden pt-24 md:block md:min-h-[var(--hero-h)] md:pt-0"
-      style={{ ['--hero-h' as string]: 'min(88vh, 780px)' }}
+    <div className={className} style={{ aspectRatio: `${w} / ${h}`, ...style }}>
+      <Image
+        src={shot.src}
+        alt="דוגמנית ודוגמן עונדים תכשיטים של מקרא: מדליון עץ החיים עם השבב הכחול, מגן דוד וצמיד"
+        fill
+        priority
+        sizes={shot.sizes}
+        className="object-cover"
+      />
+      <svg aria-hidden viewBox={`0 0 ${w} ${h}`} className="pointer-events-none absolute inset-0 h-full w-full">
+        <circle cx={chip.x} cy={chip.y} r={ring / 2 + 12} fill="rgb(222 180 94 / .28)" />
+        <circle cx={chip.x} cy={chip.y} r={ring / 2} fill="none" stroke="#c9a14a" strokeWidth={6} />
+        <line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke="#e2c27a" strokeWidth={5} strokeDasharray="16 12" />
+      </svg>
+      <div
+        className="pointer-events-none absolute z-10"
+        style={{ width: pct(box, w), left: pct(lens.x - box / 2, w), top: pct(lens.y - box / 2, h) }}
+      >
+        <Image src="/hero/lens-eshet.webp" alt="" width={520} height={521} className="h-auto w-full" />
+        <p
+          className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[40%] rounded px-2.5 py-1"
+          style={{
+            background: 'rgb(22 21 15 / .72)',
+            color: '#fff',
+            fontSize: 'var(--fs-xs)',
+            lineHeight: 1.4,
+            whiteSpace: 'nowrap',
+            width: 'max-content',
+          }}
+        >
+          צילום אמיתי במיקרוסקופ
+        </p>
+      </div>
+      {children}
+    </div>
+  );
+}
+
+function Title({ facts }: { facts: string }) {
+  return (
+    <>
+      <p className="reveal load" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', fontWeight: 500 }}>
+        {facts}
+      </p>
+      <h1 className="display mt-3 text-[11.5vw] md:text-[min(6vw,5.5rem)]" style={{ fontWeight: 800, lineHeight: 1 }}>
+        <span className="mask-line load">
+          <span>ברכה שלמה</span>
+        </span>{' '}
+        <span className="mask-line load">
+          <span style={{ ['--d' as string]: '120ms' }}>בתוך תכשיט</span>
+        </span>
+      </h1>
+      <p
+        className="reveal load mx-auto mt-5 inline-block rounded-md px-4 py-2"
+        style={{ ['--d' as string]: '240ms', background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 500 }}
+      >
+        <span className="md:hidden">4 ברכות שלמות מהתנ״ך</span>
+        <span className="hidden md:inline">{FOUR.join('  ·  ')}</span>
+      </p>
+    </>
+  );
+}
+
+function Action() {
+  return (
+    <>
+      <p className="reveal load mx-auto max-w-[34rem]" style={{ ['--d' as string]: '360ms', color: 'var(--ink-2)', lineHeight: 1.6 }}>
+        בוחרים ברכה וקוראים את כולה באתר. היא נחרטת על שבב זכוכית בתוך התכשיט, מילה במילה.
+      </p>
+      <div className="reveal load mt-7 flex justify-center" style={{ ['--d' as string]: '440ms' }}>
+        <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
+          לקטלוג
+        </Link>
+      </div>
+    </>
+  );
+}
+
+/** בטלפון התג בפינה השמאלית: בימנית יושבת העדשה */
+function Badge({ side = 'right' }: { side?: 'right' | 'left' }) {
+  return (
+    <p
+      className={`absolute bottom-0 z-10 px-4 py-2 ${side === 'right' ? 'right-0 rounded-tl-lg' : 'left-0 rounded-tr-lg'}`}
+      style={{ background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}
     >
-      {/* בטלפון: 4:5 בזרימה, והכותרת יושבת על החלק התחתון שלו.
-          במסך רחב: 62% השמאליים של המקטע */}
-      <div className="relative col-start-1 row-start-1 aspect-[4/5] w-full md:absolute md:inset-y-0 md:left-0 md:aspect-auto md:w-[62%]">
-        <HeroVideo
-          className="absolute inset-0 h-full w-full object-cover"
-          label="דוגמן ודוגמנית ביום צילום, עונדים שרשרת מגן דוד, צמיד קלוע, שרשרת אינסוף וצמיד אינסוף - כולם עם השבב הכחול"
-        />
+      {PROMO.percent}% הנחה בהצטרפות למועדון
+    </p>
+  );
+}
 
-        {/* בטלפון: הכהיה מתחת לכותרת שיושבת על הסרטון. בלי זה אותיות
-            לבנות על גופייה לבנה אינן נקראות */}
-        <div
-          aria-hidden
-          className="absolute inset-x-0 bottom-0 h-[58%] md:hidden"
-          style={{
-            background:
-              'linear-gradient(to top, rgb(12 10 6 / .82) 0%, rgb(12 10 6 / .5) 42%, transparent 100%)',
-          }}
-        />
+export default function Hero() {
+  const facts = `שבב של 5 מ״מ  ·  החזרה תוך ${POLICY.returnDays} יום  ·  משלוח לכל הארץ`;
 
-        {/* הקצה הימני של הסרטון נמס אל הרקע, רק במסך רחב. האחוזים הם
-            מרוחב הסרטון: עמודת הטקסט חופפת ל-13% הימניים שלו */}
-        <div
-          aria-hidden
-          className="absolute inset-y-0 left-0 -right-0.5 hidden md:block"
-          style={{
-            background:
-              'linear-gradient(to left, var(--bg) 2%, color-mix(in oklab, var(--bg) 70%, transparent) 14%, transparent 32%)',
-          }}
-        />
-      </div>
-
-      {/* בטלפון שתי העטיפות הן display: contents, כך שהכותרת, הכפתורים
-          והמקורות הם פריטים של הרשת של המקטע: הכותרת באותו תא של הסרטון, והשאר
-          מתחתיו. כך יש כותרת אחת ב-DOM ולא שתיים שאחת מהן מוסתרת */}
-      <div className="shell relative max-md:contents md:flex md:min-h-[inherit] md:items-center">
-        <div className="max-md:contents md:w-[46%] md:py-24">
-          {/* בלי תווית מעל הכותרת. "כסף 925 · צריבת ננו · הנוסח המלא"
-              ישבה כאן באותיות מרווחות, והכותרת אומרת את זה טוב יותר */}
-          {/* 4.10.2026: כותרת המבצע, בנוסח של עמית, והיא לבדה - הפסקה
-              שמתחתיה ירדה לבקשתו. המשפט אינו בגודל אחד: ההכרזה דקה,
-              המספר הוא הדבר הגדול ביותר בהירו ובצבע, ו"הנחה / על כל האתר"
-              נערמות לצידו בגובה שלו. הכול ב-Heebo, במשקלים 300 ו-800.
-              כל המידות ב-em מגודל ה-h1, כך שהיחסים זהים בטלפון ובמסך רחב.
-              האחוז בא מ-PROMO, כדי שלא יהיו שני מקומות שאומרים מספר */}
-          <h1
-            className="display z-10 col-start-1 row-start-1 self-end text-[5.7vw] max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-6 max-md:text-white md:text-[min(2.5vw,2.5rem)]"
-            style={{ fontWeight: 300, lineHeight: 1.25 }}
-          >
-            {/* 1.44em: ברוחב של הבלוק שמתחתיה, כך שהכותרת היא מלבן אחד */}
-            <span className="mask-line load">
-              <span className="text-[1.44em]">מבצעי נובמבר כבר כאן!</span>
-            </span>{' '}
-            <span className="mask-line load">
-              <span style={{ ['--d' as string]: '120ms' }}>
-                {/* last baseline: "עם", המספר ו"על כל האתר" על קו אחד.
-                    דפדפן שאינו מכיר את הערך נשאר עם items-end */}
-                <span className="flex items-end gap-[.3em]" style={{ alignItems: 'last baseline' }}>
-                  <span>עם</span>{' '}
-                  <span
-                    className="num text-[3.4em] [color:var(--spark)] md:[color:var(--accent)]"
-                    style={{ fontWeight: 800, lineHeight: 0.9, letterSpacing: '-.02em' }}
-                  >
-                    {PROMO.percent}%
-                  </span>{' '}
-                  {/* שתי השורות בגובה הספרות: ראש "הנחה" בקו ראש המספר */}
-                  <span className="flex flex-col">
-                    <span className="text-[1.75em]" style={{ fontWeight: 800, lineHeight: 1 }}>
-                      הנחה
-                    </span>{' '}
-                    <span className="mt-[.167em]" style={{ fontWeight: 400 }}>
-                      על כל האתר!
-                    </span>
-                  </span>
-                </span>
-              </span>
-            </span>
-          </h1>
-
-          <div
-            className="reveal load mt-8 flex flex-wrap items-center gap-4 max-md:mx-auto max-md:w-[var(--shell)]"
-            style={{ ['--d' as string]: '440ms' }}
-          >
-            {/* כפתור אחד (עמית, 6.10.2026). "לבחירת הברכה" הוביל לעמוד שבו
-                קוראים ברכות ולא קונים, והלקוח לא הבין מאיפה מתחילים */}
-            <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
-              לקטלוג
-            </Link>
+  return (
+    <>
+      {/* מחשב: הצילום הרחב הוא הרקע, והטקסט על הקיר שמימין לזוג */}
+      <section className="relative hidden overflow-hidden md:block" style={{ height: 'min(88vh, 820px)', background: WALL }}>
+        <Shot shot={DESKTOP} className="absolute bottom-0 left-0 top-24" />
+        <div className="shell relative h-full pt-24">
+          <div className="flex h-full w-[46%] flex-col items-center justify-center text-center">
+            <Title facts={facts} />
+            <div className="mt-6">
+              <Action />
+            </div>
           </div>
-
-          {/* המקורות בשורה אחת עם נקודות, ולא ברשימה עם כוכביות.
-              הכוכבית היא סימן היכר של עיצוב מיוצר, ורשימה של חמישה
-              פריטים בשתי עמודות תפסה גובה של פסקה כדי לומר משפט אחד */}
-          <p
-            className="reveal load mt-6 max-md:mx-auto max-md:w-[var(--shell)] max-md:pb-2"
-            style={{
-              ['--d' as string]: '580ms',
-              fontSize: 'var(--fs-xs)',
-              color: 'var(--ink-3)',
-              lineHeight: 1.9,
-              letterSpacing: '.02em',
-            }}
-          >
-            {SOURCES.join(' · ')}
-          </p>
         </div>
-      </div>
-    </section>
+        <Badge />
+      </section>
+
+      {/* טלפון: הצילום האנכי, והכותרת על הקיר שמעל הראשים */}
+      <section className="relative overflow-hidden pt-24 md:hidden">
+        <Shot shot={MOBILE} className="relative w-full">
+          <div className="absolute inset-x-0 top-[5%] mx-auto w-[var(--shell)] text-center">
+            <Title facts={facts} />
+          </div>
+          <Badge side="left" />
+        </Shot>
+        <div className="shell pb-12 pt-6 text-center">
+          <Action />
+        </div>
+      </section>
+    </>
   );
 }
