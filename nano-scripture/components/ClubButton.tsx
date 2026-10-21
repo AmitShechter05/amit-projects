@@ -39,7 +39,7 @@ export default function ClubButton() {
       className={`fixed right-4 z-[90] bottom-4 rounded-lg px-4 py-2.5 shadow-lg transition-transform hover:-translate-y-0.5`}
       style={{ background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}
     >
-      {PROMO.percent}% הנחה בהצטרפות למועדון
+      לקבלת {PROMO.percent}% הנחה
     </button>
   );
 }
