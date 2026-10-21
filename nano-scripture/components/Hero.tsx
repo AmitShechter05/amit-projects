@@ -3,7 +3,6 @@ import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { BLESSINGS } from '@/lib/blessings';
 import { POLICY } from '@/lib/policy';
-import { PROMO } from '@/lib/promo';
 
 /**
  * הירו: הזוג עונד את התכשיטים, הכותרת יושבת על הקיר שבצילום, וזום אל
@@ -165,18 +164,6 @@ function Action() {
   );
 }
 
-/** בטלפון התג בפינה השמאלית: בימנית יושבת העדשה */
-function Badge({ side = 'right' }: { side?: 'right' | 'left' }) {
-  return (
-    <p
-      className={`absolute bottom-0 z-10 px-4 py-2 ${side === 'right' ? 'right-0 rounded-tl-lg' : 'left-0 rounded-tr-lg'}`}
-      style={{ background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}
-    >
-      {PROMO.percent}% הנחה בהצטרפות למועדון
-    </p>
-  );
-}
-
 export default function Hero() {
   const facts = `שבב של 5 מ״מ  ·  החזרה תוך ${POLICY.returnDays} יום  ·  משלוח לכל הארץ`;
 
@@ -193,7 +180,6 @@ export default function Hero() {
             </div>
           </div>
         </div>
-        <Badge />
       </section>
 
       {/* טלפון: הצילום האנכי, הכותרת על הקיר שמעל הראשים, והכפתור על
@@ -209,7 +195,6 @@ export default function Hero() {
               </Link>
             </div>
           </div>
-          <Badge side="left" />
         </Shot>
       </section>
     </>

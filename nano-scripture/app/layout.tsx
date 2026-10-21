@@ -14,6 +14,7 @@ import A11yWidget from '@/components/A11yWidget';
 import Analytics from '@/components/Analytics';
 import CookieBanner from '@/components/CookieBanner';
 import SignupPopup from '@/components/SignupPopup';
+import ClubButton from '@/components/ClubButton';
 import WhatsAppFab from '@/components/WhatsAppFab';
 import PendingPayment from '@/components/PendingPayment';
 import { organizationSchema, websiteSchema } from '@/lib/schema';
@@ -120,6 +121,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
         <A11yWidget />
         <CookieBanner />
         <SignupPopup />
+        <ClubButton />
         <Analytics />
       </body>
     </html>

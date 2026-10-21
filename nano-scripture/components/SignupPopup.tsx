@@ -9,6 +9,10 @@ import { validateLead, EMPTY_LEAD, type Lead, type LeadErrors } from '@/lib/subs
 import { trackLead } from '@/lib/analytics';
 
 const SEEN = 'mikra:club';
+/** אירוע שהכפתור הצף שולח כדי לפתוח את החלון */
+export const CLUB_OPEN = 'mikra:club-open';
+/** מי שכבר הצטרף - הכפתור הצף נעלם אצלו */
+export const CLUB_JOINED = 'mikra:club-joined';
 /** כמה עמודים נצפו בביקור הזה. sessionStorage - נמחק עם הלשונית */
 const VIEWS = 'mikra:views';
 /** מהעמוד השני והלאה: בעמוד הראשון עוד לא נבנה שום אמון */
@@ -107,6 +111,17 @@ export default function SignupPopup() {
     };
   }, [pathname]);
 
+  // הכפתור הצף (ClubButton) פותח את החלון בכל רגע, גם אם כבר נסגר פעם
+  useEffect(() => {
+    const onAsk = () => {
+      if (useCart.getState().open) useCart.getState().setOpen(false);
+      opener.current = document.activeElement;
+      setOpen(true);
+    };
+    window.addEventListener(CLUB_OPEN, onAsk);
+    return () => window.removeEventListener(CLUB_OPEN, onAsk);
+  }, []);
+
   // אם העגלה נפתחה בזמן שהפופאפ מוצג, הפופאפ מתקפל
   useEffect(() => {
     if (cartOpen && open) setOpen(false);
@@ -181,9 +196,11 @@ export default function SignupPopup() {
       trackLead();
       try {
         localStorage.setItem(SEEN, '1');
+        localStorage.setItem(CLUB_JOINED, '1');
       } catch {
         /* לא קריטי */
       }
+      window.dispatchEvent(new Event(CLUB_JOINED));
     } catch {
       setFailed('אין חיבור לשרת. נסו שוב.');
     } finally {
