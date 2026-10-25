@@ -5,7 +5,7 @@
   "hrv-recovery":            {"topics": ["HRV", "התאוששות"], "alt": "רץ בודק צמיד כושר בלי מסך על ספסל בפארק עם שחר", "used_by": "hrv-recovery"},
   "night-shift-vs-glasses":  {"topics": ["Night Shift", "מצב לילה"], "alt": "טלפון במצב לילה כתום לצד עדשה אדומה על שולחן עץ", "used_by": "night-shift-vs-blue-light-glasses"},
   "resting-heart-rate":      {"topics": ["דופק במנוחה"], "alt": "אישה מתעוררת בבוקר ובודקת צמיד כושר על היד", "used_by": "resting-heart-rate"},
-  "athlete-evening-routine": {"topics": ["שגרת ערב", "שחקן כדורגל"], "alt": "ספורטאי בבית בערב מעמעם את האורות, הטלפון נטען רחוק", "used_by": null},
+  "athlete-evening-routine": {"topics": ["שגרת ערב", "שחקן כדורגל"], "alt": "ספורטאי בבית בערב מעמעם את האורות, הטלפון נטען רחוק", "used_by": "athlete-evening-routine"},
   "pre-game-sleep":          {"topics": ["שינה לפני משחק", "תחרות"], "alt": "שחקן כדורגל שוכב ער במיטה בלילה שלפני משחק, חולצת המשחק תלויה ברקע", "used_by": null},
   "scrolling-in-bed":        {"topics": ["גלילה במיטה", "גלילה לפני השינה"], "alt": "זוג במיטה בלילה, הפנים מוארות מהטלפונים", "used_by": null},
   "digital-eye-strain":      {"topics": ["עייפות עיניים"], "alt": "תקריב של עין עייפה שמשתקף בה מסך מחשב", "used_by": null},
