@@ -1,6 +1,7 @@
 import { PROMO, promoOn } from '@/lib/promo';
 import { POLICY, deliveryLine } from '@/lib/policy';
 import { GIFT_BOX, INSTALLMENTS } from '@/lib/extras';
+import { RABBINATE } from '@/lib/rabbinate';
 import OccasionDeadline from './OccasionDeadline';
 
 /**
@@ -21,6 +22,7 @@ const OFFERS = [
   `עד ${INSTALLMENTS} תשלומים ללא ריבית`,
   `החזרה תוך ${POLICY.returnDays} יום`,
   `משלוח מבוטח · ${deliveryLine}${POLICY.freeShippingOver !== null ? ` · חינם מעל ₪${POLICY.freeShippingOver}` : ''}`,
+  `${RABBINATE.short} מודיעין`,
   'קופסה מרופדת וכרטיס ברכה בכל הזמנה',
   `אריזת מתנה ב־₪${GIFT_BOX.price}`,
   'שנה אחריות על גוף התכשיט',

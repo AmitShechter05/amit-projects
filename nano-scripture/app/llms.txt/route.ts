@@ -7,6 +7,7 @@ import { COMPANY } from '@/lib/company';
 import { SITE_URL } from '@/lib/site';
 import { syncPrices } from '@/lib/livePrices';
 import { distinctName } from '@/lib/seo';
+import { RABBINATE } from '@/lib/rabbinate';
 import { GIFT_AMOUNTS, GIFT_VALID_YEARS } from '@/lib/giftcard';
 
 export const revalidate = 300;
@@ -28,6 +29,7 @@ export async function GET() {
   out();
   out(`- משלוח מבוטח ${POLICY.deliveryMinDays}-${POLICY.deliveryMaxDays} ימי עסקים לכל הארץ${POLICY.shippingFlat ? ` (₪${POLICY.shippingFlat}${POLICY.freeShippingOver ? `, חינם מעל ₪${POLICY.freeShippingOver}` : ''})` : ''}, או איסוף עצמי ממודיעין בתיאום.`);
   out(`- החזרה תוך ${POLICY.returnDays} יום. אחריות ${POLICY.warrantyMonths} חודשים על גוף התכשיט. עד ${POLICY.maxInstallments} תשלומים.`);
+  out(`- ${RABBINATE.issuer} עבר על הפסוקים והברכות שעל השבבים ואישר אותם (${RABBINATE.date}). אפשר להיכנס עם התכשיטים לשירותים: ${u(RABBINATE.href)}`);
   out(`- יצירת קשר: ${[COMPANY.phone, COMPANY.email].filter(Boolean).join(' · ')} · ${COMPANY.address}`);
   out();
 

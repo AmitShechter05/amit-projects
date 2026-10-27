@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { BLESSING_COUNT } from '@/lib/blessings';
+import RabbinateBadge from '@/components/RabbinateBadge';
 
 /**
  * שלוש הבטחות, כשלוש שורות.
@@ -44,6 +45,8 @@ export default function Assurance() {
               לקריאת {BLESSING_COUNT} הברכות ←
             </Link>
           </figcaption>
+          {/* אישור הרבנות (25.10.2026), מתחת לציטוט על הברכה המלאה */}
+          <RabbinateBadge className="mt-8 max-w-md" />
         </figure>
 
         <dl className="flex flex-col">

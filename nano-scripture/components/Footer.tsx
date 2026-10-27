@@ -115,6 +115,9 @@ export default function Footer() {
             <Link href="/match" className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
               איזו ברכה מתאימה?
             </Link>
+            <Link href="/rabbinate" className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+              אישור הרבנות
+            </Link>
           </nav>
 
           <nav className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:flex md:flex-col md:gap-3">

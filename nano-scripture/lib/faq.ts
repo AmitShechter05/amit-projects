@@ -15,6 +15,7 @@ import { formatPrice } from './catalog';
 import { getBlessing, type Blessing } from './blessings';
 import { POLICY, dispatchLine, SHIPPING, shippingNote } from './policy';
 import { GIFT_BOX } from './extras';
+import { RABBINATE } from './rabbinate';
 
 export type QA = { q: string; a: string };
 
@@ -61,6 +62,10 @@ export function productFaq(product: Product, b: Blessing): QA[] {
             })
             .join('; ')}. כל הברכות מופיעות כאן באתר במלואן, ואפשר לקרוא ולהשוות לפני שמחליטים. הבחירה לא משנה את המחיר.`,
         },
+    {
+      q: 'יש לתכשיטים אישור רבני? אפשר להיכנס איתם לשירותים?',
+      a: `כן. ${RABBINATE.signer} עבר על הפסוקים והברכות שעל השבבים ואישר אותם, ובמכתב האישור כתב גם שאפשר להיכנס לשירותים עם התכשיטים. את המכתב המלא אפשר לראות באתר, בעמוד "אישור הרבנות".`,
+    },
     {
       q: 'אפשר לחרוט טקסט משלי?',
       a: 'לא. הברכות קבועות, ובוחרים אחת מתוך הרשימה. כך כל ברכה נבדקת מול המקור לפני שחורטים אותה. יש לזה גם יתרון: מכיוון שאין כאן חריטה אישית, התכשיט לא נחשב מוצר שהוכן במיוחד בשבילכם, ולכן הזכות שלכם לבטל את העסקה נשמרת במלואה.',

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import type { CSSProperties, ReactNode } from 'react';
 import { BLESSINGS } from '@/lib/blessings';
 import { POLICY } from '@/lib/policy';
+import { RABBINATE } from '@/lib/rabbinate';
 
 /**
  * הירו: הזוג עונד את התכשיטים, הכותרת יושבת על הקיר שבצילום, וזום אל
@@ -165,7 +166,7 @@ function Action() {
 }
 
 export default function Hero() {
-  const facts = `שבב של 5 מ״מ  ·  החזרה תוך ${POLICY.returnDays} יום  ·  משלוח לכל הארץ`;
+  const facts = `${RABBINATE.short}  ·  שבב של 5 מ״מ  ·  החזרה תוך ${POLICY.returnDays} יום`;
 
   return (
     <>

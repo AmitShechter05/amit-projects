@@ -37,6 +37,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url('/match', 0.7, UPDATED.match),
     url('/gift-card', 0.6, UPDATED.match),
     url('/contact', 0.5, UPDATED.match),
+    url('/rabbinate', 0.6, '2026-10-27'),
     url('/craft', 0.7, UPDATED.craft),
     url('/guides', 0.6, GUIDES.reduce((m, g) => (g.published > m ? g.published : m), UPDATED.home)),
     url('/catalog', 0.9, UPDATED.catalog),

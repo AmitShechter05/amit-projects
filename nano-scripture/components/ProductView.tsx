@@ -36,6 +36,7 @@ import { SITE_URL } from '@/lib/site';
 import { productFaq } from '@/lib/faq';
 import { trackViewItem } from '@/lib/analytics';
 import PaymentMarks from '@/components/PaymentMarks';
+import RabbinateBadge from '@/components/RabbinateBadge';
 import NotifyRestock from '@/components/NotifyRestock';
 import OccasionDeadline from '@/components/OccasionDeadline';
 
@@ -781,6 +782,9 @@ export default function ProductView({ product }: { product: Product }) {
           {ASSURANCE.join(' · ')}
         </p>
         <PaymentMarks tone="cards" gap={6} className="mt-3 justify-center" />
+
+        {/* אישור הרבנות (25.10.2026) - ליד הכפתור, שם נולדת השאלה */}
+        <RabbinateBadge className="mt-6" />
 
         {/* ---------- "איך אני יודע שזה באמת שם" ---------- */}
         {/*
