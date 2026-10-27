@@ -48,7 +48,7 @@ export default function RabbinatePage() {
             />
           </a>
           <figcaption className="mt-3" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-            לחיצה על המכתב פותחת אותו בגודל מלא. שמות בעלי העסק הוסתרו.
+            לחיצה על המכתב פותחת אותו בגודל מלא.
           </figcaption>
         </figure>
 
