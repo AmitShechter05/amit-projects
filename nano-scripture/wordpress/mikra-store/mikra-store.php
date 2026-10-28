@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.5.0
+ * Version: 1.5.1
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -21,8 +21,8 @@ defined( 'ABSPATH' ) || exit;
 
 define( 'MIKRA_STORE_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MIKRA_SITE', 'https://mikra.shop' );
-define( 'MIKRA_WHATSAPP', '972533714872' );
-define( 'MIKRA_PHONE', '053-371-4872' );
+define( 'MIKRA_WHATSAPP', '972506128288' );
+define( 'MIKRA_PHONE', '050-612-8288' );
 define( 'MIKRA_EMAIL', 'mikrajewelry@gmail.com' );
 
 // סדרת ההצטרפות (שיווק) והבלוקים של העיצוב החדש
@@ -192,6 +192,13 @@ function mikra_store_redirect() {
 		return;
 	}
 	if ( isset( $_GET['wc-api'] ) || isset( $_GET['wc-ajax'] ) ) {
+		return;
+	}
+	// אפליקציית WooCommerce בטלפון מזהה את החנות לפי עמוד הבית של
+	// wp.mikra.shop. אם היא מופנית ל-mikra.shop היא עונה "כתובת לא מזוהה"
+	// (עמית, 28.10.2026). ה-User-Agent שלה: wc-ios/... או wc-android/...
+	$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
+	if ( preg_match( '/wc-ios|wc-android|woocommerce/i', $ua ) ) {
 		return;
 	}
 	// הודעות של סולקים שמגיעות כ-GET עם פרמטרים משלהן
