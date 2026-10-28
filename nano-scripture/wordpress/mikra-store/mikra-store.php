@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.5.1
+ * Version: 1.5.2
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -199,6 +199,7 @@ function mikra_store_redirect() {
 	// (עמית, 28.10.2026). ה-User-Agent שלה: wc-ios/... או wc-android/...
 	$ua = isset( $_SERVER['HTTP_USER_AGENT'] ) ? (string) $_SERVER['HTTP_USER_AGENT'] : '';
 	if ( preg_match( '/wc-ios|wc-android|woocommerce/i', $ua ) ) {
+		mikra_store_no_cache();
 		return;
 	}
 	// הודעות של סולקים שמגיעות כ-GET עם פרמטרים משלהן
@@ -221,8 +222,19 @@ function mikra_store_redirect() {
 	if ( function_exists( 'is_product' ) && ( is_product() || is_shop() || is_product_category() || is_product_tag() ) ) {
 		$target = MIKRA_SITE . '/catalog';
 	}
+	mikra_store_no_cache();
 	wp_redirect( $target, 301, 'Mikra' );
 	exit;
+}
+
+/**
+ * ההפניה תלויה ב-User-Agent, אבל LiteSpeed וה-CDN של הוסטינגר שומרים
+ * תשובה אחת לכל כתובת. בלי זה, ה-301 שנשמר לגולש רגיל מוגש גם
+ * לאפליקציה (ולהפך: עמוד הוורדפרס שנשמר לאפליקציה היה מוגש לגולשים).
+ */
+function mikra_store_no_cache() {
+	do_action( 'litespeed_control_set_nocache', 'mikra: redirect depends on user agent' );
+	nocache_headers();
 }
 
 /* ------------------------------------------------------------------
