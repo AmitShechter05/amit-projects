@@ -250,14 +250,21 @@ export default function ProductCard({
             className="mt-5 flex items-center justify-between pt-4"
             style={{ borderTop: "1px solid var(--line)" }}
           >
+            {/* בטלפון הכרטיס ברוחב ~165 פיקסל, והשורה נשברה לשלוש. שם:
+                "3 ברכות · 29.2 מ״מ" בשורה אחת, בלי "לתכשיט" - כל הכרטיס
+                לחיץ (30.10.2026) */}
             <span
-              className="flex items-baseline gap-2.5"
+              className="flex min-w-0 items-baseline gap-1.5 whitespace-nowrap sm:gap-2.5"
               style={{ fontSize: "var(--fs-xs)", color: "var(--ink-3)" }}
             >
-              <span>
-                {available.length === 1
-                  ? available[0].plain
-                  : `${available.length} ברכות לבחירה`}
+              <span className="truncate">
+                {available.length === 1 ? (
+                  available[0].plain
+                ) : (
+                  <>
+                    {available.length} ברכות<span className="hidden sm:inline"> לבחירה</span>
+                  </>
+                )}
               </span>
               {/* רמז קנה מידה: הכרטיס הוא ריבוע, ובלי מספר אין ממנו
                     שום דרך לדעת אם המדליון בגודל מטבע או בגודל אגורה */}
@@ -268,7 +275,7 @@ export default function ProductCard({
               )}
             </span>
             <span
-              className="link-u"
+              className="link-u hidden shrink-0 sm:inline"
               style={{ fontSize: "var(--fs-sm)", color: "var(--accent)" }}
             >
               לתכשיט ←

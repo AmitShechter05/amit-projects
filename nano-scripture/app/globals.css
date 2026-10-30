@@ -861,6 +861,10 @@ html[data-a11y-motion='off'] * {
     width: 46px;
     height: 46px;
   }
+  /* כל עוד באנר העוגיות פתוח הכפתור ישב על הטקסט שלו */
+  body:has(.cookie-banner) .wa-fab {
+    display: none;
+  }
 }
 
 /* בטלפון המשגר צר יותר: 44 פיקסל רוחב כיסו את קצה התמונות והטקסט.
