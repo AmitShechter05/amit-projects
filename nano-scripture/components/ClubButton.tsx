@@ -37,9 +37,10 @@ export default function ClubButton() {
       type="button"
       onClick={() => window.dispatchEvent(new Event(CLUB_OPEN))}
       className={`fixed right-4 z-[90] bottom-4 rounded-lg px-4 py-2.5 shadow-lg transition-transform hover:-translate-y-0.5`}
-      style={{ background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}
+      style={{ background: '#c62828', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 700 }}
     >
-      לקבלת {PROMO.percent}% הנחה
+      {/* עמית, 30.10.2026: באדום ועם אימוג'י של מתנה */}
+      <span aria-hidden="true">🎁</span> לקבלת {PROMO.percent}% הנחה
     </button>
   );
 }
