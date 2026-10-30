@@ -9,6 +9,8 @@ import { SITE_URL } from '@/lib/site';
 import { syncPrices } from '@/lib/livePrices';
 import { checkCoupon } from '@/lib/coupons';
 import { isPromoCode } from '@/lib/promo';
+import { findJoinable } from '@/lib/joinServer';
+import { wcPost } from '@/lib/wc';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +34,8 @@ type Body = {
   note?: string;
   /** הסכום שהלקוח ראה על כפתור השליחה */
   expected?: number;
+  /** הצטרפות לחבילה של הזמנה קודמת (lib/join.ts) */
+  join?: { id?: unknown; key?: unknown } | null;
 };
 
 export async function POST(req: NextRequest) {
@@ -89,6 +93,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'פרטים חסרים או שגויים', fields: errors }, { status: 400 });
   }
 
+  // הצטרפות לחבילה: נבדקת כאן מחדש. נכשלה - הלקוח שומע למה ושולח שוב
+  // כהזמנה רגילה, ולא מקבל בשקט משלוח שלא הובטח לו או נגבה בלי הסבר
+  let join: Awaited<ReturnType<typeof findJoinable>> | null = null;
+  if (body.join) {
+    join = await findJoinable(body.join.id, body.join.key);
+    if (!join.ok) {
+      return NextResponse.json({ error: join.error, joinExpired: true }, { status: 409 });
+    }
+    // אותה שיטה כמו בהזמנה המקורית: איסוף נשאר איסוף
+    customer.shipping = join.order.shipping;
+  }
+  const joined = join?.ok ? join.order : null;
+
   const gift = Boolean(body.gift);
   const code = typeof body.code === 'string' ? body.code : null;
 
@@ -131,7 +148,7 @@ export async function POST(req: NextRequest) {
     if (!c.ok) return NextResponse.json({ error: `${c.error} אפשר להסיר את הקוד בעגלה ולהמשיך בלעדיו.` }, { status: 400 });
   }
 
-  const totals = orderTotal({ lines, gift, code, shipping: customer.shipping });
+  const totals = orderTotal({ lines, gift, code, shipping: customer.shipping, joined: Boolean(joined) });
 
   // מחיר שהשתנה בווקומרס בזמן שהעמוד היה פתוח: הלקוח רואה סכום אחד
   // והשרת מחשב אחר. לא יוצרים הזמנה בסכום שהוא לא ראה - הוא מרענן,
@@ -167,7 +184,17 @@ export async function POST(req: NextRequest) {
       status: onlinePayment ? 'pending' : 'on-hold',
       // במסלול התוסף, התוסף של Grow בווקומרס הוא שגובה את ההזמנה
       ...(payViaWc ? { paymentMethod: WC_GROW_METHOD } : {}),
+      ...(joined
+        ? { join: { id: joined.id, number: joined.number, billing: joined.billing, shipping: joined.shippingAddress } }
+        : {}),
     });
+
+    // גם בהזמנה המקורית, כדי שמי שאורז אותה ראשונה יחכה לשנייה
+    if (joined) {
+      wcPost(`/orders/${joined.id}/notes`, {
+        note: `נוצרה הזמנה #${order.number} לצירוף לאותה חבילה (בדקו שהיא שולמה לפני האריזה).`,
+      }).catch((e) => console.error('join note failed', e));
+    }
 
     // שני החישובים אמורים להסכים. אם לא - יש מחיר, משלוח או קופון שהאתר
     // וווקומרס רואים אחרת, וזה חייב להופיע בלוג ולא להתגלות אצל לקוח
@@ -193,6 +220,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         orderId: order.id,
         orderNumber: order.number,
+        orderKey: order.order_key,
         total: totals.total,
         payment: `/checkout/pay?o=${order.id}&k=${encodeURIComponent(order.order_key)}`,
       });
@@ -202,6 +230,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         orderId: order.id,
         orderNumber: order.number,
+        orderKey: order.order_key,
         total: totals.total,
         payment: null,
         message:
@@ -226,6 +255,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({
         orderId: order.id,
         orderNumber: order.number,
+        orderKey: order.order_key,
         total: totals.total,
         payment: null,
         message: 'ההזמנה נשמרה, אך פתיחת דף התשלום נכשלה. ניצור איתך קשר.',
@@ -235,6 +265,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       orderId: order.id,
       orderNumber: order.number,
+      orderKey: order.order_key,
       total: totals.total,
       payment,
     });

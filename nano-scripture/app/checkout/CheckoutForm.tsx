@@ -9,7 +9,8 @@ import { getProduct, formatPrice, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { GIFT_BOX } from '@/lib/extras';
 import { PROMO } from '@/lib/promo';
-import { SHIPPING, shippingMethod, shippingCost } from '@/lib/policy';
+import { SHIPPING, shippingMethod, shippingCost, giftBoxFee } from '@/lib/policy';
+import { readJoin, clearJoin, type JoinCtx } from '@/lib/join';
 import { COMPANY, waHref } from '@/lib/company';
 import { trackBeginCheckout } from '@/lib/analytics';
 import { saveOrderDone } from '@/lib/orderDone';
@@ -51,6 +52,8 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
   const [ready, setReady] = useState(false);
   /** מספר ההזמנה כשחוזרים מדף הסולק בלי לשלם */
   const [cancelled, setCancelled] = useState<string | null>(null);
+  /** הצטרפות לחבילה של הזמנה קודמת: בלי דמי משלוח, ואותם פרטים */
+  const [join, setJoin] = useState<JoinCtx | null>(null);
 
   // ההידרציה נדחית, אחרת השרת והלקוח מציירים עגלות שונות
   useEffect(() => {
@@ -77,6 +80,21 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
 
     const q = new URLSearchParams(window.location.search);
     if (q.get('cancelled') === '1') setCancelled(q.get('order'));
+
+    // הפרטים של ההזמנה הראשונה, מהשרת - אותו קונה ואותה כתובת
+    const j = readJoin();
+    if (j) {
+      setJoin(j);
+      fetch(`/api/join?o=${j.id}&k=${encodeURIComponent(j.key)}`)
+        .then((r) => (r.ok ? r.json() : Promise.reject()))
+        .then((d: { customer: Partial<Customer>; shipping: Customer['shipping'] }) =>
+          setCustomer((c) => ({ ...c, ...d.customer, shipping: d.shipping, toRecipient: false })),
+        )
+        .catch(() => {
+          clearJoin();
+          setJoin(null);
+        });
+    }
   }, [setOpen]);
 
   // שמירת הטיוטה בכל שינוי. ההסכמות לא נשמרות בכוונה
@@ -107,10 +125,10 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
   }, [customer.marketing, customer.email, customer.firstName]);
 
   const totals = cartTotals(lines, code);
-  const giftFee = gift ? GIFT_BOX.price : 0;
+  const giftFee = giftBoxFee(gift, totals.listTotal);
   const ship = shippingMethod(customer.shipping);
   // הסף נמדד על המחירון, כמו בשרת. listTotal ולא subtotal
-  const shipCost = shippingCost(customer.shipping, totals.listTotal);
+  const shipCost = shippingCost(customer.shipping, totals.listTotal, Boolean(join));
   const total = totals.subtotal + giftFee + shipCost;
   const count = lines.reduce((n, l) => n + l.qty, 0);
 
@@ -192,11 +210,16 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
         headers: { 'Content-Type': 'application/json' },
         // expected: הסכום שהכפתור מציג. השרת משווה אותו לסכום שהוא מחשב
         // ממחירי הרגע, ולא יוצר הזמנה בסכום שהלקוח לא ראה
-        body: JSON.stringify({ customer, lines, gift, code, expected: total }),
+        body: JSON.stringify({ customer, lines, gift, code, expected: total, join: join ? { id: join.id, key: join.key } : null }),
       });
       const data = await res.json();
 
       if (!res.ok) {
+        // החבילה יצאה בינתיים: ממשיכים כהזמנה רגילה, והלקוח רואה את הסכום החדש
+        if (data.joinExpired) {
+          clearJoin();
+          setJoin(null);
+        }
         if (data.fields) setErrors(data.fields);
         setFailed(data.error ?? 'משהו השתבש');
         return;
@@ -222,7 +245,11 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
           customer.toRecipient && customer.shipping !== 'pickup'
             ? customer.toName.trim() || undefined
             : undefined,
+        key: data.orderKey,
+        placedAt: new Date().toISOString(),
+        joinOf: join?.number,
       });
+      clearJoin();
 
       try {
         sessionStorage.removeItem(DRAFT_KEY);
@@ -302,10 +329,12 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
                   <span className="num" style={{ color: 'var(--sale)' }}>−{formatPrice(totals.discount)}</span>
                 </div>
               )}
-              {giftFee > 0 && (
+              {gift && (
                 <div className="mb-2 flex justify-between" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
                   <span>{GIFT_BOX.title}</span>
-                  <span className="num">{formatPrice(giftFee)}</span>
+                  <span className={giftFee ? 'num' : undefined} style={{ color: giftFee ? undefined : 'var(--accent-deep)' }}>
+                    {giftFee ? formatPrice(giftFee) : 'חינם'}
+                  </span>
                 </div>
               )}
               <div className="mb-3 flex justify-between" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
@@ -361,6 +390,24 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
           </p>
         )}
 
+        {join && (
+          <p
+            role="status"
+            className="mt-6 p-4"
+            style={{
+              fontSize: 'var(--fs-sm)',
+              lineHeight: 1.7,
+              borderRadius: 'var(--radius)',
+              border: '1px solid var(--accent)',
+              background: 'color-mix(in oklab, var(--accent) 7%, var(--surface))',
+              color: 'var(--ink-2)',
+            }}
+          >
+            ההזמנה הזו נכנסת לאותה חבילה של הזמנה <span className="num">#{join.number}</span>, ונשלחת לאותה
+            כתובת - בלי דמי משלוח. הפרטים כבר מולאו מההזמנה הקודמת.
+          </p>
+        )}
+
         <div className="mt-8 grid gap-5 sm:grid-cols-2">
           {FIELDS.filter(
             (f) => customer.shipping !== 'pickup' || !['address', 'city', 'postcode'].includes(f.key),
@@ -373,7 +420,8 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
             ביקש להפוך: קודם ממלאים מי ומאיפה, ואז איך מקבלים - הסדר
             שמכירים מכל חנות. מי שבוחר איסוף אחרי שמילא כתובת רואה את
             שדות הכתובת נסגרים, וזה בסדר - השרת ממילא מתעלם מהם */}
-        <fieldset className="mt-10">
+        {/* בהצטרפות לחבילה השיטה נקבעה בהזמנה הראשונה */}
+        <fieldset className="mt-10" hidden={Boolean(join)}>
           <legend style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>איך תרצו לקבל</legend>
           <div className="mt-2 grid gap-3 sm:grid-cols-2">
             {SHIPPING.map((m) => {
@@ -435,8 +483,9 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
 
         {/* ---------- משלוח לנמען אחר ---------- */}
         {/* רק במשלוח. באיסוף עצמי אין חבילה שיוצאת לשום מקום, והצעה
-            לשלוח למישהו אחר שם היא רק שאלה מבלבלת */}
-        {customer.shipping !== 'pickup' && (
+            לשלוח למישהו אחר שם היא רק שאלה מבלבלת. גם לא בהצטרפות
+            לחבילה - היא נוסעת לכתובת של ההזמנה הראשונה */}
+        {customer.shipping !== 'pickup' && !join && (
           <div className="mt-8">
             <label className="flex cursor-pointer items-start gap-3">
               <input

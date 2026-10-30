@@ -72,7 +72,7 @@ export function productFaq(product: Product, b: Blessing): QA[] {
     },
     {
       q: 'זה מגיע ארוז למתנה?',
-      a: `בכל הזמנה מגיעים קופסה מרופדת וכרטיס עם שם הברכה, מאיפה היא לקוחה, והברכה המלאה. ${GIFT_BOX.title} בתוספת ${formatPrice(GIFT_BOX.price)}: ${GIFT_BOX.note}`,
+      a: `בכל הזמנה מגיעים קופסה מרופדת וכרטיס עם שם הברכה, מאיפה היא לקוחה, והברכה המלאה. ${GIFT_BOX.title} בתוספת ${formatPrice(GIFT_BOX.price)}: ${GIFT_BOX.note}${POLICY.freeShippingOver !== null ? ` בהזמנה מעל ${formatPrice(POLICY.freeShippingOver)} היא חינם, וגם המשלוח.` : ''}`,
     },
   ];
 }

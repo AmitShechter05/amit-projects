@@ -1,3 +1,5 @@
+import { GIFT_BOX } from './extras';
+
 /**
  * מספרי המדיניות. מקור אמת יחיד.
  *
@@ -34,14 +36,16 @@ export const POLICY = {
    * בווקומרס, כל אחד מהם הפך להבטחה שהחנות לא מקיימת.
    */
   /**
-   * הסף נבחר כ"כל שני פריטים": שני הדגמים הזולים ביותר יחד הם ₪558,
-   * ו-11 מתוך 15 הדגמים נמצאים בטווח 279-349 - כלומר ההזמנה הטיפוסית
-   * היא פריט אחד. הסף הופך את הפריט השני להחלטה שנשאלת.
+   * הסף נבחר כ"כל שני פריטים": שני הדגמים הזולים ביותר יחד הם ₪698.
+   * ההזמנה הטיפוסית היא פריט אחד, והסף הופך את הפריט השני להחלטה
+   * שנשאלת. 30.10.2026 (עמית): 550 → 690 אחרי העלאת המחירים, ומעל הסף
+   * גם אריזת המתנה חינם (`giftBoxFee`) - "שני תכשיטים = משלוח ואריזה
+   * עלינו", בלי עוד אחוזי הנחה.
    *
    * זה מספר עסקי, לא טכני: שינוי כאן מעדכן את העגלה, הצ'קאאוט, סכום
    * הסליקה ושורת המשלוח בהזמנה יחד, ו-null מכבה את המנגנון כולו.
    */
-  freeShippingOver: 550 as number | null,
+  freeShippingOver: 690 as number | null,
 
   /** דמי משלוח קבועים. null = טרם נקבע, והעגלה תדחה את המספר לתשלום */
   shippingFlat: 29 as number | null,
@@ -103,9 +107,11 @@ export const shippingMethod = (id: ShippingMethodId) =>
  * זו הייתה כבר התנהגות השרת, והעגלה מדדה אחרת - כך שהשניים היו
  * חלוקים על אותה הזמנה. עכשיו יש חישוב אחד, וכולם קוראים לו.
  */
-export function shippingCost(id: ShippingMethodId, itemsListTotal: number) {
+export function shippingCost(id: ShippingMethodId, itemsListTotal: number, joined = false) {
   const m = shippingMethod(id);
   if (m.price === 0) return 0;
+  // הזמנה שמצטרפת לחבילה של הזמנה קודמת (lib/join.ts) נוסעת באותה קופסה
+  if (joined) return 0;
   if (POLICY.freeShippingOver !== null && itemsListTotal >= POLICY.freeShippingOver) return 0;
   return m.price;
 }
@@ -114,6 +120,20 @@ export function shippingCost(id: ShippingMethodId, itemsListTotal: number) {
 export function freeShippingGap(itemsListTotal: number) {
   if (POLICY.freeShippingOver === null) return null;
   return Math.max(0, POLICY.freeShippingOver - itemsListTotal);
+}
+
+/**
+ * מחיר אריזת המתנה בהזמנה הזו. מעל סף המשלוח החינם היא חינם - אותו סף,
+ * אותו מחירון לפני הנחה, כדי שההבטחה "המשלוח והאריזה עלינו" תיגבה
+ * בשרת בדיוק כמו שהעגלה מציגה אותה.
+ */
+export function giftBoxFee(gift: boolean, itemsListTotal: number) {
+  if (!gift) return 0;
+  return giftBoxFree(itemsListTotal) ? 0 : GIFT_BOX.price;
+}
+
+export function giftBoxFree(itemsListTotal: number) {
+  return POLICY.freeShippingOver !== null && itemsListTotal >= POLICY.freeShippingOver;
 }
 
 /** "1-4 ימי עסקים" - הניסוח היחיד. ה־num עוטף במקומות שצריך LTR */

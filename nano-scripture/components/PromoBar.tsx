@@ -21,10 +21,12 @@ const OFFERS = [
   ...(promoOn ? [`${PROMO.percent}% הנחה על כל האתר · להצטרפות למועדון`] : []),
   `עד ${INSTALLMENTS} תשלומים ללא ריבית`,
   `החזרה תוך ${POLICY.returnDays} יום`,
-  `משלוח מבוטח · ${deliveryLine}${POLICY.freeShippingOver !== null ? ` · חינם מעל ₪${POLICY.freeShippingOver}` : ''}`,
+  `משלוח מבוטח · ${deliveryLine}`,
   `${RABBINATE.short} מודיעין`,
   'קופסה מרופדת וכרטיס ברכה בכל הזמנה',
-  `אריזת מתנה ב־₪${GIFT_BOX.price}`,
+  POLICY.freeShippingOver !== null
+    ? `מעל ₪${POLICY.freeShippingOver}: משלוח ואריזת מתנה עלינו`
+    : `אריזת מתנה ב־₪${GIFT_BOX.price}`,
   'שנה אחריות על גוף התכשיט',
 ];
 

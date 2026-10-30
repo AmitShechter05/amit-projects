@@ -30,7 +30,7 @@ export default function PairedWith({ slug }: { slug: string }) {
    */
   const together = (price: number) =>
     POLICY.freeShippingOver !== null && me.price + price >= POLICY.freeShippingOver
-      ? ` · יחד ${formatPrice(me.price + price)}, המשלוח חינם`
+      ? ` · יחד ${formatPrice(me.price + price)}, המשלוח ואריזת המתנה חינם`
       : '';
 
   return (

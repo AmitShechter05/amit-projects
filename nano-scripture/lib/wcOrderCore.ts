@@ -2,7 +2,7 @@ import { wcPost, skuToId } from './wcClient';
 import { getProduct } from './catalog';
 import { getBlessing, isBlessingId, type BlessingId } from './blessings';
 import { GIFT_BOX } from './extras';
-import { shippingMethod, shippingCost } from './policy';
+import { shippingMethod, shippingCost, giftBoxFee, giftBoxFree } from './policy';
 import { PROMO, isPromoCode, codeDiscount, normalizeCode } from './promo';
 
 /**
@@ -72,6 +72,12 @@ export type OrderInput = {
    * אפילו בלי שהלקוח חזר לאתר - מטא תוכל לשייך את הרכישה למודעה.
    */
   tracking?: { fbp?: string; fbc?: string; gaCid?: string; ip?: string; ua?: string };
+  /**
+   * הזמנה שמצטרפת לחבילה של הזמנה קודמת (lib/join.ts), אחרי שהשרת בדק
+   * אותה (lib/joinServer.ts). בלי דמי משלוח, ובאותן כתובות בדיוק - כך
+   * שמה שנארז יחד נשלח לאותו מקום.
+   */
+  join?: { id: number; number: string; billing: Record<string, string>; shipping: Record<string, string> };
 };
 
 export type WcOrder = {
@@ -117,21 +123,28 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
     return sum + (p ? p.price * l.qty : 0);
   }, 0);
 
+  // מעל הסף האריזה חינם, אבל השורה נשארת: מי שאורז צריך לראות שהתבקשה
   const fee_lines = input.gift
-    ? [{ name: GIFT_BOX.title, total: String(GIFT_BOX.price), tax_status: 'taxable' }]
+    ? [
+        {
+          name: giftBoxFree(itemsTotal) ? `${GIFT_BOX.title} (חינם בהזמנה מעל הסף)` : GIFT_BOX.title,
+          total: String(giftBoxFee(true, itemsTotal)),
+          tax_status: 'taxable',
+        },
+      ]
     : [];
 
   const ship = shippingMethod(input.customer.shipping);
   // הסף נמדד על המחירון לפני ההנחה, דרך אותה פונקציה שהעגלה
   // והצ'קאאוט קוראים לה - אחרת השלושה חלוקים על אותה הזמנה
-  const shipTotal = shippingCost(input.customer.shipping, itemsTotal);
+  const shipTotal = shippingCost(input.customer.shipping, itemsTotal, Boolean(input.join));
   // קוד ההצטרפות, או כל קופון אחר של ווקומרס שנבדק בקופה (lib/coupons.ts)
   const coupon_lines = input.code
     ? [{ code: (isPromoCode(input.code) ? PROMO.code : normalizeCode(input.code)).toLowerCase() }]
     : [];
 
   const c = input.customer;
-  const billing = {
+  const billing = input.join ? { ...input.join.billing } : {
     first_name: c.firstName,
     last_name: c.lastName,
     email: c.email,
@@ -162,7 +175,9 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
   // פרטי למשפחה, ומה שמודפס על המדבקה הוא ממילא השם כפי שנכתב
   const [toFirst = '', ...toRest] = (c.toName ?? '').trim().split(/\s+/);
 
-  const shipping = toRecipient
+  const shipping = input.join
+    ? { ...input.join.shipping }
+    : toRecipient
     ? {
         first_name: toFirst,
         last_name: toRest.join(' '),
@@ -198,9 +213,13 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
         total: String(shipTotal),
       },
     ],
-    customer_note: input.note ?? '',
+    customer_note: input.join
+      ? `לצרף לחבילה של הזמנה #${input.join.number}${input.note ? ` · ${input.note}` : ''}`
+      : input.note ?? '',
     meta_data: [
       { key: '_mikra_source', value: 'storefront' },
+      // בפאנל: שתי הזמנות, קופסה אחת
+      ...(input.join ? [{ key: 'לצרף להזמנה', value: `#${input.join.number}` }, { key: '_mikra_join_of', value: String(input.join.id) }] : []),
       // אישור התקנון נשמר עם חותמת זמן. אם מישהו יטען שלא ראה את
       // התנאים, זו הראיה - ולכן היא חלק מההזמנה ולא לוג נפרד
       { key: 'אישור תקנון', value: new Date().toISOString() },
@@ -235,14 +254,14 @@ export async function createOrder(input: OrderInput): Promise<WcOrder> {
 
 /** הסכום שהלקוח ישלם, לפי אותם כללים שהעגלה מציגה */
 export function orderTotal(
-  input: Pick<OrderInput, 'lines' | 'gift' | 'code'> & { shipping?: 'delivery' | 'pickup' },
+  input: Pick<OrderInput, 'lines' | 'gift' | 'code'> & { shipping?: 'delivery' | 'pickup'; joined?: boolean },
 ) {
   const items = input.lines.reduce((sum, l) => {
     const p = getProduct(l.slug);
     return sum + (p ? p.price * l.qty : 0);
   }, 0);
   const discount = codeDiscount(items, input.code);
-  const gift = input.gift ? GIFT_BOX.price : 0;
-  const ship = shippingCost(input.shipping ?? 'delivery', items);
+  const gift = giftBoxFee(input.gift, items);
+  const ship = shippingCost(input.shipping ?? 'delivery', items, input.joined);
   return { items, discount, gift, shipping: ship, total: items - discount + gift + ship };
 }

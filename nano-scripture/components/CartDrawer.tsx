@@ -4,11 +4,13 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart, cartTotals, lineKey } from '@/lib/cart';
-import { getProduct, formatPrice, ACTIVE_CATEGORIES, PRODUCTS, FINISHES, packshotFit } from '@/lib/catalog';
+import { getProduct, formatPrice, ACTIVE_CATEGORIES, FINISHES, packshotFit } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { PROMO, saleOf, isPromoCode, normalizeCode, type CouponInfo } from '@/lib/promo';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
-import { POLICY, shippingNote, freeShippingGap, shippingCost } from '@/lib/policy';
+import { POLICY, shippingNote, freeShippingGap, shippingCost, giftBoxFee } from '@/lib/policy';
+import { companionsFor, forWhom } from '@/lib/companions';
+import { readJoin, type JoinCtx } from '@/lib/join';
 import PaymentMarks from '@/components/PaymentMarks';
 import { hasFinishSibling } from '@/lib/seo';
 
@@ -164,7 +166,12 @@ function Stepper({
 export default function CartDrawer() {
   const { lines, open, setOpen, setQty, remove, add, gift, setGift, code } = useCart();
   const { items, subtotal, listTotal, discount } = cartTotals(lines, code);
-  const giftFee = gift ? GIFT_BOX.price : 0;
+  const giftFee = giftBoxFee(gift, listTotal);
+  // הצטרפות לחבילה של הזמנה קודמת: המשלוח כבר שולם שם (lib/join.ts)
+  const [join, setJoin] = useState<JoinCtx | null>(null);
+  useEffect(() => {
+    if (open) setJoin(readJoin());
+  }, [open]);
   /**
    * הסכום כולל משלוח, לא "ביניים".
    *
@@ -173,7 +180,7 @@ export default function CartDrawer() {
    * פונקציה שהשרת גובה בה, עם ברירת המחדל שלו - משלוח עד הבית. מי
    * שיבחר איסוף בצ'קאאוט יראה את הסכום יורד, לא עולה.
    */
-  const shipCost = POLICY.shippingFlat === null ? 0 : shippingCost('delivery', listTotal);
+  const shipCost = POLICY.shippingFlat === null ? 0 : shippingCost('delivery', listTotal, Boolean(join));
   const total = subtotal + giftFee + shipCost;
   /**
    * הסף נמדד על המחירון לפני ההנחה - listTotal ולא subtotal.
@@ -184,18 +191,13 @@ export default function CartDrawer() {
    */
   const threshold = POLICY.freeShippingOver;
   const gap = freeShippingGap(listTotal) ?? 0;
-  const freeShip = threshold !== null && gap <= 0;
+  const freeShip = (threshold !== null && gap <= 0) || Boolean(join);
   const progress = threshold === null ? 0 : Math.min(1, listTotal / threshold);
 
-  // השלמה למשלוח חינם: הפריטים הזולים שאינם כבר בעגלה
-  const inCart = new Set(lines.map((l) => l.slug));
-  const fillers =
-    threshold !== null && gap > 0 && lines.length
-      ? [...PRODUCTS]
-          .filter((p) => !inCart.has(p.slug))
-          .sort((a, b) => saleOf(a.price).now - saleOf(b.price).now)
-          .slice(0, 2)
-      : [];
+  // השלמה לסף: עוד תכשיט לאותו אדם שבשבילו כבר בחרו (lib/companions.ts),
+  // ולא הזול ביותר באתר - מי שקונה לה לא מחפש תכשיט לעצמו
+  const fillers = threshold !== null && gap > 0 && lines.length && !join ? companionsFor(lines.map((l) => l.slug), 2) : [];
+  const whom = forWhom(lines.map((l) => l.slug));
 
   // שחזור העגלה מהאחסון המקומי - נדחה עד לאחר ההידרציה
   useEffect(() => {
@@ -285,14 +287,21 @@ export default function CartDrawer() {
           </button>
         </div>
 
-        {lines.length > 0 && threshold !== null && (
+        {lines.length > 0 && join && (
+          <p className="px-7 py-4" style={{ borderBottom: '1px solid var(--line)', fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+            נכנס לחבילה של הזמנה <span className="num">#{join.number}</span> ·{' '}
+            <span style={{ color: 'var(--accent-deep)', fontWeight: 500 }}>בלי דמי משלוח</span>
+          </p>
+        )}
+
+        {lines.length > 0 && threshold !== null && !join && (
           <div className="px-7 py-4" style={{ borderBottom: '1px solid var(--line)' }}>
             <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
               {gap <= 0 ? (
-                <span style={{ color: 'var(--accent-deep)', fontWeight: 500 }}>המשלוח עלינו</span>
+                <span style={{ color: 'var(--accent-deep)', fontWeight: 500 }}>המשלוח ואריזת המתנה עלינו</span>
               ) : (
                 <>
-                  עוד <span className="num">{formatPrice(gap)}</span> למשלוח חינם
+                  עוד <span className="num">{formatPrice(gap)}</span>, והמשלוח ואריזת המתנה עלינו
                 </>
               )}
             </p>
@@ -468,7 +477,7 @@ export default function CartDrawer() {
                 </span>
               </span>
               <span className="num" style={{ fontSize: 'var(--fs-sm)', color: 'var(--accent)' }}>
-                +{formatPrice(GIFT_BOX.price)}
+                {gift && !giftFee ? 'חינם' : `+${formatPrice(GIFT_BOX.price)}`}
               </span>
             </button>
           )}
@@ -476,7 +485,7 @@ export default function CartDrawer() {
           {fillers.length > 0 && (
             <div className="py-7">
               <p style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-deep)' }}>
-                להשלמה למשלוח חינם
+                {whom ? `עוד תכשיט ${whom}` : 'עוד תכשיט'}, והמשלוח ואריזת המתנה עלינו
               </p>
 
               <div className="mt-4 flex flex-col gap-3">
@@ -565,11 +574,14 @@ export default function CartDrawer() {
               </span>
             </div>
 
-            {giftFee > 0 && (
+            {gift && (
               <div className="mb-3 flex items-center justify-between">
                 <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>{GIFT_BOX.title}</span>
-                <span className="num" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink)' }}>
-                  {formatPrice(giftFee)}
+                <span
+                  className={giftFee ? 'num' : undefined}
+                  style={{ fontSize: 'var(--fs-sm)', color: giftFee ? 'var(--ink)' : 'var(--accent-deep)', fontWeight: giftFee ? 400 : 500 }}
+                >
+                  {giftFee ? formatPrice(giftFee) : 'חינם'}
                 </span>
               </div>
             )}

@@ -34,6 +34,12 @@ export type OrderDone = {
   shipping: ShippingMethodId;
   /** שם הנמען, כשהמשלוח יוצא לכתובת אחרת */
   toName?: string;
+  /** מפתח ההזמנה בווקומרס - בשביל "להוסיף לאותה חבילה" (lib/join.ts) */
+  key?: string;
+  /** ISO - מתי נוצרה ההזמנה */
+  placedAt?: string;
+  /** מספר ההזמנה שאליה ההזמנה הזו מצטרפת */
+  joinOf?: string;
 };
 
 export function saveOrderDone(order: OrderDone) {

@@ -118,4 +118,28 @@ if ( $order->has_shipping_address() && '' !== $mikra_to ) :
 	</table>
 </td></tr>
 <?php endif; ?>
+
+<?php
+/*
+ * עוד תכשיט לאותה חבילה (באתר: lib/join.ts, app/join). האתר בודק אם
+ * החבילה עוד לא יצאה; אם יצאה - העמוד אומר את זה, ולכן אין כאן שעה.
+ * לא בהזמנה שבעצמה מצטרפת לחבילה.
+ */
+if ( $args['join'] && ! $order->get_meta( '_mikra_join_of' ) ) :
+	$mikra_join_url = add_query_arg(
+		array(
+			'o' => $order->get_id(),
+			'k' => $order->get_order_key(),
+		),
+		MIKRA_SITE . '/join'
+	);
+	?>
+<tr><td class="mikra-pad" style="padding:14px 40px 0;<?php echo $mikra_font; ?>">
+	<div style="padding:18px;border:1px solid #d9c7a3;border-radius:10px;text-align:right;">
+		<p style="margin:0;font-size:16px;font-weight:700;color:#16150f;">עוד תכשיט, באותה חבילה?</p>
+		<p style="margin:6px 0 14px;font-size:14px;line-height:1.7;color:#4a4840;">עד שהחבילה יוצאת אפשר להוסיף לה עוד תכשיט - בלי דמי משלוח, והפרטים כבר ממולאים.</p>
+		<a href="<?php echo esc_url( $mikra_join_url ); ?>" style="display:inline-block;background:#96661c;color:#ffffff;text-decoration:none;font-size:15px;font-weight:700;padding:12px 22px;border-radius:8px;">לבחירת תכשיט</a>
+	</div>
+</td></tr>
+<?php endif; ?>
 </table>

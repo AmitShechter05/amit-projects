@@ -20,6 +20,7 @@ mikra_store_email_body(
 		'intro'       => $mikra_hi . 'קיבלנו את ההזמנה והתשלום עבר. מכאן אנחנו מטפלים בהכל.',
 		'total_label' => 'סה״כ ששולם',
 		'steps'       => true,
+		'join'        => true,
 	)
 );
 

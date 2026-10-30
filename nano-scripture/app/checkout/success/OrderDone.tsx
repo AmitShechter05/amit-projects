@@ -6,7 +6,10 @@ import { useCart, cartTotals } from '@/lib/cart';
 import { getProduct, formatPrice } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { GIFT_BOX } from '@/lib/extras';
-import { shippingMethod } from '@/lib/policy';
+import { shippingMethod, shippingCost, giftBoxFee } from '@/lib/policy';
+import Link from 'next/link';
+import { sameDispatch, untilLine } from '@/lib/join';
+import { forWhom } from '@/lib/companions';
 import { trackPurchase } from '@/lib/analytics';
 import { readOrderDone, type OrderDone as Done } from '@/lib/orderDone';
 import { clearPending } from '@/components/PendingPayment';
@@ -83,7 +86,11 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
 
   const totals = cartTotals(done.lines, done.code);
   const ship = shippingMethod(done.shipping);
-  const giftFee = done.gift ? GIFT_BOX.price : 0;
+  const giftFee = giftBoxFee(done.gift, totals.listTotal);
+  const shipFee = shippingCost(done.shipping, totals.listTotal, Boolean(done.joinOf));
+  // "להוסיף לאותה חבילה" - רק כל עוד החבילה לא יצאה (lib/join.ts)
+  const canJoin = Boolean(done.key && done.placedAt && sameDispatch(new Date(done.placedAt)));
+  const whom = forWhom(done.lines.map((l) => l.slug));
 
   return (
     <div className="mt-8">
@@ -182,9 +189,9 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
           />
         )}
 
-        {giftFee > 0 && <Row label={GIFT_BOX.title} value={formatPrice(giftFee)} />}
+        {done.gift && <Row label={GIFT_BOX.title} value={giftFee ? formatPrice(giftFee) : 'חינם'} />}
 
-        <Row label={ship.label} value={ship.price ? formatPrice(ship.price) : 'חינם'} />
+        <Row label={ship.label} value={shipFee ? formatPrice(shipFee) : 'חינם'} />
 
         <div
           className="mt-1.5 flex items-baseline justify-between pt-3.5"
@@ -196,6 +203,32 @@ export default function OrderDone({ order, sum }: { order?: string; sum?: number
           </span>
         </div>
       </div>
+
+      {/* ---------- עוד תכשיט לאותה חבילה ---------- */}
+      {canJoin && (
+        <div
+          className="mt-7 p-5"
+          style={{
+            borderRadius: 'var(--radius-lg)',
+            border: '1px solid var(--accent)',
+            background: 'color-mix(in oklab, var(--accent) 6%, var(--surface))',
+          }}
+        >
+          <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
+            עוד תכשיט{whom ? ` ${whom}` : ''}, באותה חבילה?
+          </p>
+          <p className="mt-1.5" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', lineHeight: 1.7 }}>
+            אפשר להוסיף {untilLine(new Date(done.placedAt!))}, כשהחבילה יוצאת. הוא נכנס לאותה קופסה, בלי דמי
+            משלוח, והפרטים כבר ממולאים.
+          </p>
+          <Link
+            href={`/join?o=${encodeURIComponent(done.id)}&k=${encodeURIComponent(done.key!)}`}
+            className="btn btn-solid mt-4 inline-block"
+          >
+            לבחירת תכשיט
+          </Link>
+        </div>
+      )}
 
       {/* ---------- לאן זה נשלח ---------- */}
       {done.toName && (

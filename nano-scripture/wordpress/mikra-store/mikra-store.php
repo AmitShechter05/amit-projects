@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.5.3
+ * Version: 1.6.0
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -134,7 +134,7 @@ function mikra_store_money( $amount, $order ) {
  * עם הטקסטים שלה.
  *
  * @param WC_Order $order
- * @param array    $args intro, total_label, steps, pay_button, note
+ * @param array    $args intro, total_label, steps, pay_button, note, join
  */
 function mikra_store_email_body( $order, $args ) {
 	$args = wp_parse_args(
@@ -146,6 +146,7 @@ function mikra_store_email_body( $order, $args ) {
 			'steps'       => false,
 			'pay_button'  => false,
 			'note'        => '',
+			'join'        => false,
 		)
 	);
 	include MIKRA_STORE_DIR . 'templates/parts/body.php';

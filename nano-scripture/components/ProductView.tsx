@@ -62,7 +62,7 @@ const ASSURANCE = [`משלוח מבוטח · ${deliveryLine}`, 'שנה אחרי�
 const pickup = SHIPPING.find((m) => m.id === 'pickup');
 const SHIPPING_LINE = [
   POLICY.shippingFlat === null ? 'דמי המשלוח מוצגים בתשלום' : `משלוח ${shippingNote}`,
-  ...(POLICY.freeShippingOver !== null ? [`חינם מ־₪${POLICY.freeShippingOver}`] : []),
+  ...(POLICY.freeShippingOver !== null ? [`חינם, עם אריזת מתנה, מ־₪${POLICY.freeShippingOver}`] : []),
   ...(pickup ? [`או ${pickup.label} ללא עלות`] : []),
 ].join(' · ');
 
