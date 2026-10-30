@@ -21,7 +21,7 @@
 defined( 'ABSPATH' ) || exit;
 
 /** קוד הקופון של המבצע בווקומרס. ממנו נלקחים האחוז ותאריך הסיום */
-define( 'MIKRA_PROMO_COUPON', 'mikra20' );
+define( 'MIKRA_PROMO_COUPON', 'mikra15' );
 define( 'MIKRA_FROM', 'orders@mikra.shop' );
 define( 'MIKRA_IMG', MIKRA_SITE . '/brand/email/' );
 /**
