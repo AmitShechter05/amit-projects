@@ -6,12 +6,13 @@ import { usePathname } from 'next/navigation';
 import Logo from './Logo';
 import PromoBar from './PromoBar';
 import { useCart, cartTotals } from '@/lib/cart';
-import { CATEGORIES, ACTIVE_CATEGORIES } from '@/lib/catalog';
+import { CATEGORIES, ACTIVE_CATEGORIES, AUDIENCE_PAGES, AUDIENCE_ORDER } from '@/lib/catalog';
 import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
 
 // הניווט נגזר מהקטגוריות הפעילות — קטגוריה ריקה נעלמת מכאן מאליה
 const CAT_NAV = [
   { href: '/catalog', label: 'כל התכשיטים' },
+  ...AUDIENCE_ORDER.map((a) => ({ href: AUDIENCE_PAGES[a].path, label: AUDIENCE_PAGES[a].nav })),
   ...ACTIVE_CATEGORIES.map((id) => ({
     href: `/categories/${id}`,
     label: CATEGORIES[id].title,
@@ -26,8 +27,11 @@ const PAGE_NAV = [
   { href: '/guides', label: 'מדריכי מתנה', wide: true },
   { href: '/craft', label: 'איך זה עובד', wide: true },
 ];
-// כרטיס מתנה יושב בצד של הקטלוג - זה עוד דבר לקנות, לא עמוד מידע
-const SHOP_NAV = [...CAT_NAV, { href: '/gift-card', label: 'כרטיס מתנה' }];
+// כרטיס מתנה יושב בצד של הקטלוג - זה עוד דבר לקנות, לא עמוד מידע.
+// 30.10.2026: "לנשים" ו"לגברים" נכנסו לפס העליון, והוא הגיע עד הלוגו
+// (נמדד ב-1100 וב-1280). כרטיס המתנה יצא מהפס במחשב ונשאר בתפריט
+// הנפתח ובפוטר
+const SHOP_NAV = CAT_NAV;
 const NAV = [...SHOP_NAV, ...PAGE_NAV];
 
 /**
@@ -290,6 +294,11 @@ export default function Header() {
             <Link href="/catalog" className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
               כל התכשיטים
             </Link>
+            {AUDIENCE_ORDER.map((a) => (
+              <Link key={a} href={AUDIENCE_PAGES[a].path} className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
+                {AUDIENCE_PAGES[a].title}
+              </Link>
+            ))}
             {ACTIVE_CATEGORIES.map((id) => (
               <Link key={id} href={`/categories/${id}`} className="tap-row display" style={{ fontSize: 'var(--fs-lg)', padding: '.42rem 0' }}>
                 {CATEGORIES[id].title}

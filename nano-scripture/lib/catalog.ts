@@ -820,6 +820,36 @@ export function productsByCategory(id: CategoryId) {
   return uniqueDesigns(PRODUCTS.filter((p) => p.category === id));
 }
 
+/**
+ * תכשיטי נשים ותכשיטי גברים - עמודים משלהם (/women, /men).
+ * עמית (30.10.2026): "חלוקה באתר גם לתכשיטי נשים ותכשיטי גברים".
+ * דגם לשניהם (unisex) נכנס לשני העמודים.
+ */
+export const AUDIENCE_PAGES = {
+  women: {
+    path: '/women',
+    title: 'תכשיטים לנשים',
+    nav: 'לנשים',
+    blurb: 'שרשראות וצמידים עדינים, מכסף 925 ומפלדת אל־חלד. בכל אחד שבב קטן עם ברכה שלמה, ואת הברכה בוחרים בעמוד של התכשיט.',
+  },
+  men: {
+    path: '/men',
+    title: 'תכשיטים לגברים',
+    nav: 'לגברים',
+    blurb: 'צמידים ושרשראות לגבר, מפלדת אל־חלד שלא מחלידה. בכל אחד שבב קטן עם ברכה שלמה, ואת הברכה בוחרים בעמוד של התכשיט.',
+  },
+} as const;
+export type AudiencePage = keyof typeof AUDIENCE_PAGES;
+export const AUDIENCE_ORDER: AudiencePage[] = ['women', 'men'];
+
+export function productsForAudience(a: AudiencePage, category?: CategoryId) {
+  return uniqueDesigns(
+    PRODUCTS.filter(
+      (p) => (p.audience === a || p.audience === 'unisex') && (!category || p.category === category),
+    ),
+  );
+}
+
 export function getProduct(slug: string) {
   return PRODUCTS.find((p) => p.slug === slug) ?? HIDDEN_PRODUCTS.find((p) => p.slug === slug);
 }

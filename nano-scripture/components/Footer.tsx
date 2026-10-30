@@ -5,7 +5,7 @@ import { useState } from 'react';
 import Logo from './Logo';
 import { BRAND } from '@/lib/brand';
 import { COMPANY, SOCIAL, telHref, waHref } from '@/lib/company';
-import { CATEGORIES, ACTIVE_CATEGORIES } from '@/lib/catalog';
+import { CATEGORIES, ACTIVE_CATEGORIES, AUDIENCE_PAGES, AUDIENCE_ORDER } from '@/lib/catalog';
 import { BLESSINGS } from '@/lib/blessings';
 import PaymentMarks from '@/components/PaymentMarks';
 
@@ -98,6 +98,11 @@ export default function Footer() {
 
           <nav className="grid grid-cols-2 gap-x-4 gap-y-2.5 md:flex md:flex-col md:gap-3">
             <p className="eyebrow col-span-2 mb-0 md:mb-2">הקטלוג</p>
+            {AUDIENCE_ORDER.map((a) => (
+              <Link key={a} href={AUDIENCE_PAGES[a].path} className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+                {AUDIENCE_PAGES[a].title}
+              </Link>
+            ))}
             {ACTIVE_CATEGORIES.map((id) => (
               <Link key={id} href={`/categories/${id}`} className="tap-row link-u" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
                 {CATEGORIES[id].title}

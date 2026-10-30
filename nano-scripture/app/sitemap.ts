@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { SITE_URL } from '@/lib/site';
-import { PRODUCTS, ACTIVE_CATEGORIES } from '@/lib/catalog';
+import { PRODUCTS, ACTIVE_CATEGORIES, AUDIENCE_PAGES, AUDIENCE_ORDER } from '@/lib/catalog';
 import { BLESSINGS } from '@/lib/blessings';
 import { LEGAL } from '@/lib/legal';
 import { GUIDES } from '@/lib/guides';
@@ -41,6 +41,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url('/craft', 0.7, UPDATED.craft),
     url('/guides', 0.6, GUIDES.reduce((m, g) => (g.published > m ? g.published : m), UPDATED.home)),
     url('/catalog', 0.9, UPDATED.catalog),
+    ...AUDIENCE_ORDER.map((a) => url(AUDIENCE_PAGES[a].path, 0.8, '2026-10-30')),
     ...ACTIVE_CATEGORIES.map((c) => url(`/categories/${c}`, 0.8, UPDATED.catalog)),
     ...PRODUCTS.map((p) => url(`/products/${p.slug}`, 0.9, UPDATED.catalog)),
     ...BLESSINGS.map((b) => url(`/blessings/${b.id}`, 0.7, UPDATED.blessings)),
