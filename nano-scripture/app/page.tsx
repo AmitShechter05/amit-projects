@@ -17,7 +17,7 @@ import { syncPrices } from '@/lib/livePrices';
  * בטלפון נשארות שלוש מהשש: שש רצועות של ~300px היו 2,000 מתוך 9,700
  * פיקסל של העמוד. עמית (27.9.2026): "4, תסדר הכל"
  */
-const [j2, j3, j4, j5, j6, j7] = INTERLUDES;
+const [j2, j3, j4, j5, j6] = INTERLUDES;
 
 export default async function HomePage() {
   // הכרטיסים וטווחי המחירים מרונדרים בשרת, מהמחיר שבווקומרס
@@ -38,7 +38,6 @@ export default async function HomePage() {
       <Process />
       <Interlude shot={j6} />
       <Assurance />
-      <Interlude shot={j7} className="hidden md:block" />
       <Closing />
     </>
   );

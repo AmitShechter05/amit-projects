@@ -57,8 +57,8 @@ const PICKS: Pick[] = [
     category: 'necklaces',
     alt: 'שלושה תליונים על זמש: חמסה, טיפת אור ועץ החיים, בכל אחד אותו שבב כחול',
   },
-  // ההבטחות → הסיום. "אהבת עולם" לפני "מה נותנים למי שיש לו הכול"
-  { src: '/scene/ahavat-olam-tray.jpg', position: '54% 68%', product: 'ahavat-olam' },
+  // ההבטחות → הסיום: בלי רצועה. הצמיד "אהבת עולם" על האבן ישב כאן
+  // והוסר (עמית, 30.10.2026)
 ];
 
 export const INTERLUDES: InterludeShot[] = PICKS.map((p) => {
