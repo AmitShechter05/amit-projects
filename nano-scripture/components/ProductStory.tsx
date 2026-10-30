@@ -126,7 +126,9 @@ export default function ProductStory({
           return (
             <div
               key={block.title}
-              className="story-row reveal"
+              // בלי reveal: כל בלוק גבוה ~680 פיקסל בטלפון, ועד שנכנס
+              // מספיק למסך הוא נשאר שקוף - שטח ריק בגלילה (עמית, 30.10.2026)
+              className="story-row"
               data-flip={photo && i % 2 === 1 ? 'true' : undefined}
               data-wide={photo ? undefined : 'true'}
               style={{
