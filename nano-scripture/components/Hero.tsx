@@ -33,7 +33,7 @@ import { RABBINATE } from '@/lib/rabbinate';
  */
 
 /** ארבע הברכות שאפשר להזמין. ברכת התינוק שייכת לסיכה המוסתרת */
-const FOUR = BLESSINGS.filter((b) => b.id !== 'tinok').map((b) => b.plain);
+const FOUR = BLESSINGS.filter((b) => b.id !== 'tinok');
 
 /** צבע הקיר בצילום הרחב, לשוליים במסכים רחבים במיוחד */
 const WALL = '#d6c2aa';
@@ -139,12 +139,27 @@ function Title({ facts }: { facts: string }) {
           <span style={{ ['--d' as string]: '120ms' }}>בתוך תכשיט</span>
         </span>
       </h1>
+      {/* 30.10.2026: הייתה כאן קופסה כחולה כהה, ובטלפון היא נראתה ככפתור
+          שני מעל "לקטלוג". עכשיו זו שורה: ארבע הברכות, כל אחת עם הצבע שלה */}
       <p
-        className="reveal load mx-auto mt-5 inline-block rounded-md px-4 py-2"
-        style={{ ['--d' as string]: '240ms', background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 500 }}
+        className="reveal load mx-auto mt-5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1.5"
+        style={{ ['--d' as string]: '240ms', color: 'var(--ink)', fontSize: 'var(--fs-sm)', fontWeight: 600 }}
       >
-        <span className="md:hidden">4 ברכות שלמות מהתנ״ך</span>
-        <span className="hidden md:inline">{FOUR.join('  ·  ')}</span>
+        {/* בטלפון ארבעה שמות לא נכנסים בשורה אחת. שם: ארבעת הצבעים ומשפט אחד */}
+        <span className="inline-flex items-center gap-2 md:hidden">
+          <span aria-hidden className="inline-flex gap-1">
+            {FOUR.map((b) => (
+              <span key={b.id} style={{ width: 9, height: 9, borderRadius: 2, background: b.accent }} />
+            ))}
+          </span>
+          {FOUR.length} ברכות שלמות מהתנ״ך
+        </span>
+        {FOUR.map((b) => (
+          <span key={b.id} className="hidden items-center gap-1.5 md:inline-flex">
+            <span aria-hidden style={{ width: 9, height: 9, borderRadius: 2, background: b.accent }} />
+            {b.plain}
+          </span>
+        ))}
       </p>
     </>
   );

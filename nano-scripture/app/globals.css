@@ -42,12 +42,14 @@
      היו כאן 51 גדלים שונים ב־177 מקומות, מהם חמישה־עשר בין 0.7rem
      ל־1rem בלבד. הפרש של 0.01rem אינו נראה, אבל היעדר החוקיות כן
      מורגש. שמונה מדרגות ביחס של כ־1.12, וכל גודל באתר נשאב מהן. */
-  --fs-2xs: 0.66rem;
-  --fs-xs: 0.74rem;
-  --fs-sm: 0.84rem;
-  --fs-base: 0.94rem;
-  --fs-md: 1.06rem;
-  --fs-lg: 1.2rem;
+  /* 30.10.2026: המדרגות הקטנות עלו במחשב. כרטיס מוצר נשא ארבע שורות
+     ב-11.8 עד 13.4 פיקסל באפור - נקרא כמרקם ולא כמידע */
+  --fs-2xs: 0.7rem;
+  --fs-xs: 0.8rem;
+  --fs-sm: 0.9rem;
+  --fs-base: 1rem;
+  --fs-md: 1.1rem;
+  --fs-lg: 1.25rem;
   --fs-xl: 1.5rem;
   --fs-2xl: 1.9rem;
 
@@ -64,9 +66,9 @@
   @media (max-width: 639px) {
     --fs-2xs: 0.75rem;
     --fs-xs: 0.82rem;
-    --fs-sm: 0.88rem;
+    --fs-sm: 0.9rem;
     --fs-base: 1rem;
-    --fs-md: 1.08rem;
+    --fs-md: 1.1rem;
   }
 
   /* כותרות זורמות. היו שתים־עשרה נוסחאות clamp שונות בקוד; אלה ארבע
@@ -85,9 +87,11 @@
   --font-display: var(--font-app), system-ui, sans-serif;
   --font-body: var(--font-app), system-ui, sans-serif;
   --weight-display: 700;
-  --track-display: 0;
-  --radius: 3px;
-  --radius-lg: 6px;
+  /* כותרת כבדה בעברית נראית מהודקת יותר במעט מינוס. לא ריווח רחב */
+  --track-display: -0.012em;
+  /* 30.10.2026: פינות רכות במעט - 3/6 נראו חדים כמו טבלה. עדיין לא גלולה */
+  --radius: 4px;
+  --radius-lg: 10px;
 
   --shell: min(1440px, 92vw);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
@@ -888,4 +892,48 @@ html[data-a11y-motion='off'] * {
   body:has(.buybar-space) .cookie-banner {
     bottom: calc(68px + env(safe-area-inset-bottom));
   }
+}
+
+
+/* ================= 30.10.2026 - שדרוג עיצובי ================= */
+
+/* כרטיס מוצר בלי מסגרת: הצילום הוא הכרטיס, והטקסט יושב על הנייר.
+   מסגרת + רקע לבן סביב כל דגם היו הדפוס הגנרי ביותר בעמוד, ושתים-עשרה
+   מסגרות ברשת אחת נקראו כטבלה ולא כחנות תכשיטים */
+.card-plain {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.card-plain .tile {
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  /* צל חם וקצר שמפריד צילום בהיר מהנייר, בלי "להרים" את הכרטיס */
+  box-shadow: 0 1px 0 rgb(150 110 32 / 0.08), 0 10px 28px -18px rgb(80 58 18 / 0.35);
+}
+.card-plain .card-body {
+  padding-inline: 0.15rem;
+}
+
+/* פרלקסה עדינה בגלילה - CSS בלבד (animation-timeline), בלי JavaScript.
+   דפדפן שלא מכיר את זה מציג תמונה רגילה. מי שביקש פחות תנועה - כלום */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .drift {
+      animation: drift linear both;
+      animation-timeline: view();
+      animation-range: cover 0% cover 100%;
+    }
+    @keyframes drift {
+      from {
+        transform: scale(1.12) translateY(-4%);
+      }
+      to {
+        transform: scale(1.12) translateY(4%);
+      }
+    }
+  }
+}
+html[data-a11y-motion='off'] .drift {
+  animation: none !important;
 }

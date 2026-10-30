@@ -42,7 +42,7 @@ export default function ProductCard({
     >
       <Link
         href={`/products/${product.slug}`}
-        className="card group flex h-full flex-col"
+        className="card-plain group h-full"
       >
         <div
           className="tile relative overflow-hidden"
@@ -181,7 +181,7 @@ export default function ProductCard({
           </span>
         </div>
 
-        <div className="card-body flex flex-1 flex-col px-3.5 pb-4 pt-3 sm:px-6 sm:pb-6 sm:pt-5">
+        <div className="card-body flex flex-1 flex-col pb-2 pt-3.5 sm:pt-4">
           <div className="flex items-baseline justify-between gap-3">
             <h3 className="display text-[var(--fs-md)] sm:text-[var(--fs-lg)]">
               {product.name}
@@ -236,7 +236,7 @@ export default function ProductCard({
           </p>
 
           <p
-            className="mt-3 hidden flex-1 sm:block"
+            className="mt-2.5 hidden flex-1 sm:block"
             style={{
               fontSize: "var(--fs-sm)",
               color: "var(--ink-3)",
@@ -246,18 +246,21 @@ export default function ProductCard({
             {product.short}
           </p>
 
-          <div
-            className="mt-5 flex items-center justify-between pt-4"
-            style={{ borderTop: "1px solid var(--line)" }}
-          >
+          <div className="mt-3 flex items-center justify-between">
             <span
-              className="flex items-baseline gap-2.5"
+              className="flex items-baseline gap-2 whitespace-nowrap sm:gap-2.5"
               style={{ fontSize: "var(--fs-xs)", color: "var(--ink-3)" }}
             >
+              {/* בטלפון הכרטיס בחצי רוחב, ו"3 ברכות לבחירה" + המידה + החץ
+                  נשברו לשלוש שורות. שם: "3 ברכות · 29.2 מ״מ" */}
               <span>
-                {available.length === 1
-                  ? available[0].plain
-                  : `${available.length} ברכות לבחירה`}
+                {available.length === 1 ? (
+                  available[0].plain
+                ) : (
+                  <>
+                    {available.length} ברכות<span className="hidden sm:inline"> לבחירה</span>
+                  </>
+                )}
               </span>
               {/* רמז קנה מידה: הכרטיס הוא ריבוע, ובלי מספר אין ממנו
                     שום דרך לדעת אם המדליון בגודל מטבע או בגודל אגורה */}
@@ -267,11 +270,13 @@ export default function ProductCard({
                 </span>
               )}
             </span>
+            {/* כל הכרטיס הוא קישור; החץ מסמן אותו בלי עוד שורת "לתכשיט" */}
             <span
-              className="link-u"
-              style={{ fontSize: "var(--fs-sm)", color: "var(--accent)" }}
+              aria-hidden
+              className="hidden transition-transform duration-300 group-hover:-translate-x-1 sm:inline"
+              style={{ fontSize: "var(--fs-md)", color: "var(--accent)" }}
             >
-              לתכשיט ←
+              ←
             </span>
           </div>
         </div>

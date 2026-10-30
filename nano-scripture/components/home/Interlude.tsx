@@ -44,7 +44,7 @@ export default function Interlude({
           fill
           sizes="100vw"
           loading={eager ? 'eager' : 'lazy'}
-          className="object-cover"
+          className="drift object-cover"
           style={{ objectPosition: shot.position }}
         />
       </div>
