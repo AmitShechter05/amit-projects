@@ -269,8 +269,9 @@ export default function ProductCard({
               {/* רמז קנה מידה: הכרטיס הוא ריבוע, ובלי מספר אין ממנו
                     שום דרך לדעת אם המדליון בגודל מטבע או בגודל אגורה */}
               {sizeCue(product) && (
-                <span className="num shrink-0" style={{ opacity: 0.8 }}>
-                  · {sizeCue(product)}
+                // הנקודה מחוץ ל-.num: בתוך כיוון LTR היא קפצה לקצה השמאלי
+                <span className="shrink-0" style={{ opacity: 0.8 }}>
+                  · <span className="num">{sizeCue(product)}</span>
                 </span>
               )}
             </span>
