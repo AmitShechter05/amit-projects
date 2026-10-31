@@ -4,8 +4,9 @@ import type { Product } from '@/lib/catalog';
  * סרטונים בעמוד המוצר, כמו רצועת הסרטונים בעמוד המוצר של תנאור.
  *
  * עמית (31.10.2026): "לתכשיטי גברים את הסרטונים של הגברים, ואת של הנשים
- * לנשים". הסרטונים של יוצרות תוכן ששילמנו להן, וכתוב את זה מתחת - לא
- * ביקורת ולא לקוחה (כללי האתר: אין המלצות שהומצאו).
+ * לנשים". דגם של "שניהם" מקבל את של הנשים (עמית, באותו יום). הסרטונים
+ * של יוצרות תוכן; עמית ביקש בלי שורת "יוצרות תוכן" מתחת. מה שאסור הוא
+ * להציג אותם כביקורת או כלקוחה - ולכן אין כאן דירוג, ציטוט או "לקוחות".
  *
  * בסרטונים המקוריים היו צילומי מסך של האתר עם המחירים הישנים (549,
  * 279-299). בגרסה שכאן הם נחתכו, בגבולות משפט, והדיבור לא נפגע. המקור
@@ -26,9 +27,9 @@ const CLIPS: Record<'women' | 'men', Clip[]> = {
 };
 
 export default function ProductVideos({ product }: { product: Product }) {
-  if (product.audience === 'unisex') return null;
+  const audience = product.audience === 'unisex' ? 'women' : product.audience;
   // הסרטון שבו רואים את הדגם הזה בדיוק - ראשון
-  const clips = [...CLIPS[product.audience]].sort(
+  const clips = [...CLIPS[audience]].sort(
     (a, b) => Number(b.product === product.slug) - Number(a.product === product.slug),
   );
 
@@ -54,9 +55,6 @@ export default function ProductVideos({ product }: { product: Product }) {
             </figure>
           ))}
         </div>
-        <p className="mt-4" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-          סרטונים של יוצרות תוכן שעבדו איתנו.
-        </p>
       </div>
     </section>
   );
