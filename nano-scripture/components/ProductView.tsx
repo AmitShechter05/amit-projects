@@ -866,7 +866,9 @@ export default function ProductView({ product }: { product: Product }) {
           {[
             { title: 'התכשיט', rows: productRows },
             { title: 'השבב', rows: CHIP_SPEC },
-            { title: 'מה מגיע בקופסה', rows: BOX_SPEC },
+            // צילום אמיתי של הקופסה והכרטיס (עמית אישר, 31.10.2026). בלי השקית:
+            // לא ידוע אם היא בכל הזמנה או רק באריזת המתנה בתשלום
+            { title: 'מה מגיע בקופסה', rows: BOX_SPEC, photo: '/scene/box-card.jpg' },
             { title: 'שמירה ואחריות', rows: CARE_SPEC },
           ].map((group, i) => {
             const open = openSpec === i;
@@ -904,6 +906,17 @@ export default function ProductView({ product }: { product: Product }) {
                   }}
                 >
                   <dl style={{ overflow: 'hidden' }}>
+                    {'photo' in group && group.photo && (
+                      <div className="relative mb-3 mt-1 overflow-hidden" style={{ aspectRatio: '4 / 3', borderRadius: 'var(--radius-lg)', maxWidth: 420 }}>
+                        <Image
+                          src={group.photo}
+                          alt="הקופסה המרופדת עם התכשיט, ולידה כרטיס הברכה"
+                          fill
+                          sizes="(max-width: 768px) 92vw, 420px"
+                          className="object-cover"
+                        />
+                      </div>
+                    )}
                     {group.rows.map((row) => (
                       <div
                         key={row.label + row.value}

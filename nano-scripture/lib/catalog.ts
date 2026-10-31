@@ -155,7 +155,7 @@ const ALL_PRODUCTS: Product[] = [
   {
     sku: 'YASNN010W',
     slug: 'tipat-or',
-    scenes: ['/scene/tipat-or-sweater.jpg'],
+    scenes: ['/scene/tipat-or-sweater.jpg', '/scene/tipat-or-box-card.jpg'],
     name: 'טִפַּת אוֹר',
     nameLatin: 'TIPAT OR',
     category: 'necklaces',
@@ -314,6 +314,8 @@ const ALL_PRODUCTS: Product[] = [
   {
     sku: 'OYANN006S',
     slug: 'luach-libecha',
+    // צילומים אמיתיים מיום הצילום של ליז (27.10.2026), חיתוך בלבד
+    scenes: ['/scene/luach-libecha-closeup.jpg', '/scene/luach-libecha-smile.jpg'],
     name: 'לוּחַ לִבֶּךָ',
     nameLatin: 'LUACH LIBECHA',
     source: { phrase: 'כָּתְבֵם עַל־לוּחַ לִבֶּךָ', ref: 'משלי ג׳, ג׳' },
