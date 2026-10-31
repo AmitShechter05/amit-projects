@@ -4,7 +4,6 @@ import { getReviews } from '@/lib/reviews';
 import { notFound } from 'next/navigation';
 import ProductView from '@/components/ProductView';
 import ProductCard from '@/components/ProductCard';
-import HowItWorks from '@/components/home/HowItWorks';
 import { PRODUCTS, getProduct, productsByCategory, CATEGORIES, isHiddenProduct } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { productFaq } from '@/lib/faq';
@@ -81,9 +80,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
       <ProductReviews summary={reviews[product.name]} />
 
-      {/* איך זה עובד, עם מסכים מוקטנים וצילום השבב במיקרוסקופ.
-          עבר מעמוד הבית לכאן (עמית, 11.10.2026) */}
-      <HowItWorks />
+      {/* "איך זה עובד" ירד מכאן (31.10.2026): עמית ביקש את המבנה של תנאור,
+          ושם אין בלוק כזה. הוא חי ב-/craft, והקישור אליו בבלוק ההסבר */}
 
       {related.length > 0 && (
         <section className="py-24" style={{ borderTop: '1px solid var(--line)', background: 'var(--bg-2)' }}>

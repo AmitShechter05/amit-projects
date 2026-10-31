@@ -27,6 +27,7 @@ import { useCart } from '@/lib/cart';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
 import { wornFor, wornFocus } from '@/lib/worn';
 import ProductStory from './ProductStory';
+import ProductVideos from './ProductVideos';
 import PairedWith from './PairedWith';
 import DeliveryEstimate from './DeliveryEstimate';
 import Accordion from './Accordion';
@@ -797,19 +798,18 @@ export default function ProductView({ product }: { product: Product }) {
 
           כל טענה כאן ניתנת לבדיקה ע"י הקונה, ואין בה מספר שטרם הוכרע.
         */}
-        <div
-          className="mt-8 p-5 sm:p-6"
-          style={{
-            borderRadius: 'var(--radius-lg)',
-            border: '1px solid var(--line-strong)',
-            background: 'var(--surface-2)',
-          }}
-        >
-          <p className="display" style={{ fontSize: 'var(--fs-md)' }}>
-            איך אפשר לדעת שהברכה באמת שם?
-          </p>
+        {/* שורה מתקפלת ולא קופסה פתוחה, כמו אצל תנאור (31.10.2026) */}
+        <details className="group mt-8" style={{ borderBlock: '1px solid var(--line)' }}>
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-4">
+            <span className="display" style={{ fontSize: 'var(--fs-md)' }}>
+              איך אפשר לדעת שהברכה באמת שם?
+            </span>
+            <span aria-hidden className="transition-transform group-open:rotate-45" style={{ color: 'var(--accent)', fontSize: 'var(--fs-lg)', lineHeight: 1 }}>
+              +
+            </span>
+          </summary>
 
-          <ul className="mt-4 flex flex-col gap-3">
+          <ul className="flex flex-col gap-3">
             {[
               [
                 'קראו אותה לפני שאתם קונים',
@@ -844,7 +844,8 @@ export default function ProductView({ product }: { product: Product }) {
               איך זה נעשה ←
             </Link>
           </div>
-        </div>
+          <div className="pb-5" />
+        </details>
 
         {/* ---------- התיאור ---------- */}
         {/*
@@ -931,6 +932,9 @@ export default function ProductView({ product }: { product: Product }) {
 
       {/* ---------- התוכן המסביר ---------- */}
       <ProductStory product={product} blessing={b} />
+
+      {/* ---------- סרטונים ---------- */}
+      <ProductVideos product={product} />
 
       {/* ---------- נענדים יחד ---------- */}
       <PairedWith slug={product.slug} />
