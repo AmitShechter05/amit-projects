@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import {
-  FINISHES,
   MATERIALS,
+  finishesOf,
   formatPrice,
   photoFor,
   sizeCue,
@@ -232,7 +232,7 @@ export default function ProductCard({
             className="mt-1.5"
             style={{ fontSize: "var(--fs-xs)", color: "var(--ink-3)" }}
           >
-            {MATERIALS[product.material].label} · {FINISHES[product.finish]}
+            {MATERIALS[product.material].label} · {finishesOf(product)}
           </p>
 
           <p

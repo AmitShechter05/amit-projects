@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import Image from 'next/image';
-import { FINISHES, MATERIALS, formatPrice, type Product, isCutout } from '@/lib/catalog';
+import { MATERIALS, finishesOf, formatPrice, type Product, isCutout } from '@/lib/catalog';
 import { PROMO, saleOf } from '@/lib/promo';
 import { BLESSINGS } from '@/lib/blessings';
 
@@ -126,7 +126,7 @@ export default function FeaturedCard({ product }: { product: Product }) {
             style={{ borderTop: '1px solid var(--line)', fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}
           >
             <span>
-              {MATERIALS[product.material].label} · {FINISHES[product.finish]}
+              {MATERIALS[product.material].label} · {finishesOf(product)}
             </span>
             <span className="flex items-center gap-1.5">
               {available.map((b) => (

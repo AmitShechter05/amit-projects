@@ -818,6 +818,14 @@ export function uniqueDesigns(list: Product[]) {
   return list.filter((p) => (seen.has(p.name) ? false : seen.add(p.name)));
 }
 
+/**
+ * הצבעים של עיצוב, לכרטיס ברשימה: "כסף או זהב". דגם בשני צבעים מופיע
+ * ברשימה פעם אחת, ובלי זה מי שמחפש זהב רואה "כסף" ועובר הלאה (31.10.2026)
+ */
+export function finishesOf(product: Product) {
+  return [...new Set(PRODUCTS.filter((p) => p.name === product.name).map((p) => FINISHES[p.finish]))].join(' או ');
+}
+
 export function productsByCategory(id: CategoryId) {
   return uniqueDesigns(PRODUCTS.filter((p) => p.category === id));
 }
