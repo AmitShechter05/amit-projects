@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { readConsent, writeConsent, type ConsentLevel } from '@/lib/consent';
+import { CONSENT_OPEN_EVENT, readConsent, writeConsent, type ConsentLevel } from '@/lib/consent';
 import { analyticsOn } from '@/lib/analytics';
 
 /**
@@ -14,6 +14,10 @@ import { analyticsOn } from '@/lib/analytics';
  *
  * הוא יושב בתחתית ואינו חוסם את העמוד: אין רקע כהה ואין לכידת מיקוד,
  * כי אפשר להתעלם ממנו ולהמשיך לגלוש.
+ *
+ * מ-1.11.2026 המדידה פועלת מהכניסה (lib/consent.ts), והבאנר אומר את
+ * זה בפירוש. "לא מסכים" מכבה אותה, ו"הגדרות עוגיות" בפוטר פותח אותו
+ * מחדש כדי לשנות את הבחירה.
  *
  * הנוסח נגזר מ-`analyticsOn` ולא נכתב ביד. כשאין מזהי מדידה בסביבה
  * באמת לא רץ כאן כלום, וכשהם נוספים המשפט מתעדכן מעצמו - באנר
@@ -27,6 +31,9 @@ export default function CookieBanner() {
     // נבדק אחרי ההרכבה: בשרת אין localStorage, ובדיקה בזמן רינדור
     // הייתה מייצרת חוסר התאמה בין מה שהשרת שלח למה שהלקוח ציפה לו
     if (!readConsent()) setShow(true);
+    const open = () => setShow(true);
+    window.addEventListener(CONSENT_OPEN_EVENT, open);
+    return () => window.removeEventListener(CONSENT_OPEN_EVENT, open);
   }, []);
 
   if (!show) return null;
@@ -54,10 +61,9 @@ export default function CookieBanner() {
         }}
       >
         <p style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.65 }}>
-          אנחנו שומרים בדפדפן את העגלה ואת בחירות התצוגה שלכם - זה נחוץ כדי שהאתר יעבוד.{' '}
           {analyticsOn
-            ? 'כלי מדידה ופרסום - Google Analytics ופיקסל של מטא - נטענים רק אחרי אישור, ולא לפניו.'
-            : 'מדידה ופרסום לא פועלים כאן כרגע, וייכנסו רק אם תאשרו.'}{' '}
+            ? 'האתר משתמש בעוגיות למדידה ולפרסום (Google Analytics ופיקסל של מטא). אם לא מתאים לכם, לחצו "לא מסכים" והמדידה תיכבה.'
+            : 'אנחנו שומרים בדפדפן רק את העגלה ואת בחירות התצוגה שלכם - זה נחוץ כדי שהאתר יעבוד.'}{' '}
           <Link href="/legal/privacy" className="link-u">
             מדיניות הפרטיות
           </Link>
@@ -69,7 +75,7 @@ export default function CookieBanner() {
             className="btn"
             style={{ fontSize: 'var(--fs-2xs)', padding: '.6rem 1rem', whiteSpace: 'nowrap' }}
           >
-            רק הכרחיות
+            לא מסכים
           </button>
           <button
             type="button"
@@ -77,7 +83,7 @@ export default function CookieBanner() {
             className="btn btn-solid"
             style={{ fontSize: 'var(--fs-2xs)', padding: '.6rem 1rem', whiteSpace: 'nowrap' }}
           >
-            אישור הכל
+            אישור
           </button>
         </div>
       </div>

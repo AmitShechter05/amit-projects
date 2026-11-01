@@ -7,19 +7,13 @@ import { GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
 import { hasConsent } from '@/lib/consent';
 
 /**
- * טעינת סקריפטי המדידה - אחרי הסכמה, ולא לפניה.
+ * טעינת סקריפטי המדידה - מהכניסה, אלא אם הגולש אמר "לא מסכים"
+ * (lib/consent.ts, 1.11.2026).
  *
- * ------------------------------------------------------------------
- * הסדר כאן הוא ההפך מהמקובל.
- *
- * ברוב האתרים הפיקסל נטען עם העמוד, והבאנר מבקש רשות למשהו שכבר
- * קרה. כאן הרכיב פשוט לא מרנדר את הסקריפטים עד שיש "אישור הכל" -
- * מי שבחר "רק הכרחיות" לא מוריד את הקוד בכלל, לא רק שלא נמדד.
- * ------------------------------------------------------------------
- *
- * הרכיב מאזין ל-`mikra:consent`, ולכן לחיצה על "אישור הכל" מתחילה
- * למדוד מיד ולא רק אחרי רענון - אחרת הביקור הראשון, זה שהגיע
- * מהמודעה, הוא בדיוק זה שאובד.
+ * מי שסירב בביקור קודם לא מוריד את הקוד בכלל. מי שסירב עכשיו, אחרי
+ * שהסקריפטים כבר נטענו - שניהם נעצרים במקום: גוגל דרך
+ * `ga-disable-<מזהה>`, ומטא דרך `fbq('consent','revoke')`. בלי זה הם
+ * היו ממשיכים לספור צפיות עד הרענון הבא.
  */
 export default function Analytics() {
   const pathname = usePathname();
@@ -32,7 +26,13 @@ export default function Analytics() {
 
   useEffect(() => {
     if (!analyticsOn) return;
-    const sync = () => setGranted(hasConsent('analytics'));
+    const sync = () => {
+      const ok = hasConsent('analytics');
+      const w = window as unknown as Record<string, unknown> & { fbq?: (...a: unknown[]) => void };
+      if (GA_ID) w[`ga-disable-${GA_ID}`] = !ok;
+      if (w.fbq) w.fbq('consent', ok ? 'grant' : 'revoke');
+      setGranted(ok);
+    };
     sync();
     window.addEventListener('mikra:consent', sync);
     return () => window.removeEventListener('mikra:consent', sync);

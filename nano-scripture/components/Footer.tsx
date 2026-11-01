@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import Logo from './Logo';
+import { CONSENT_OPEN_EVENT } from '@/lib/consent';
 import { BRAND } from '@/lib/brand';
 import { COMPANY, SOCIAL, telHref, waHref } from '@/lib/company';
 import { CATEGORIES, ACTIVE_CATEGORIES, AUDIENCE_PAGES, AUDIENCE_ORDER } from '@/lib/catalog';
@@ -196,9 +197,13 @@ export default function Footer() {
           <p>
             © {new Date().getFullYear()} {BRAND.name} · {BRAND.nameLatin} - כל הזכויות שמורות
           </p>
-          <div className="flex gap-6">
+          <div className="flex flex-wrap gap-x-6 gap-y-1">
             <Link href="/legal/terms" className="tap-row link-u">תנאי שימוש</Link>
             <Link href="/legal/privacy" className="tap-row link-u">פרטיות</Link>
+            {/* פותח את באנר העוגיות מחדש, כדי לשנות את הבחירה (1.11.2026) */}
+            <button type="button" onClick={() => window.dispatchEvent(new Event(CONSENT_OPEN_EVENT))} className="tap-row link-u">
+              הגדרות עוגיות
+            </button>
             <Link href="/legal/accessibility" className="tap-row link-u">נגישות</Link>
             <Link href="/legal/shipping-returns" className="tap-row link-u">משלוחים והחזרות</Link>
             {/* המילים "ביטול עסקה" בדיוק, וקישור משלו - דרישת סעיף 14ט */}

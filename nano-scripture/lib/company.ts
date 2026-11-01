@@ -21,7 +21,7 @@ export const COMPANY = {
    * נמסר - ואת השם של אדם אמיתי לא ממציאים. שווה להשלים.
    */
   accessibilityContact: 'בטלפון 050-612-8288 או באימייל mikrajewelry@gmail.com' as string | null,
-  updated: 'אוגוסט 2026',
+  updated: 'נובמבר 2026',
 };
 
 /**
