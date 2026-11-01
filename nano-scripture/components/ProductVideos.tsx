@@ -48,10 +48,9 @@ export default function ProductVideos({ product }: { product: Product }) {
                 preload="none"
                 className="w-full"
                 style={{ aspectRatio: '9 / 16', objectFit: 'cover', borderRadius: 'var(--radius-lg)', background: 'var(--bg-2)' }}
+                aria-label={c.label}
               />
-              <figcaption className="mt-2" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-                {c.label}
-              </figcaption>
+              {/* בלי כיתוב מתחת לסרטון (עמית, 1.11.2026) */}
             </figure>
           ))}
         </div>
