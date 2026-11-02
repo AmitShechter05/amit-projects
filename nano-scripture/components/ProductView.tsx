@@ -902,7 +902,7 @@ export default function ProductView({ product }: { product: Product }) {
                     {'photo' in group && group.photo && (
                       // סרטון הקופסה ליד הצילום, בכל דגם (עמית, 2.11.2026). הוא נטען
                       // רק כשלוחצים, כך שהקטע הסגור לא מוסיף משקל לעמוד
-                      <div className="mb-3 mt-1 grid gap-3" style={{ gridTemplateColumns: '1fr auto', height: 'clamp(220px, 60vw, 300px)', maxWidth: 520 }}>
+                      <div className="mb-3 mt-1 grid gap-3" style={{ gridTemplateColumns: '1fr 146px', height: 260, maxWidth: 520 }}>
                         <div className="relative overflow-hidden" style={{ borderRadius: 'var(--radius-lg)' }}>
                           <Image
                             src={group.photo}
@@ -919,8 +919,8 @@ export default function ProductView({ product }: { product: Product }) {
                           playsInline
                           preload="none"
                           aria-label="סרטון: פותחים את הקופסה של מקרא"
-                          className="h-full"
-                          style={{ aspectRatio: '9 / 16', objectFit: 'cover', borderRadius: 'var(--radius-lg)', background: 'var(--bg-2)' }}
+                          className="h-full w-full"
+                          style={{ objectFit: 'cover', borderRadius: 'var(--radius-lg)', background: 'var(--bg-2)' }}
                         />
                       </div>
                     )}
