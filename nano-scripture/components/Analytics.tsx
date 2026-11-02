@@ -7,7 +7,7 @@ import { CLARITY_ID, GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/a
 import { hasConsent } from '@/lib/consent';
 
 /**
- * טעינת סקריפטי המדידה - מהכניסה, אלא אם הגולש אמר "לא מסכים"
+ * טעינת סקריפטי המדידה - מהכניסה, אלא אם הגולש אמר "לא, תודה"
  * (lib/consent.ts, 1.11.2026).
  *
  * מי שסירב בביקור קודם לא מוריד את הקוד בכלל. מי שסירב עכשיו, אחרי

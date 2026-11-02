@@ -16,8 +16,12 @@ import { analyticsOn } from '@/lib/analytics';
  * כי אפשר להתעלם ממנו ולהמשיך לגלוש.
  *
  * מ-1.11.2026 המדידה פועלת מהכניסה (lib/consent.ts), והבאנר אומר את
- * זה בפירוש. "לא מסכים" מכבה אותה, ו"הגדרות עוגיות" בפוטר פותח אותו
+ * זה בפירוש. "לא, תודה" מכבה אותה, ו"הגדרות עוגיות" בפוטר פותח אותו
  * מחדש כדי לשנות את הבחירה.
+ *
+ * הנוסח (2.11.2026): עמית - "הקלטת הגלישה" ו"לא מסכים" נשמעים מאיימים,
+ * ולקוח היה לוחץ לסרב. הבאנר אומר בשביל מה העוגיות (לשפר את האתר,
+ * פרסומות מתאימות), ואיזה כלי עושה מה - כולל ההקלטה - במדיניות הפרטיות.
  *
  * הנוסח נגזר מ-`analyticsOn` ולא נכתב ביד. כשאין מזהי מדידה בסביבה
  * באמת לא רץ כאן כלום, וכשהם נוספים המשפט מתעדכן מעצמו - באנר
@@ -64,7 +68,7 @@ export default function CookieBanner() {
       >
         <p className="min-w-0 flex-1" style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.5 }}>
           {analyticsOn
-            ? 'עוגיות למדידה, לפרסום ולהקלטת הגלישה.'
+            ? 'אנחנו משתמשים בעוגיות כדי לשפר את האתר ולהראות לך פרסומות שמתאימות לך.'
             : 'אנחנו שומרים בדפדפן רק את העגלה ואת בחירות התצוגה שלכם - זה נחוץ כדי שהאתר יעבוד.'}{' '}
           <Link href="/legal/privacy" className="link-u">
             פרטים
@@ -77,7 +81,7 @@ export default function CookieBanner() {
             className="btn"
             style={{ fontSize: 'var(--fs-2xs)', padding: '.3rem .8rem', minHeight: 44, whiteSpace: 'nowrap' }}
           >
-            לא מסכים
+            לא, תודה
           </button>
           <button
             type="button"
@@ -85,7 +89,7 @@ export default function CookieBanner() {
             className="btn btn-solid"
             style={{ fontSize: 'var(--fs-2xs)', padding: '.3rem .8rem', minHeight: 44, whiteSpace: 'nowrap' }}
           >
-            אישור
+            בסדר
           </button>
         </div>
       </div>
