@@ -74,7 +74,9 @@ gtag('config','${GA_ID}');`}
         </>
       )}
 
-      {CLARITY_ID && (
+      {/* רק בדומיין האמיתי: Vercel פותח כל גרסה חדשה בבוט מכתובת זמנית,
+          וההקלטות שלו מילאו את Clarity ביום הראשון (2.11.2026) */}
+      {CLARITY_ID && /(^|\.)mikra\.shop$/.test(window.location.hostname) && (
         <Script id="ms-clarity" strategy="afterInteractive">
           {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
 t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
