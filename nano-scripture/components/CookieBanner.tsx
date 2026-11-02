@@ -51,29 +51,31 @@ export default function CookieBanner() {
       style={{ zIndex: 110, padding: '0 .75rem .75rem' }}
     >
       <div
-        className="mx-auto flex max-w-[820px] flex-col gap-4 sm:flex-row sm:items-center"
+        // קומפקטי (2.11.2026): בגרסה הקודמת הבאנר תפס כחמישית מהמסך בטלפון,
+        // ובעמוד מוצר הסתיר את שם הדגם. מה בדיוק נטען - במדיניות הפרטיות
+        className="mx-auto flex max-w-[820px] items-center gap-3"
         style={{
           background: 'var(--bg)',
           border: '1px solid var(--line-strong)',
           borderRadius: 'var(--radius-lg)',
-          padding: '1rem 1.15rem',
+          padding: '.6rem .75rem',
           boxShadow: '0 14px 40px rgb(20 18 12 / .14)',
         }}
       >
-        <p style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.65 }}>
+        <p className="min-w-0 flex-1" style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.5 }}>
           {analyticsOn
-            ? 'האתר משתמש בעוגיות למדידה ולפרסום (Google Analytics, פיקסל של מטא, ו-Microsoft Clarity שמקליט את הגלישה באתר). אם לא מתאים לכם, לחצו "לא מסכים" והמדידה תיכבה.'
+            ? 'עוגיות למדידה, לפרסום ולהקלטת הגלישה.'
             : 'אנחנו שומרים בדפדפן רק את העגלה ואת בחירות התצוגה שלכם - זה נחוץ כדי שהאתר יעבוד.'}{' '}
           <Link href="/legal/privacy" className="link-u">
-            מדיניות הפרטיות
+            פרטים
           </Link>
         </p>
-        <div className="flex flex-shrink-0 gap-2.5">
+        <div className="flex flex-shrink-0 gap-2">
           <button
             type="button"
             onClick={() => choose('essential')}
             className="btn"
-            style={{ fontSize: 'var(--fs-2xs)', padding: '.6rem 1rem', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--fs-2xs)', padding: '.3rem .8rem', minHeight: 44, whiteSpace: 'nowrap' }}
           >
             לא מסכים
           </button>
@@ -81,7 +83,7 @@ export default function CookieBanner() {
             type="button"
             onClick={() => choose('all')}
             className="btn btn-solid"
-            style={{ fontSize: 'var(--fs-2xs)', padding: '.6rem 1rem', whiteSpace: 'nowrap' }}
+            style={{ fontSize: 'var(--fs-2xs)', padding: '.3rem .8rem', minHeight: 44, whiteSpace: 'nowrap' }}
           >
             אישור
           </button>

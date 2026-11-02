@@ -75,15 +75,14 @@ export default function ProductView({ product }: { product: Product }) {
 
   const [blessing, setBlessing] = useState<BlessingId>((stocked[0] ?? available[0]).id);
   /**
-   * האם הברכה נבחרה בפועל, ולא רק ברירת המחדל.
-   *
-   * עשרה מתוך חמישה־עשר הדגמים נושאים יותר מנוסח אחד, וברירת המחדל
-   * היא הראשון ברשימה. הפס הדביק מופיע עכשיו גם לפני שמגיעים לבורר,
-   * ובלי הדגל הזה אפשר היה להוסיף לעגלה ולצרוב נוסח שאיש לא בחר.
+   * עד 2.11.2026 הפס הדביק דרש "בחירה מודעת": הוא כתב "עוד לא נבחרה
+   * ברכה" ושלח לבורר, בזמן שבבורר עצמו הברכה הראשונה כבר הייתה מסומנת
+   * ב-✓ - וכפתור ההוספה הראשי הוסיף אותה בלי לשאול. שתי הודעות סותרות
+   * על אותו מסך, ביום שבו אף מבקר מהמודעות לא הוסיף לעגלה. עכשיו יש
+   * מצב אחד: ברירת המחדל היא בחירה, והפס כותב את שמה. החלפה אפשרית
+   * בוואטסאפ עד שהחבילה יוצאת, והתכשיטים במלאי לפי ברכה - אין כאן
+   * חריטה שאי אפשר לבטל.
    */
-  const [picked, setPicked] = useState(false);
-  const chooserRef = useRef<HTMLDivElement>(null);
-  const mustChoose = stocked.length > 1 && !picked;
   const [view, setView] = useState<View>('jewel');
   const [qty, setQty] = useState(1);
   const [openSpec, setOpenSpec] = useState<number | null>(null);
@@ -129,10 +128,7 @@ export default function ProductView({ product }: { product: Product }) {
   useEffect(() => {
     const want = new URLSearchParams(window.location.search).get('b');
     const hit = stocked.find((x) => x.id === want);
-    if (hit) {
-      setBlessing(hit.id);
-      setPicked(true);
-    }
+    if (hit) setBlessing(hit.id);
     // רק בטעינה. הבחירה של הלקוח אחר כך היא שקובעת
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -565,7 +561,7 @@ export default function ProductView({ product }: { product: Product }) {
           הכרטיסים גלויים תמיד. הבורר המתקפל חסך גובה, אבל הסתיר את
           העובדה שיש בכלל מה לבחור - וזה בדיוק מה שנקרא "מבולגן".
         */}
-        <div ref={chooserRef} style={{ scrollMarginTop: 96 }}>
+        <div style={{ scrollMarginTop: 96 }}>
           <div className="mb-3 flex items-baseline justify-between gap-3">
             <p className="display" style={{ fontSize: 'var(--fs-md)', letterSpacing: 0 }}>
               {one ? 'הברכה שחרוטה על השבב' : 'איזו ברכה תהיה על השבב?'}
@@ -595,10 +591,7 @@ export default function ProductView({ product }: { product: Product }) {
                   aria-checked={one ? undefined : on}
                   aria-disabled={out || undefined}
                   disabled={one || out}
-                  onClick={() => {
-                    setBlessing(item.id);
-                    setPicked(true);
-                  }}
+                  onClick={() => setBlessing(item.id)}
                   className="relative flex items-start gap-2.5 p-3 text-start"
                   style={{
                     borderRadius: 'var(--radius)',
@@ -1003,9 +996,8 @@ export default function ProductView({ product }: { product: Product }) {
             <span className="display block truncate" style={{ fontSize: 'var(--fs-base)' }}>
               {product.name}
             </span>
-            {/* בלי בחירה אין מה להציג כנוסח - הכפתור שולח לבורר */}
             <span className="block truncate" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-2)' }}>
-              {mustChoose ? 'עוד לא נבחרה ברכה' : b.plain}
+              {one ? b.plain : `ברכה: ${b.plain}`}
             </span>
           </span>
 
@@ -1028,21 +1020,13 @@ export default function ProductView({ product }: { product: Product }) {
 
           <button
             onClick={() => {
-              // בלי בחירה מודעת הפס לא קונה - הוא מגלגל אל הבורר.
-              // צריבה של נוסח שלא נבחר אינה שגיאה שאפשר לתקן אחרי
-              // המשלוח, כי התכשיט כבר נצרב
-              if (soldOut) return;
-              if (mustChoose) {
-                chooserRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                return;
-              }
-              add(product.slug, blessing, qty);
+              if (!soldOut) add(product.slug, blessing, qty);
             }}
             disabled={soldOut}
             className="btn btn-solid shrink-0 sm:max-w-xs sm:flex-1"
             style={{ ['--pad' as string]: '.85rem 1.1rem', fontSize: 'var(--fs-sm)', ...(soldOut ? { opacity: 0.55, cursor: 'not-allowed' } : {}) }}
           >
-            {soldOut ? 'אזל מהמלאי' : mustChoose ? 'בחירת ברכה' : 'הוספה לעגלה'}
+            {soldOut ? 'אזל מהמלאי' : 'הוספה לעגלה'}
           </button>
         </div>
       </div>
