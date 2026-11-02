@@ -900,13 +900,27 @@ export default function ProductView({ product }: { product: Product }) {
                 >
                   <dl style={{ overflow: 'hidden' }}>
                     {'photo' in group && group.photo && (
-                      <div className="relative mb-3 mt-1 overflow-hidden" style={{ aspectRatio: '4 / 3', borderRadius: 'var(--radius-lg)', maxWidth: 420 }}>
-                        <Image
-                          src={group.photo}
-                          alt="הקופסה המרופדת עם התכשיט, ולידה כרטיס הברכה"
-                          fill
-                          sizes="(max-width: 768px) 92vw, 420px"
-                          className="object-cover"
+                      // סרטון הקופסה ליד הצילום, בכל דגם (עמית, 2.11.2026). הוא נטען
+                      // רק כשלוחצים, כך שהקטע הסגור לא מוסיף משקל לעמוד
+                      <div className="mb-3 mt-1 grid gap-3" style={{ gridTemplateColumns: '1fr auto', height: 'clamp(220px, 60vw, 300px)', maxWidth: 520 }}>
+                        <div className="relative overflow-hidden" style={{ borderRadius: 'var(--radius-lg)' }}>
+                          <Image
+                            src={group.photo}
+                            alt="הקופסה המרופדת עם התכשיט, ולידה כרטיס הברכה"
+                            fill
+                            sizes="(max-width: 768px) 55vw, 320px"
+                            className="object-cover"
+                          />
+                        </div>
+                        <video
+                          src="/ugc/unboxing.mp4"
+                          poster="/ugc/unboxing.jpg"
+                          controls
+                          playsInline
+                          preload="none"
+                          aria-label="סרטון: פותחים את הקופסה של מקרא"
+                          className="h-full"
+                          style={{ aspectRatio: '9 / 16', objectFit: 'cover', borderRadius: 'var(--radius-lg)', background: 'var(--bg-2)' }}
                         />
                       </div>
                     )}
