@@ -62,7 +62,7 @@ export default function CookieBanner() {
       >
         <p style={{ fontSize: 'var(--fs-2xs)', color: 'var(--ink-2)', lineHeight: 1.65 }}>
           {analyticsOn
-            ? 'האתר משתמש בעוגיות למדידה ולפרסום (Google Analytics ופיקסל של מטא). אם לא מתאים לכם, לחצו "לא מסכים" והמדידה תיכבה.'
+            ? 'האתר משתמש בעוגיות למדידה ולפרסום (Google Analytics, פיקסל של מטא, ו-Microsoft Clarity שמקליט את הגלישה באתר). אם לא מתאים לכם, לחצו "לא מסכים" והמדידה תיכבה.'
             : 'אנחנו שומרים בדפדפן רק את העגלה ואת בחירות התצוגה שלכם - זה נחוץ כדי שהאתר יעבוד.'}{' '}
           <Link href="/legal/privacy" className="link-u">
             מדיניות הפרטיות

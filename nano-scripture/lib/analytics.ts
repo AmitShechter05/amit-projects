@@ -27,9 +27,16 @@ import type { CartLine } from './cart';
 
 export const GA_ID = process.env.NEXT_PUBLIC_GA_ID || '';
 export const PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID || '';
+/**
+ * Microsoft Clarity - הקלטות גלישה ומפות חום (עמית, 2.11.2026): 50 מבקרים
+ * מהמודעות ואף הוספה לעגלה, וההקלטות מראות איפה כל אחד עצר. המזהה
+ * ציבורי (הוא יושב בקוד של כל עמוד), אז הוא כאן ולא במשתנה סביבה.
+ * מאחורי אותו שער הסכמה כמו השניים האחרים.
+ */
+export const CLARITY_ID = 'z79ud4jwa2';
 
 /** נדלק רק כשיש מה להפעיל. בלי מזהים האתר מתנהג כאילו הקובץ לא קיים */
-export const analyticsOn = Boolean(GA_ID || PIXEL_ID);
+export const analyticsOn = Boolean(GA_ID || PIXEL_ID || CLARITY_ID);
 
 type Params = Record<string, unknown>;
 

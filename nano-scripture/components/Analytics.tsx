@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
+import { CLARITY_ID, GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
 import { hasConsent } from '@/lib/consent';
 
 /**
@@ -12,7 +12,8 @@ import { hasConsent } from '@/lib/consent';
  *
  * מי שסירב בביקור קודם לא מוריד את הקוד בכלל. מי שסירב עכשיו, אחרי
  * שהסקריפטים כבר נטענו - שניהם נעצרים במקום: גוגל דרך
- * `ga-disable-<מזהה>`, ומטא דרך `fbq('consent','revoke')`. בלי זה הם
+ * `ga-disable-<מזהה>`, מטא דרך `fbq('consent','revoke')`, ו-Clarity דרך
+ * `clarity('stop')`. בלי זה הם
  * היו ממשיכים לספור צפיות עד הרענון הבא.
  */
 export default function Analytics() {
@@ -28,9 +29,13 @@ export default function Analytics() {
     if (!analyticsOn) return;
     const sync = () => {
       const ok = hasConsent('analytics');
-      const w = window as unknown as Record<string, unknown> & { fbq?: (...a: unknown[]) => void };
+      const w = window as unknown as Record<string, unknown> & {
+        fbq?: (...a: unknown[]) => void;
+        clarity?: (...a: unknown[]) => void;
+      };
       if (GA_ID) w[`ga-disable-${GA_ID}`] = !ok;
       if (w.fbq) w.fbq('consent', ok ? 'grant' : 'revoke');
+      if (w.clarity) w.clarity(ok ? 'start' : 'stop');
       setGranted(ok);
     };
     sync();
@@ -67,6 +72,15 @@ gtag('js',new Date());
 gtag('config','${GA_ID}');`}
           </Script>
         </>
+      )}
+
+      {CLARITY_ID && (
+        <Script id="ms-clarity" strategy="afterInteractive">
+          {`(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+})(window,document,"clarity","script","${CLARITY_ID}");`}
+        </Script>
       )}
 
       {PIXEL_ID && (
