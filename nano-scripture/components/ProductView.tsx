@@ -143,6 +143,16 @@ export default function ProductView({ product }: { product: Product }) {
   const cat = CATEGORIES[product.category];
   const sale = saleOf(product.price);
   // התצוגה הנוכחית כשהיא סצנה - האינדקס נגזר מהמזהה
+  // החלקה ונגיעה בתמונה הגדולה (7.11.2026): ב-Clarity הלחיצות הנפוצות ביותר
+  // בעמוד היו על התמונה, ושום דבר לא קרה - "נראה שבור" (עמית). בעברית
+  // התמונה הבאה יושבת משמאל, ולכן אצבע שזזה ימינה מביאה אותה.
+  // בתצוגת השבב האצבע מזיזה את הזכוכית המגדלת, אז שם אין החלקה
+  const touchFrom = useRef<{ x: number; y: number } | null>(null);
+  const swiped = useRef(false);
+  const step = (dir: 1 | -1) => {
+    const i = VIEWS.findIndex((v) => v.id === view);
+    setView(VIEWS[(i + dir + VIEWS.length) % VIEWS.length].id);
+  };
   const sceneIndex = view.startsWith('scene-') ? Number(view.slice(6)) : -1;
   const siblings = finishSiblings(product);
 
@@ -283,6 +293,27 @@ export default function ProductView({ product }: { product: Product }) {
             border: '1px solid var(--line)',
             borderRadius: 'var(--radius-lg)',
             overflow: 'hidden',
+            cursor: view === 'chip' ? undefined : 'pointer',
+            touchAction: view === 'chip' ? undefined : 'pan-y',
+          }}
+          onTouchStart={(e) => {
+            swiped.current = false;
+            touchFrom.current = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+          }}
+          onTouchEnd={(e) => {
+            const from = touchFrom.current;
+            touchFrom.current = null;
+            if (!from || view === 'chip') return;
+            const dx = e.changedTouches[0].clientX - from.x;
+            const dy = e.changedTouches[0].clientY - from.y;
+            if (Math.abs(dx) > 40 && Math.abs(dx) > Math.abs(dy)) {
+              swiped.current = true;
+              step(dx > 0 ? 1 : -1);
+            }
+          }}
+          onClick={() => {
+            if (swiped.current || view === 'chip') return;
+            step(1);
           }}
         >
           {view === 'jewel' && (
@@ -321,6 +352,24 @@ export default function ProductView({ product }: { product: Product }) {
               <NanoLoupe blessing={blessing} height="100%" radius={62} />
             </div>
           )}
+          {/* כמה תמונות יש - כדי שיהיה ברור שאפשר להחליק */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-3 flex justify-center gap-1.5"
+          >
+            {VIEWS.map((v) => (
+              <span
+                key={v.id}
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: 2,
+                  background: v.id === view ? 'var(--accent)' : 'rgb(255 255 255 / .85)',
+                  boxShadow: '0 0 0 1px rgb(0 0 0 / .18)',
+                }}
+              />
+            ))}
+          </div>
         </div>
 
         {/* תמונות ממוזערות — כמו בכל חנות, ולא כפתורי טקסט.
