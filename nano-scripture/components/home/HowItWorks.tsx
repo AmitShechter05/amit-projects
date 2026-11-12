@@ -64,8 +64,8 @@ function CatalogMock() {
               padding: '2px 8px',
               borderRadius: 3,
               border: `1px solid ${i === 0 ? 'var(--accent)' : 'var(--line)'}`,
-              background: i === 0 ? 'var(--accent)' : 'transparent',
-              color: i === 0 ? 'var(--on-accent)' : 'var(--ink-2)',
+              background: i === 0 ? 'var(--mark)' : 'transparent',
+              color: i === 0 ? 'var(--on-mark)' : 'var(--ink-2)',
             }}
           >
             {t}
@@ -141,7 +141,7 @@ function BlessingMock() {
       <div className="px-3 pb-3 pt-3">
         <div
           className="flex items-center justify-center"
-          style={{ height: 24, borderRadius: 3, background: 'var(--accent)', color: 'var(--on-accent)', fontSize: 9.5 }}
+          style={{ height: 24, borderRadius: 3, background: 'var(--accent-fill)', color: 'var(--on-accent)', fontSize: 9.5 }}
         >
           הוספה לעגלה
         </div>

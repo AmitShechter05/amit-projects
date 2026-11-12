@@ -39,7 +39,7 @@ export function ZoomTile({ photo, accent }: { photo: string; accent: string }) {
       />
       <figcaption
         className="absolute inset-x-0 bottom-0 flex items-baseline justify-between px-5 py-3.5"
-        style={{ background: 'linear-gradient(to top, rgb(22 21 15 / .82), transparent)', color: '#fff' }}
+        style={{ background: 'linear-gradient(to top, rgb(59 36 24 / .82), transparent)', color: '#fff' }}
       >
         <span style={{ fontSize: 'var(--fs-sm)' }}>השבב במסגרת</span>
         <span className="num" style={{ fontSize: 'var(--fs-xs)', opacity: 0.85 }}>
@@ -114,7 +114,7 @@ export default function ZoomLadder({
                 transform: 'translate(-50%, -50%)',
                 border: `1.5px solid ${accent}`,
                 borderRadius: 2,
-                boxShadow: '0 0 0 9999px rgb(22 21 15 / .28)',
+                boxShadow: '0 0 0 9999px rgb(59 36 24 / .28)',
               }}
             />
           )}
@@ -122,7 +122,7 @@ export default function ZoomLadder({
           <figcaption
             className="absolute inset-x-0 bottom-0 flex items-baseline justify-between px-3.5 py-2.5"
             style={{
-              background: 'linear-gradient(to top, rgb(22 21 15 / .82), transparent)',
+              background: 'linear-gradient(to top, rgb(59 36 24 / .82), transparent)',
               color: '#fff',
             }}
           >
@@ -148,7 +148,7 @@ export default function ZoomLadder({
         <figcaption
           className="pointer-events-none absolute inset-x-0 bottom-0 flex items-baseline justify-between px-3.5 py-2.5"
           style={{
-            background: 'linear-gradient(to top, rgb(22 21 15 / .88), transparent)',
+            background: 'linear-gradient(to top, rgb(59 36 24 / .88), transparent)',
             color: '#fff',
           }}
         >

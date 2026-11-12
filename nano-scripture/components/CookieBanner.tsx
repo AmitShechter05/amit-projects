@@ -13,7 +13,7 @@ import { analyticsOn } from '@/lib/analytics';
  * לתשובה אחת - וזה בדיוק מה שרשויות באירופה קונסות עליו.
  *
  * הוא יושב בתחתית ואינו חוסם את העמוד: אין רקע כהה ואין לכידת מיקוד,
- * כי אפשר להתעלם ממנו ולהמשיך לגלוש.
+ * כי אפשר להתעלם ממנו ולהמשיך לגלוש - ומי שגולל, הבאנר יורד לו.
  *
  * מ-1.11.2026 המדידה פועלת מהכניסה (lib/consent.ts), והבאנר אומר את
  * זה בפירוש. "לא, תודה" מכבה אותה, ו"הגדרות עוגיות" בפוטר פותח אותו
@@ -28,17 +28,60 @@ import { analyticsOn } from '@/lib/analytics';
  * שמצהיר "לא מודדים" בזמן שהפיקסל טעון הוא בדיוק ההצהרה שקונסים
  * עליה.
  */
+/**
+ * נסגר מעצמו בגלילה (10.11.2026). ב-Clarity רוב המבקרים מהמודעות לא
+ * לחצו על אף כפתור, והבאנר ישב על תחתית עמוד המוצר לאורך כל הביקור.
+ * גלילה אינה הסכמה ולכן לא נרשמת בחירה: המדידה ממילא פועלת מהכניסה,
+ * ו"הגדרות עוגיות" בפוטר עדיין פותח אותו. הסימון ב-sessionStorage
+ * שומר שלא יחזור בכל עמוד באותו ביקור; בביקור הבא הוא יופיע שוב.
+ */
+const DISMISS_KEY = 'mikra:cookie-banner-dismissed';
+const DISMISS_SCROLL_PX = 150;
+
+function dismissedThisVisit() {
+  try {
+    return sessionStorage.getItem(DISMISS_KEY) === '1';
+  } catch {
+    return false;
+  }
+}
+
 export default function CookieBanner() {
   const [show, setShow] = useState(false);
+  // רק הופעה אוטומטית נסגרת בגלילה. מי שפתח מהפוטר גלל כדי להגיע
+  // לשם, והבאנר לא אמור להיעלם לו מתחת לאצבע
+  const [auto, setAuto] = useState(false);
 
   useEffect(() => {
     // נבדק אחרי ההרכבה: בשרת אין localStorage, ובדיקה בזמן רינדור
     // הייתה מייצרת חוסר התאמה בין מה שהשרת שלח למה שהלקוח ציפה לו
-    if (!readConsent()) setShow(true);
-    const open = () => setShow(true);
+    if (!readConsent() && !dismissedThisVisit()) {
+      setShow(true);
+      setAuto(true);
+    }
+    const open = () => {
+      setAuto(false);
+      setShow(true);
+    };
     window.addEventListener(CONSENT_OPEN_EVENT, open);
     return () => window.removeEventListener(CONSENT_OPEN_EVENT, open);
   }, []);
+
+  useEffect(() => {
+    if (!show || !auto) return;
+    const start = window.scrollY;
+    const onScroll = () => {
+      if (Math.abs(window.scrollY - start) < DISMISS_SCROLL_PX) return;
+      try {
+        sessionStorage.setItem(DISMISS_KEY, '1');
+      } catch {
+        // גלישה פרטית - ייסגר רק בעמוד הזה
+      }
+      setShow(false);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, [show, auto]);
 
   if (!show) return null;
 
@@ -86,7 +129,7 @@ export default function CookieBanner() {
           <button
             type="button"
             onClick={() => choose('all')}
-            className="btn btn-solid"
+            className="btn btn-dark"
             style={{ fontSize: 'var(--fs-2xs)', padding: '.3rem .8rem', minHeight: 44, whiteSpace: 'nowrap' }}
           >
             בסדר

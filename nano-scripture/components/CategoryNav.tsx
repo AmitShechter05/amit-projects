@@ -29,8 +29,8 @@ export default function CategoryNav({ current }: { current?: CategoryId }) {
               fontSize: 'var(--fs-sm)',
               whiteSpace: 'nowrap',
               border: `1px solid ${active ? 'var(--accent)' : 'var(--line)'}`,
-              background: active ? 'var(--accent)' : 'transparent',
-              color: active ? 'var(--on-accent)' : 'var(--ink-2)',
+              background: active ? 'var(--mark)' : 'transparent',
+              color: active ? 'var(--on-mark)' : 'var(--ink-2)',
               transition: 'all .35s var(--ease)',
             }}
           >

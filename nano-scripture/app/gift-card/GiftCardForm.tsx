@@ -83,7 +83,7 @@ export default function GiftCardForm() {
           style={{
             borderRadius: 'var(--radius-lg)',
             background: 'linear-gradient(140deg, #1d1a16, #3a3326 60%, #6b5a36)',
-            color: '#fbf8f1',
+            color: '#f2e8da',
             boxShadow: '0 20px 40px -18px rgb(30 25 15 / .45)',
           }}
         >

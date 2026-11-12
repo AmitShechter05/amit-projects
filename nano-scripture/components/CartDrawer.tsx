@@ -8,7 +8,7 @@ import { getProduct, formatPrice, ACTIVE_CATEGORIES, FINISHES, packshotFit } fro
 import { getBlessing } from '@/lib/blessings';
 import { PROMO, saleOf, isPromoCode, normalizeCode, type CouponInfo } from '@/lib/promo';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
-import { POLICY, shippingNote, freeShippingGap, shippingCost, giftBoxFee } from '@/lib/policy';
+import { POLICY, shippingNote, giftBoxGap, shippingCost, giftBoxFee } from '@/lib/policy';
 import { companionsFor, forWhom } from '@/lib/companions';
 import { readJoin, type JoinCtx } from '@/lib/join';
 import PaymentMarks from '@/components/PaymentMarks';
@@ -175,7 +175,7 @@ export default function CartDrawer() {
   /**
    * הסכום כולל משלוח, לא "ביניים".
    *
-   * המספר בעגלה גדל בצ'קאאוט ב-₪29, וזה בדיוק המנגנון של הסיבה
+   * המספר בעגלה גדל בצ'קאאוט בדמי המשלוח, וזה בדיוק המנגנון של הסיבה
    * הראשונה לנטישה בכל סקר של Baymard: עלות שמופיעה מאוחר. אותה
    * פונקציה שהשרת גובה בה, עם ברירת המחדל שלו - משלוח עד הבית. מי
    * שיבחר איסוף בצ'קאאוט יראה את הסכום יורד, לא עולה.
@@ -189,9 +189,10 @@ export default function CartDrawer() {
    * חלוקים על אותה הזמנה: העגלה אומרת "עוד ₪60" והשרת כבר נותן
    * משלוח חינם. עכשיו שניהם קוראים לאותו חישוב.
    */
-  const threshold = POLICY.freeShippingOver;
-  const gap = freeShippingGap(listTotal) ?? 0;
-  const freeShip = (threshold !== null && gap <= 0) || Boolean(join);
+  // מ-5.11.2026 המשלוח עד הבית חינם תמיד; הסף שנשאר הוא של אריזת המתנה
+  const threshold = POLICY.giftBoxFreeOver;
+  const gap = giftBoxGap(listTotal) ?? 0;
+  const freeShip = (POLICY.shippingFlat !== null && shipCost === 0) || Boolean(join);
   const progress = threshold === null ? 0 : Math.min(1, listTotal / threshold);
 
   // השלמה לסף: עוד תכשיט לאותו אדם שבשבילו כבר בחרו (lib/companions.ts),
@@ -301,7 +302,8 @@ export default function CartDrawer() {
                 <span style={{ color: 'var(--accent-deep)', fontWeight: 500 }}>המשלוח ואריזת המתנה עלינו</span>
               ) : (
                 <>
-                  עוד <span className="num">{formatPrice(gap)}</span>, והמשלוח ואריזת המתנה עלינו
+                  <span style={{ color: 'var(--accent-deep)', fontWeight: 500 }}>המשלוח עלינו.</span> עוד{' '}
+                  <span className="num">{formatPrice(gap)}</span>, וגם אריזת המתנה
                 </>
               )}
             </p>
@@ -312,7 +314,7 @@ export default function CartDrawer() {
                   // scaleX ולא width: מתיחה במרוכב, בלי חישוב פריסה בכל פריים
                   transform: `scaleX(${progress})`,
                   transformOrigin: 'right',
-                  background: 'linear-gradient(to left, var(--accent), var(--spark))',
+                  background: 'var(--mark)',
                   transition: 'transform .7s var(--ease)',
                 }}
               />
@@ -411,7 +413,7 @@ export default function CartDrawer() {
                     {formatPrice(sale.now)} ליחידה
                   </p>
 
-                  <div className="mt-auto flex items-center justify-between pt-3">
+                  <div className="mt-auto flex items-center justify-between gap-3 pt-3">
                     <Stepper qty={line.qty} onChange={(n) => setQty(key, n)} />
                     <span className="flex items-baseline gap-2">
                       {sale.discounted && (
@@ -433,6 +435,17 @@ export default function CartDrawer() {
           })}
 
           {lines.length > 0 && (
+            <div className="mt-5 flex items-center gap-3 p-2.5" style={{ background: 'var(--surface)', borderRadius: 'var(--radius)' }}>
+              <span className="relative shrink-0 overflow-hidden" style={{ width: 72, height: 54, borderRadius: 'var(--radius)' }}>
+                <Image src="/scene/box-card.jpg" alt="הקופסה המרופדת וכרטיס הברכה" fill sizes="72px" className="object-cover" />
+              </span>
+              <span style={{ fontSize: 'var(--fs-xs)', lineHeight: 1.5, color: 'var(--ink-2)' }}>
+                <span style={{ fontWeight: 700, color: 'var(--ink)' }}>כך זה מגיע:</span> קופסה מרופדת, וכרטיס עם הברכה המלאה
+              </span>
+            </div>
+          )}
+
+          {lines.length > 0 && (
             <button
               onClick={() => setGift(!gift)}
               role="switch"
@@ -452,7 +465,7 @@ export default function CartDrawer() {
                   flexShrink: 0,
                   borderRadius: 99,
                   padding: 3,
-                  background: gift ? 'var(--accent)' : 'var(--line-strong)',
+                  background: gift ? 'var(--mark)' : 'var(--line-strong)',
                   transition: 'background-color .3s var(--ease)',
                 }}
               >
@@ -482,10 +495,69 @@ export default function CartDrawer() {
             </button>
           )}
 
+          {lines.length > 0 && (
+            <div className="pt-6">
+              {/* מחירון ואז הנחה ואז סכום. בלי שורת המחירון ההנחה נראית כאילו
+                  היא יורדת מהסכום שכבר מוצג, ומספרים שלא מסתדרים שוברים אמון */}
+              {discount > 0 && (
+                <>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>סכום הפריטים</span>
+                    <span className="num" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
+                      {formatPrice(listTotal)}
+                    </span>
+                  </div>
+                  <div className="mb-2 flex items-center justify-between">
+                    <span style={{ color: 'var(--sale)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
+                      {PROMO.pill} · {PROMO.code}
+                    </span>
+                    <span className="num" style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--sale)' }}>
+                      −{formatPrice(discount)}
+                    </span>
+                  </div>
+                </>
+              )}
+
+              <CodeField />
+
+              <div className="mb-3 flex items-center justify-between">
+                <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>משלוח</span>
+                <span
+                  className={POLICY.shippingFlat === null ? undefined : 'num'}
+                  style={{
+                    fontSize: 'var(--fs-sm)',
+                    fontWeight: freeShip ? 500 : 400,
+                    color: freeShip ? 'var(--accent-deep)' : 'var(--ink-2)',
+                  }}
+                >
+                  {freeShip ? 'חינם' : shippingNote}
+                </span>
+              </div>
+
+              {gift && (
+                <div className="mb-3 flex items-center justify-between">
+                  <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>{GIFT_BOX.title}</span>
+                  <span
+                    className={giftFee ? 'num' : undefined}
+                    style={{ fontSize: 'var(--fs-sm)', color: giftFee ? 'var(--ink)' : 'var(--accent-deep)', fontWeight: giftFee ? 400 : 500 }}
+                  >
+                    {giftFee ? formatPrice(giftFee) : 'חינם'}
+                  </span>
+                </div>
+              )}
+
+              {/* המשלוח לא נכלל כאן. ההבטחה הזו סותרת את הפס שלמעלה */}
+              <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
+                קופסה מרופדת וכרטיס ברכה - כלולים בכל הזמנה
+              </p>
+              <PaymentMarks tone="cards" gap={6} className="mt-3 justify-center" />
+            </div>
+          )}
+
           {fillers.length > 0 && (
             <div className="py-7">
               <p style={{ fontSize: 'var(--fs-xs)', fontWeight: 500, color: 'var(--accent-deep)' }}>
-                {whom ? `עוד תכשיט ${whom}` : 'עוד תכשיט'}, והמשלוח ואריזת המתנה עלינו
+                {whom ? `עוד תכשיט ${whom}` : 'עוד תכשיט'}, ואריזת המתנה עלינו
               </p>
 
               <div className="mt-4 flex flex-col gap-3">
@@ -535,61 +607,13 @@ export default function CartDrawer() {
           )}
         </div>
 
+        {/* למטה קבועים רק הסכום והכפתור. כל השאר - קוד, משלוח, אמצעי
+            תשלום - נגלל יחד עם הפריטים. קודם כל אלה היו קבועים, ותפסו כמעט את
+            כל המסך: בהדמיית אייפון (4.11.2026) שורת המוצר נחתכה אחרי השם,
+            והלקוח לא ראה את הברכה, הכמות או המחיר של מה שהוא קונה */}
         {lines.length > 0 && (
-          <div className="px-7 py-6" style={{ borderTop: '1px solid var(--line)' }}>
-            {/* מחירון ואז הנחה ואז סכום. בלי שורת המחירון ההנחה נראית כאילו
-                היא יורדת מהסכום שכבר מוצג, ומספרים שלא מסתדרים שוברים אמון */}
-            {discount > 0 && (
-              <>
-                <div className="mb-2 flex items-center justify-between">
-                  <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>סכום הפריטים</span>
-                  <span className="num" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
-                    {formatPrice(listTotal)}
-                  </span>
-                </div>
-                <div className="mb-2 flex items-center justify-between">
-                  <span style={{ color: 'var(--sale)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}>
-                    {PROMO.pill} · {PROMO.code}
-                  </span>
-                  <span className="num" style={{ fontSize: 'var(--fs-sm)', fontWeight: 500, color: 'var(--sale)' }}>
-                    −{formatPrice(discount)}
-                  </span>
-                </div>
-              </>
-            )}
-
-            <CodeField />
-
-            <div className="mb-3 flex items-center justify-between">
-              <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>משלוח</span>
-              <span
-                className={POLICY.shippingFlat === null ? undefined : 'num'}
-                style={{
-                  fontSize: 'var(--fs-sm)',
-                  fontWeight: freeShip ? 500 : 400,
-                  color: freeShip ? 'var(--accent-deep)' : 'var(--ink-2)',
-                }}
-              >
-                {freeShip ? 'חינם' : shippingNote}
-              </span>
-            </div>
-
-            {gift && (
-              <div className="mb-3 flex items-center justify-between">
-                <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>{GIFT_BOX.title}</span>
-                <span
-                  className={giftFee ? 'num' : undefined}
-                  style={{ fontSize: 'var(--fs-sm)', color: giftFee ? 'var(--ink)' : 'var(--accent-deep)', fontWeight: giftFee ? 400 : 500 }}
-                >
-                  {giftFee ? formatPrice(giftFee) : 'חינם'}
-                </span>
-              </div>
-            )}
-
-            <div
-              className="flex items-baseline justify-between pt-3"
-              style={{ borderTop: '1px solid var(--line)' }}
-            >
+          <div className="px-7 py-5" style={{ borderTop: '1px solid var(--line)' }}>
+            <div className="flex items-baseline justify-between">
               <span style={{ color: 'var(--ink-2)', fontSize: 'var(--fs-sm)' }}>
                 {POLICY.shippingFlat === null ? 'סה״כ ביניים' : 'סה״כ כולל משלוח'}
               </span>
@@ -616,12 +640,6 @@ export default function CartDrawer() {
             >
               מעבר לתשלום מאובטח
             </Link>
-
-            {/* המשלוח לא נכלל כאן. ההבטחה הזו סותרת את הפס שלמעלה */}
-            <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--ink-3)' }}>
-              קופסה מרופדת וכרטיס ברכה - כלולים בכל הזמנה
-            </p>
-            <PaymentMarks tone="cards" gap={6} className="mt-3 justify-center" />
           </div>
         )}
       </aside>

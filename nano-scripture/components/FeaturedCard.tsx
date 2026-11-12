@@ -66,8 +66,8 @@ export default function FeaturedCard({ product }: { product: Product }) {
                 fontWeight: 600,
                 padding: '.3rem .6rem',
                 borderRadius: 'var(--radius)',
-                color: 'var(--on-accent)',
-                background: 'var(--accent)',
+                color: 'var(--on-mark)',
+                background: 'var(--mark)',
               }}
             >
               {product.badge}

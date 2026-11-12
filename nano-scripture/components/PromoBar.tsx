@@ -21,11 +21,11 @@ const OFFERS = [
   ...(promoOn ? [`${PROMO.percent}% הנחה על כל האתר · להצטרפות למועדון`] : []),
   `עד ${INSTALLMENTS} תשלומים ללא ריבית`,
   `החזרה תוך ${POLICY.returnDays} יום`,
-  `משלוח מבוטח · ${deliveryLine}`,
+  `משלוח ${POLICY.shippingFlat === 0 ? 'חינם עד הבית' : 'מבוטח'} · ${deliveryLine}`,
   `${RABBINATE.short} מודיעין`,
   'קופסה מרופדת וכרטיס ברכה בכל הזמנה',
-  POLICY.freeShippingOver !== null
-    ? `מעל ₪${POLICY.freeShippingOver}: משלוח ואריזת מתנה עלינו`
+  POLICY.giftBoxFreeOver !== null
+    ? `מעל ₪${POLICY.giftBoxFreeOver}: גם אריזת מתנה עלינו`
     : `אריזת מתנה ב־₪${GIFT_BOX.price}`,
   'שנה אחריות על גוף התכשיט',
 ];
@@ -64,9 +64,10 @@ export default function PromoBar({ spacer = false }: { spacer?: boolean }) {
         ...(spacer ? { visibility: 'hidden' as const, pointerEvents: 'none' as const } : null),
         position: 'relative',
         overflow: 'hidden',
-        background: 'linear-gradient(100deg, var(--sale-deep), var(--sale) 46%, var(--sale-deep))',
-        color: 'var(--on-sale)',
-        borderBottom: '1px solid var(--sale-deep)',
+        // חום ולא אדום (12.11.2026): ההנחה נשארת, אבל לא מתחרה בכפתור התכלת
+        background: 'var(--mark)',
+        color: 'var(--on-mark)',
+        borderBottom: '1px solid var(--mark)',
       }}
     >
       {/* לא flex: כילד של flex, ה־width:max-content של הרצועה מתכווץ

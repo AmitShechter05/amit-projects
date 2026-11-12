@@ -109,7 +109,7 @@ function Shot({ shot, className, style, children }: { shot: ShotSpec; className:
         <p
           className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[40%] rounded px-2.5 py-1"
           style={{
-            background: 'rgb(22 21 15 / .72)',
+            background: 'rgb(59 36 24 / .72)',
             color: '#fff',
             fontSize: 'var(--fs-xs)',
             lineHeight: 1.4,
@@ -141,7 +141,7 @@ function Title({ facts }: { facts: string }) {
       </h1>
       <p
         className="reveal load mx-auto mt-5 inline-block rounded-md px-4 py-2"
-        style={{ ['--d' as string]: '240ms', background: '#18223f', color: '#fff', fontSize: 'var(--fs-sm)', fontWeight: 500 }}
+        style={{ ['--d' as string]: '240ms', background: 'var(--ink)', color: 'var(--bg)', fontSize: 'var(--fs-sm)', fontWeight: 500 }}
       >
         <span className="md:hidden">4 ברכות שלמות מהתנ״ך</span>
         <span className="hidden md:inline">{FOUR.join('  ·  ')}</span>
@@ -157,9 +157,14 @@ function Action() {
         בוחרים ברכה וקוראים את כולה באתר. היא נחרטת על שבב זכוכית בתוך התכשיט, מילה במילה.
       </p>
       <div className="reveal load mt-7 flex justify-center" style={{ ['--d' as string]: '440ms' }}>
-        <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-base)' }}>
-          לקטלוג
-        </Link>
+        <Link
+                href="/catalog"
+                className="btn btn-solid"
+                style={{ ['--pad' as string]: '1.05rem 2.6rem', fontSize: 'var(--fs-md)', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 22px rgb(59 36 24 / .22)' }}
+              >
+                לבחירת תכשיט
+                <span aria-hidden>←</span>
+              </Link>
       </div>
     </>
   );
@@ -191,8 +196,13 @@ export default function Hero() {
           <div className="absolute inset-x-0 top-[5%] mx-auto w-[var(--shell)] text-center">
             <Title facts={facts} />
             <div className="reveal load mt-4 flex justify-center" style={{ ['--d' as string]: '360ms' }}>
-              <Link href="/catalog" className="btn btn-solid" style={{ ['--pad' as string]: '.85rem 2.4rem', fontSize: 'var(--fs-base)' }}>
-                לקטלוג
+              <Link
+                href="/catalog"
+                className="btn btn-solid"
+                style={{ ['--pad' as string]: '.85rem 2.4rem', fontSize: 'var(--fs-md)', borderRadius: 'var(--radius-lg)', boxShadow: '0 8px 22px rgb(59 36 24 / .22)' }}
+              >
+                לבחירת תכשיט
+                <span aria-hidden>←</span>
               </Link>
             </div>
           </div>

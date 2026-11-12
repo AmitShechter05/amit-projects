@@ -100,7 +100,7 @@ function Progress({ step }: { step: Step }) {
             className="h-[3px] flex-1"
             style={{
               borderRadius: 2,
-              background: i < step || step === TOTAL ? 'var(--accent)' : i === step ? 'var(--line-strong)' : 'var(--line)',
+              background: i < step || step === TOTAL ? 'var(--mark)' : i === step ? 'var(--line-strong)' : 'var(--line)',
               transition: 'background-color .4s var(--ease)',
             }}
           />

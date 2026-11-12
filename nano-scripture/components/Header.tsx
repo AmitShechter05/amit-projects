@@ -64,7 +64,7 @@ function navLink(n: { href: string; label: string; wide?: boolean }, active: boo
           insetInline: 0,
           bottom: -2,
           height: 1.5,
-          background: 'var(--accent)',
+          background: 'var(--mark)',
           transform: active ? 'scaleX(1)' : 'scaleX(0)',
           transformOrigin: 'center',
           transition: 'transform .3s var(--ease)',
@@ -223,7 +223,7 @@ export default function Header() {
                     width: 6,
                     height: 6,
                     borderRadius: 99,
-                    background: 'var(--accent)',
+                    background: 'var(--mark)',
                   }}
                 />
               )}
@@ -246,7 +246,7 @@ export default function Header() {
           position: 'fixed',
           inset: 0,
           zIndex: 88,
-          background: 'rgb(22 21 15 / .38)',
+          background: 'rgb(59 36 24 / .38)',
           opacity: menu ? 1 : 0,
           pointerEvents: menu ? 'auto' : 'none',
           transition: 'opacity .4s var(--ease)',

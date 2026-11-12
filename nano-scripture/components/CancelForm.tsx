@@ -125,7 +125,7 @@ export default function CancelForm() {
       <button
         type="submit"
         disabled={busy}
-        className="btn btn-solid mt-6"
+        className="btn btn-dark mt-6"
         style={{ ['--pad' as string]: '1rem 2.4rem', opacity: busy ? 0.6 : 1 }}
       >
         {busy ? 'רגע…' : 'שליחת הודעת ביטול'}

@@ -1,7 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { SITE_URL } from '@/lib/site';
 import { BLESSINGS, BLESSING_COUNT } from '@/lib/blessings';
-import { Heebo } from 'next/font/google';
+import { Heebo, Suez_One } from 'next/font/google';
 import './globals.css';
 
 import SmoothScroll from '@/components/SmoothScroll';
@@ -12,6 +12,7 @@ import CartDrawer from '@/components/CartDrawer';
 import JsonLd from '@/components/JsonLd';
 import A11yWidget from '@/components/A11yWidget';
 import Analytics from '@/components/Analytics';
+import PixelEarly from '@/components/PixelEarly';
 import CookieBanner from '@/components/CookieBanner';
 import SignupPopup from '@/components/SignupPopup';
 import ClubButton from '@/components/ClubButton';
@@ -32,6 +33,17 @@ const heebo = Heebo({
   subsets: ['hebrew', 'latin'],
   weight: ['300', '400', '500', '600', '700', '800'],
   variable: '--font-app',
+  display: 'swap',
+});
+
+// כותרות ב-Suez One (עמית, 12.11.2026, יחד עם הצבעים החום, הקרם
+// והתכלת; Frank Ruhl Libre נוסה באותו יום והרגיש לו "מעפן"). רק הכותרות -
+// כל השאר Heebo. בגופן אין סימן ₪ תקין (יוצא "ש"), ולכן מחירים בתוך
+// כותרת נכתבים ב-Heebo - ראו .display.num ב-globals.css
+const serif = Suez_One({
+  subsets: ['hebrew', 'latin'],
+  weight: '400',
+  variable: '--font-serif',
   display: 'swap',
 });
 
@@ -83,7 +95,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#faf8f3',
+  themeColor: '#f2e8da',
   width: 'device-width',
   initialScale: 1,
 };
@@ -99,9 +111,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html
       lang="he"
       dir="rtl"
-      className={heebo.variable}
+      className={`${heebo.variable} ${serif.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        <PixelEarly />
+      </head>
       <body>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <SmoothScroll />

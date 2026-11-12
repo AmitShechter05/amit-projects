@@ -1,5 +1,7 @@
 'use client';
 
+import CartIcon from './CartIcon';
+
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -22,6 +24,8 @@ import {
   isCutout,
   type Product,
   packshotFit,
+  PRODUCTS,
+  isHiddenProduct,
 } from '@/lib/catalog';
 import { useCart } from '@/lib/cart';
 import { GIFT_BOX, INSTALLMENTS, perInstallment } from '@/lib/extras';
@@ -38,6 +42,7 @@ import { productFaq } from '@/lib/faq';
 import { trackViewItem } from '@/lib/analytics';
 import PaymentMarks from '@/components/PaymentMarks';
 import RabbinateBadge from '@/components/RabbinateBadge';
+import { RABBINATE } from '@/lib/rabbinate';
 import NotifyRestock from '@/components/NotifyRestock';
 import OccasionDeadline from '@/components/OccasionDeadline';
 
@@ -73,7 +78,15 @@ export default function ProductView({ product }: { product: Product }) {
   const stocked = available.filter((b) => blessingInStock(product, b.id));
   const soldOut = stocked.length === 0;
 
-  const [blessing, setBlessing] = useState<BlessingId>((stocked[0] ?? available[0]).id);
+  // ברירת המחדל, וגם זו שמסומנת "מומלץ לדגם הזה" (עמית, 12.11.2026):
+  // לנשים אשת חיל, לגברים ברכת הפרנסה ואחריה שמירה והגנה. אם אף אחת
+  // מהן לא על הדגם או במלאי - הראשונה ברשימה של הדגם שיש במלאי
+  const prefer: BlessingId[] =
+    product.audience === 'women' ? ['eshet-chayil'] : product.audience === 'men' ? ['parnasa', 'shmira'] : [];
+  const inStock = (id: BlessingId) => stocked.some((x) => x.id === id);
+  const recommended =
+    prefer.find(inStock) ?? product.blessings.find(inStock) ?? (stocked[0] ?? available[0]).id;
+  const [blessing, setBlessing] = useState<BlessingId>(recommended);
   /**
    * עד 2.11.2026 הפס הדביק דרש "בחירה מודעת": הוא כתב "עוד לא נבחרה
    * ברכה" ושלח לבורר, בזמן שבבורר עצמו הברכה הראשונה כבר הייתה מסומנת
@@ -83,7 +96,7 @@ export default function ProductView({ product }: { product: Product }) {
    * בוואטסאפ עד שהחבילה יוצאת, והתכשיטים במלאי לפי ברכה - אין כאן
    * חריטה שאי אפשר לבטל.
    */
-  const [view, setView] = useState<View>('jewel');
+  const [view, setView] = useState<View>(() => (wornFor(product.slug) ? 'worn' : 'jewel'));
   const [qty, setQty] = useState(1);
   const [openSpec, setOpenSpec] = useState<number | null>(null);
   const add = useCart((s) => s.add);
@@ -94,17 +107,34 @@ export default function ProductView({ product }: { product: Product }) {
   // בצילום עם שני תכשיטים, המרכז הוא הרווח ביניהם ולא אחד מהם
   const wornAt = wornFocus(worn, product.slug);
   // הצילום על הדגם נכנס מיד אחרי פאק־שוט המוצר, אם קיים כזה
+  // סדר הגלריה (12.11.2026): קודם איך זה נראה על הגוף, מיד אחריו השבב
+  // עם הברכה - ההוכחה - ורק אז הפאק־שוט. רוב מי שמגיע ממודעה לא גולל,
+  // ולכן ההוכחה צריכה להיות בהחלקה אחת מהתמונה הראשונה
   const VIEWS = [
-    BASE_VIEWS[0],
     ...(worn ? [{ id: 'worn' as View, label: 'כשעונדים' }] : []),
+    ...BASE_VIEWS.slice(1),
+    BASE_VIEWS[0],
     ...(product.scenes ?? []).map((_, i) => ({
       id: `scene-${i}` as View,
       label: (product.scenes?.length ?? 0) > 1 ? `תמונה ${i + 1}` : 'תמונה',
     })),
-    ...BASE_VIEWS.slice(1),
   ];
 
   const one = available.length === 1;
+  /**
+   * חלופה זולה באותה ברכה (12.11.2026). בדגמים של ₪649 עזבו לפני הגלילה
+   * פי שניים מבדגמים של ₪349 (Clarity, 1-7.11). במקום שיעזוב - דגם לאותו
+   * קהל, עם אותה ברכה, שעולה לפחות רבע פחות.
+   */
+  const cheaper = PRODUCTS.filter(
+    (p) =>
+      p.slug !== product.slug &&
+      p.audience === product.audience &&
+      (p.blessings as string[]).includes(blessing) &&
+      !isHiddenProduct(p.slug) &&
+      blessingInStock(p, blessing) &&
+      p.price <= product.price * 0.75,
+  ).sort((x, y) => x.price - y.price)[0];
   const b = getBlessing(blessing);
   // אי אפשר להזמין יותר ממה שיש מהברכה הזו. null = המלאי לא מנוהל
   const left = blessingStock(product, blessing);
@@ -364,7 +394,7 @@ export default function ProductView({ product }: { product: Product }) {
                   width: 6,
                   height: 6,
                   borderRadius: 2,
-                  background: v.id === view ? 'var(--accent)' : 'rgb(255 255 255 / .85)',
+                  background: v.id === view ? 'var(--mark)' : 'rgb(255 255 255 / .85)',
                   boxShadow: '0 0 0 1px rgb(0 0 0 / .18)',
                 }}
               />
@@ -469,8 +499,8 @@ export default function ProductView({ product }: { product: Product }) {
               fontWeight: 600,
               padding: '.3rem .6rem',
               borderRadius: 'var(--radius)',
-              color: 'var(--on-accent)',
-              background: 'var(--accent)',
+              color: 'var(--on-mark)',
+              background: 'var(--mark)',
             }}
           >
             {product.badge}
@@ -513,12 +543,18 @@ export default function ProductView({ product }: { product: Product }) {
           </figure>
         ) : (
           <p className="mt-3 flex items-center gap-3">
-            <span aria-hidden style={{ width: 26, height: 1, background: 'var(--accent)', flexShrink: 0 }} />
+            <span aria-hidden style={{ width: 26, height: 1, background: 'var(--mark)', flexShrink: 0 }} />
             <span className="ltr" style={{ fontSize: 'var(--fs-2xs)', letterSpacing: '.32em', color: 'var(--accent)' }}>
               {product.nameLatin}
             </span>
           </p>
         )}
+
+        {/* שורה אחת מהברכה עצמה, כדי שגם מי שלא גולל יראה שיש כאן טקסט אמיתי */}
+        <p className="mt-3" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)', lineHeight: 1.6 }}>
+          <span className="display" style={{ fontWeight: 500, color: 'var(--ink)' }}>״{b.opening}...״</span>{' '}
+          - {b.plain}, חרוטה במלואה על השבב
+        </p>
 
         <div className="mt-4 flex flex-wrap items-baseline gap-x-4 gap-y-2 sm:mt-6">
           <span
@@ -550,6 +586,12 @@ export default function ProductView({ product }: { product: Product }) {
           <span style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-3)' }}>
             {MATERIALS[product.material].label} · {FINISHES[product.finish]}
           </span>
+          <Link
+            href={RABBINATE.href}
+            style={{ fontSize: 'var(--fs-2xs)', fontWeight: 500, padding: '.2rem .55rem', borderRadius: 'var(--radius)', background: 'var(--mark)', color: 'var(--on-mark)' }}
+          >
+            באישור לשכת הרבנות
+          </Link>
         </div>
 
         <p className="mt-2" style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }}>
@@ -674,6 +716,14 @@ export default function ProductView({ product }: { product: Product }) {
                       style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.3, color: on ? item.accentInk : 'var(--ink)' }}
                     >
                       {item.plain}
+                      {item.id === recommended && available.length > 1 && (
+                        <span
+                          className="ms-1.5 inline-block align-middle"
+                          style={{ fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 500, padding: '1px 5px', borderRadius: 3, background: 'var(--mark)', color: 'var(--on-mark)' }}
+                        >
+                          מומלץ לדגם הזה
+                        </span>
+                      )}
                     </span>
                     <span
                       className="mt-0.5 block"
@@ -735,9 +785,30 @@ export default function ProductView({ product }: { product: Product }) {
             className="btn btn-solid flex-1"
             style={soldOut ? { opacity: 0.55, cursor: 'not-allowed' } : undefined}
           >
-            {soldOut ? 'אזל מהמלאי' : `הוספה לעגלה · ${formatPrice(sale.now * qty)}`}
+            {soldOut ? 'אזל מהמלאי' : (
+              <>
+                <CartIcon />
+                הוספה לעגלה
+              </>
+            )}
           </button>
         </div>
+
+        {cheaper && (
+          <Link
+            href={`/products/${cheaper.slug}?b=${blessing}`}
+            className="mt-3 flex items-center gap-3 p-2.5"
+            style={{ border: '1px solid var(--line-strong)', borderRadius: 'var(--radius)', background: 'var(--surface)' }}
+          >
+            <span className="tile relative shrink-0 overflow-hidden" style={{ width: 48, height: 48, borderRadius: 'var(--radius)' }}>
+              <Image src={cheaper.image} alt="" fill sizes="48px" className={packshotFit(cheaper.image, 'p-1')} />
+            </span>
+            <span style={{ fontSize: 'var(--fs-sm)', lineHeight: 1.45 }}>
+              אותה ברכה, {b.plain}, גם ב{cheaper.name} -{' '}
+              <span className="num" style={{ fontWeight: 700 }}>{formatPrice(saleOf(cheaper.price).now)}</span> ←
+            </span>
+          </Link>
+        )}
 
         {/* מלאי נמוך - רק כשזה נכון, מהמלאי האמיתי של הברכה שנבחרה. בלי
             ספירה לאחור ובלי "רק היום": דחיפות שאינה אמת שוחקת אמון */}
@@ -779,7 +850,7 @@ export default function ProductView({ product }: { product: Product }) {
               flexShrink: 0,
               borderRadius: 99,
               padding: 3,
-              background: gift ? 'var(--accent)' : 'var(--line-strong)',
+              background: gift ? 'var(--mark)' : 'var(--line-strong)',
               transition: 'background-color .3s var(--ease)',
             }}
           >
@@ -1089,7 +1160,12 @@ export default function ProductView({ product }: { product: Product }) {
             className="btn btn-solid shrink-0 sm:max-w-xs sm:flex-1"
             style={{ ['--pad' as string]: '.85rem 1.1rem', fontSize: 'var(--fs-sm)', ...(soldOut ? { opacity: 0.55, cursor: 'not-allowed' } : {}) }}
           >
-            {soldOut ? 'אזל מהמלאי' : 'הוספה לעגלה'}
+            {soldOut ? 'אזל מהמלאי' : (
+              <>
+                <CartIcon size={16} />
+                הוספה לעגלה
+              </>
+            )}
           </button>
         </div>
       </div>

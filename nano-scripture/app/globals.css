@@ -13,24 +13,35 @@
 }
 
 :root {
-  /* --- אלבסטר וזהב עתיק --- */
-  --bg: #fbf8f1;
-  --bg-2: #f2ebdb;
-  --surface: #ffffff;
-  --surface-2: #f8f3e7;
-  --ink: #16150f;
-  /* נמדד על הקרם: 0.44 נתן 2.8:1 בטקסט המשני - מתחת לתקן, וזה מה
-     שגרם לכל הכיתוב המשני להיקרא כאותו חום דהוי בלי היררכיה.
-     0.62 מעלה אותו ל־4.9:1, ו־0.76 בשכבה שמעליו ל־8:1 */
-  --ink-2: rgb(22 21 15 / 0.76);
-  --ink-3: rgb(22 21 15 / 0.62);
-  --line: rgb(150 110 32 / 0.24);
-  --line-strong: rgb(150 110 32 / 0.44);
-  --accent: #96661c;
-  --accent-deep: #6f4a10;
-  --spark: #dcb45e;
-  --on-accent: #fffdf7;
-  --halo: rgb(214 172 82 / 0.3);
+  /* --- חום, קרם ותכלת (עמית, 12.11.2026) ---
+     החום לטקסט ולכותרות, הקרם לרקע, והתכלת רק לכפתור העגלה ולהדגשות.
+     תכלת בהיר לא קריא כטקסט על קרם, ולכן יש שני כחולים:
+     --accent-fill הוא התכלת עצמו, למשטחים (כפתורים, תגיות, נקודות),
+     ועליו כותבים בחום (--on-accent, 7.7:1). --accent הוא כחול עמוק
+     בתכלת יש רק כפתורי פעולה (btn-solid). --accent הוא חום חם לטקסט
+     מודגש ולקישורים (4.8:1 על הקרם). */
+  --bg: #f2e8da;
+  --bg-2: #e9ddcb;
+  --surface: #fbf6ef;
+  --surface-2: #f6eee2;
+  --ink: #3b2418;
+  /* נמדד על הקרם: 0.70 נותן 5:1 בטקסט המשני, 0.82 בשכבה שמעליו */
+  --ink-2: rgb(59 36 24 / 0.82);
+  --ink-3: rgb(59 36 24 / 0.7);
+  --line: rgb(59 36 24 / 0.16);
+  --line-strong: rgb(59 36 24 / 0.32);
+  --accent: #8a5a3b;
+  --accent-deep: #5e3a26;
+  --accent-fill: #8ec5e6;
+  --accent-fill-hover: #79b7dd;
+  --spark: #8ec5e6;
+  --on-accent: #3b2418;
+  --halo: rgb(142 197 230 / 0.35);
+  /* סימון שאינו פעולה (תגית, נקודה, מסנן נבחר, מתג) - חום, לא תכלת.
+     עמית, 12.11.2026: תכלת רק לכפתור שעושה פעולה חיובית, כך שגם
+     כשמכווצים את העיניים רואים רק את הכפתורים */
+  --mark: #3b2418;
+  --on-mark: #f2e8da;
 
   /* אדום המבצע — הצבע היחיד באתר שאינו במשפחת הזהב, ולכן העין נעצרת בו */
   --sale: #d81f2a;
@@ -78,13 +89,13 @@
   /* דקורטיבי בלבד: ספרת 404 והחותם בפוטר */
   --ds-mega: clamp(4rem, 16vw, 11rem);
 
-  /* גופן אחד, Heebo, לכותרות ולגוף - בחירת בעל החנות.
-     שני הכיוונים האחרים נבדקו ונפסלו: הדק היוקרתי הרג את הניגודיות,
-     וסריף ספר (Frank Ruhl Libre) לכותרות הוחזר לבקשתו. הכותרות
-     נשארות כבדות ואומרות מה המוצר. */
-  --font-display: var(--font-app), system-ui, sans-serif;
+  /* כותרות ב-Suez One, גוף ב-Heebo - עמית, 12.11.2026. ב-14.9 סריף ספר
+     הוחזר על רקע לבן וזהב; על החום והקרם נבחר Suez One. Suez בא במשקל
+     אחד (עבה מטבעו), ולכן --weight-display הוא 400 - אחרת הדפדפן
+     מעבה אותו עוד באופן מלאכותי. החזרה ל-Heebo בלבד = שתי השורות. */
+  --font-display: var(--font-serif), var(--font-app), serif;
   --font-body: var(--font-app), system-ui, sans-serif;
-  --weight-display: 700;
+  --weight-display: 400;
   --track-display: 0;
   --radius: 3px;
   --radius-lg: 6px;
@@ -152,7 +163,7 @@ body::after {
 }
 
 ::selection {
-  background: var(--accent);
+  background: var(--accent-fill);
   color: var(--on-accent);
 }
 
@@ -172,9 +183,20 @@ body::after {
 
 /* ---------- typography ---------- */
 
+/* ב-Suez One סימן ה-₪ שבור (יוצא "ש"), ולכן מספרים ומחירים בתוך כותרת
+   נכתבים ב-Heebo */
+.display.num,
+.display .num,
+.num .display {
+  font-family: var(--font-body);
+  font-weight: 700;
+}
+
 .display {
   font-family: var(--font-display);
   font-weight: var(--weight-display, 300);
+  /* ל-Suez One אין משקל עבה יותר - בלי זה הדפדפן "מעבה" אותו ומכער */
+  font-synthesis: none;
   letter-spacing: var(--track-display);
   line-height: 1.12;
   /* כותרת בשתי שורות נשברת למחצית ולא למילה אחת יתומה בשורה השנייה */
@@ -382,13 +404,13 @@ section {
   position: absolute;
   inset: 0;
   z-index: -1;
-  background: var(--accent);
+  background: var(--mark);
   transform: translateY(101%);
   transition: transform 0.45s var(--ease);
 }
 .btn:hover {
-  color: var(--on-accent);
-  border-color: var(--accent);
+  color: var(--on-mark);
+  border-color: var(--mark);
 }
 .btn:hover::before {
   transform: none;
@@ -400,13 +422,31 @@ section {
 .btn-solid {
   color: var(--on-accent);
   border-color: transparent;
+  font-weight: 700;
 }
 .btn-solid::before {
   transform: none;
+  background: var(--accent-fill);
+}
+.btn-solid:hover {
+  color: var(--on-accent);
+  border-color: transparent;
+}
+/* כפתור מלא שאינו פעולה חיובית (ביטול הזמנה, עוגיות) - חום */
+.btn-dark {
+  color: var(--on-mark);
+  border-color: transparent;
+}
+.btn-dark::before {
+  transform: none;
+  background: var(--mark);
+}
+.btn-dark:hover {
+  color: var(--on-mark);
 }
 .btn-solid:hover::before {
   transform: none;
-  background: var(--accent-deep);
+  background: var(--accent-fill-hover);
 }
 
 .btn-ghost {
