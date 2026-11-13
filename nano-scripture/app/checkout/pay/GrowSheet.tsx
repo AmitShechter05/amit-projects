@@ -90,6 +90,29 @@ export default function GrowSheet({
       savePending({ o: q.get('o') ?? '', k: q.get('k') ?? '', number, total });
     }
     const fail = (reason: string) => {
+      /**
+       * "Network error" של Grow - ניסיון שני אחד, לבד (13.11.2026).
+       * פעמיים (הזמנות 98 ו-100) חלון התשלום נפל ב-"Network error" שניות
+       * אחרי שנפתח, לפני שהלקוח בחר אמצעי תשלום, והלקוח נזרק לעמוד
+       * הכישלון. ב-98 הלקוחה לחצה "לנסות שוב" ושילמה; ב-100 הלקוחה
+       * ישבה 12 דקות בעמוד הכישלון ועזבה. טעינה מחדש של עמוד התשלום
+       * מביאה אסימון חדש מהתוסף - בדיוק מה ש"לנסות שוב" עושה. רק פעם
+       * אחת לכל הזמנה (sessionStorage), כדי שתקלה קבועה לא תהפוך ללולאה.
+       */
+      if (/network/i.test(reason)) {
+        const key = `mikra-grow-retry:${number}`;
+        let tried = true;
+        try {
+          tried = sessionStorage.getItem(key) === '1';
+          if (!tried) sessionStorage.setItem(key, '1');
+        } catch {
+          /* בלי אחסון - בלי ניסיון חוזר, כדי לא להיתקע בלולאה */
+        }
+        if (!tried) {
+          window.location.reload();
+          return;
+        }
+      }
       // ההזמנה נוסעת לעמוד הכישלון, כדי שיציג אותה גם בלי מה שנשמר בדפדפן
       const q = new URLSearchParams(path.split('?')[1] ?? '');
       if (reason) q.set('reason', reason.slice(0, 160));
