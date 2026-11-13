@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { preconnect, preload } from 'react-dom';
+import { GROW_SDK, GROW_ORIGIN } from '@/lib/growSdk';
 import { rememberShopper } from '@/lib/shopper';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -43,6 +45,11 @@ const DRAFT_KEY = 'mikra:checkout-draft';
  * server-only), וקובע מה כתוב על הכפתור: מה שבאמת קורה בלחיצה.
  */
 export default function CheckoutForm({ paymentReady = false }: { paymentReady?: boolean }) {
+  // חלון התשלום של Grow יורד כבר בקופה, כדי שייפתח מהר בעמוד התשלום
+  if (paymentReady) {
+    preconnect(GROW_ORIGIN);
+    preload(GROW_SDK, { as: 'script' });
+  }
   const { lines, gift, code, setOpen } = useCart();
   const [customer, setCustomer] = useState<Customer>(EMPTY_CUSTOMER);
   const [errors, setErrors] = useState<FieldErrors>({});

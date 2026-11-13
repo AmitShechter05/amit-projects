@@ -5,6 +5,8 @@ import Image from 'next/image';
 import { formatPrice, packshotFit } from '@/lib/catalog';
 import { POLICY } from '@/lib/policy';
 import PaymentMarks from '@/components/PaymentMarks';
+import PayTrust, { PayTrustStrip } from '@/components/PayTrust';
+import { GROW_SDK } from '@/lib/growSdk';
 import { savePending, clearPending } from '@/components/PendingPayment';
 
 /**
@@ -28,7 +30,7 @@ declare global {
   }
 }
 
-const SDK = 'https://cdn.meshulam.co.il/sdk/gs.min.js';
+const SDK = GROW_SDK;
 
 /** הודעת השגיאה של Grow, אם יש. המבנה לא מתועד, ולכן כמה שמות */
 function reasonOf(r: unknown): string {
@@ -192,6 +194,7 @@ export default function GrowSheet({
 
   return (
     <div className="mx-auto max-w-xl">
+      <PayTrustStrip className="mb-4" />
       <h1 className="display t-2 text-center">תשלום מאובטח</h1>
       <p className="mt-2 text-center" style={row}>
         הזמנה <span className="num">#{number}</span> נשמרה. נשאר רק לשלם.
@@ -269,11 +272,12 @@ export default function GrowSheet({
         {state === 'loading' ? 'פותחים את התשלום…' : `לתשלום · ${formatPrice(total)}`}
       </button>
       <PaymentMarks tone="cards" gap={6} className="mt-5 justify-center" />
-      <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: state === 'error' ? 'var(--accent)' : 'var(--ink-3)' }}>
-        {state === 'error'
-          ? 'חלון התשלום לא נטען. בדקו את החיבור לאינטרנט ונסו שוב.'
-          : `עד ${POLICY.maxInstallments} תשלומים · התשלום מאובטח אצל Grow, ופרטי הכרטיס לא נשמרים אצלנו.`}
-      </p>
+      {state === 'error' && (
+        <p className="mt-3 text-center" style={{ fontSize: 'var(--fs-xs)', color: 'var(--accent)' }}>
+          חלון התשלום לא נטען. בדקו את החיבור לאינטרנט ונסו שוב.
+        </p>
+      )}
+      <PayTrust className="mt-6" />
     </div>
   );
 }
