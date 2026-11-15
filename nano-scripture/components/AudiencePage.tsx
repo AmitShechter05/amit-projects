@@ -36,7 +36,17 @@ export default async function AudiencePage({ audience }: { audience: Audience })
   await syncPrices();
   const page = AUDIENCE_PAGES[audience];
   const all = productsForAudience(audience);
-  const groups = ACTIVE_CATEGORIES.map((id) => ({ id, list: productsForAudience(audience, id) })).filter(
+  /**
+   * מהזול ליקר (15.11.2026). העמוד הזה הוא היעד של מודעות, ובטלפון רואים
+   * בהתחלה 2-4 כרטיסים. קודם נפתח ב-₪849 וב-₪649, והדגמים שנמכרים
+   * (₪349-369) היו בסוף. מחיר שווה - נשאר הסדר של הקטלוג.
+   */
+  const byPrice = <T extends { price: number }>(list: T[]) =>
+    list
+      .map((p, i) => ({ p, i }))
+      .sort((x, y) => saleOf(x.p.price).now - saleOf(y.p.price).now || x.i - y.i)
+      .map((x) => x.p);
+  const groups = ACTIVE_CATEGORIES.map((id) => ({ id, list: byPrice(productsForAudience(audience, id)) })).filter(
     (g) => g.list.length > 0,
   );
   const prices = all.map((p) => saleOf(p.price).now);

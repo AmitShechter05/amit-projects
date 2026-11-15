@@ -68,9 +68,11 @@ export default function GrowSheet({
   const total = summary.total;
   const [state, setState] = useState<'loading' | 'open' | 'closed' | 'error'>('loading');
   const ready = useRef(false);
+  const opened = useRef(false);
 
   const open = () => {
     if (!window.growPayment) return;
+    opened.current = true;
     setState('open');
     window.growPayment.renderPaymentOptions(token);
   };
@@ -101,12 +103,18 @@ export default function GrowSheet({
        * מביאה אסימון חדש מהתוסף - בדיוק מה ש"לנסות שוב" עושה. רק פעם
        * אחת לכל הזמנה (sessionStorage), כדי שתקלה קבועה לא תהפוך ללולאה.
        */
-      if (/network/i.test(reason)) {
+      /**
+       * 15.11.2026: גם "SDK was not loaded as needed and therefore can't run".
+       * הלקוחה של הזמנה 102 (מודעת ליאל) קיבלה אותה פעמיים ונזרקה לעמוד
+       * הכישלון, ושילמה רק בניסיון השלישי. עד שני ניסיונות לבד לכל הזמנה.
+       */
+      if (/network|not loaded/i.test(reason)) {
         const key = `mikra-grow-retry:${number}`;
         let tried = true;
         try {
-          tried = sessionStorage.getItem(key) === '1';
-          if (!tried) sessionStorage.setItem(key, '1');
+          const n = Number(sessionStorage.getItem(key) ?? 0) || 0;
+          tried = n >= 2;
+          if (!tried) sessionStorage.setItem(key, String(n + 1));
         } catch {
           /* בלי אחסון - בלי ניסיון חוזר, כדי לא להיתקע בלולאה */
         }
@@ -140,7 +148,11 @@ export default function GrowSheet({
         },
       });
       // ה-SDK צריך רגע אחרי init לפני שהוא מוכן לפתוח חלון
-      setTimeout(open, 600);
+      // ה-SDK צריך רגע אחרי init. בטלפון איטי 600ms לא הספיקו (102), אז
+      // מחכים יותר, ופותחים רק אם הלקוח לא פתח כבר בעצמו
+      setTimeout(() => {
+        if (!opened.current) open();
+      }, 1200);
     };
 
     // bit ותשלומים שנפתחים באפליקציה: כשחוזרים לדפדפן, האירוע של Grow לא
