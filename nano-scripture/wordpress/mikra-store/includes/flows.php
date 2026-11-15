@@ -634,56 +634,70 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 	$go    = $code ? mikra_apply_url( $order ) : $pay;
 	$kind  = (string) $order->get_meta( '_mikra_ab_kind' );
 	$wa    = '<a href="' . esc_url( mikra_store_wa_url( $order ) ) . '" style="color:#96661c;font-weight:500;">בוואטסאפ <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span></a>';
-	$foot  = mk_footer( $unsub, 'כי אישרת דיוור', 'קיבלת את המייל כי התחלת הזמנה באתר, הזמנה #' . $order->get_order_number() . '.' );
+	$foot  = mk2_footer( $unsub );
 	$pct_h = '<span dir="ltr">' . $pct . '%</span>';
+	$box   = array( 'קופסה מרופדת', 'כרטיס עם הברכה המלאה', 'שנה אחריות על התכשיט', '30 יום להחזרה' );
+	$safe  = 'תשלום מאובטח דרך Grow · עד 5 תשלומים בלי ריבית';
 
+	// העיצוב החדש (1.7.0) - הבלוקים ב-includes/abandon-design.php
 	switch ( (int) $step ) {
 		case 1:
 			if ( $service ) {
+				// מייל שירות: בלי "פרסומת", בלי הנחה ובלי שכנוע - ההזמנה שמורה ואיך משלמים
 				$keep    = (int) $order->get_meta( '_mikra_ab_until' );
-				$rows    = mk_topbar( 'הזמנה #' . $order->get_order_number() )
-					. mk_heading( '', 'ההזמנה שלך', 'ממתינה לתשלום.', $hi . 'ההזמנה עוד לא שולמה, והיא שמורה' . ( $keep ? ' עד ' . esc_html( mikra_he_day( $keep ) ) : '' ) . '. אם כבר שילמת - אפשר להתעלם מהמייל הזה.', 40 )
-					. mk_cart( $order, 'פרטי ההזמנה' )
-					. mk_button( 'לתשלום', $pay );
+				$rows    = mk2_open( 'הזמנה #' . $order->get_order_number(), 'ההזמנה שלך', 'ממתינה לתשלום', $hi . 'ההזמנה עוד לא שולמה, והיא שמורה' . ( $keep ? ' עד ' . esc_html( mikra_he_day( $keep ) ) : '' ) . '. אם כבר שילמת - אפשר להתעלם מהמייל הזה.' )
+					. mk2_cart( $order, 'פרטי ההזמנה' )
+					. mk2_button( 'לתשלום', $pay, $safe )
+					. mk2_help( $order, 'שאלה על ההזמנה?' );
 				$subject = 'ההזמנה שלך במִקְרָא ממתינה לתשלום';
 				$pre     = 'הזמנה #' . $order->get_order_number() . ' עוד לא שולמה.';
+				$foot    = mk2_footer( '', '', 'קיבלת את המייל כי התחלת הזמנה באתר, הזמנה #' . $order->get_order_number() . '.' );
 				break;
 			}
-			$rows    = mk_photo_hero( 'hero-abandon-1.jpg', '', 'נשאר רק צעד אחד', 'התכשיט והברכה שבחרת שמורים לך, בדיוק כמו שהשארת.', 'להשלמת ההזמנה', $pay )
-				. mk_cart( $order )
-				. mk_button( 'להשלמת ההזמנה', $pay )
-				. mk_para( $hi . 'ראינו שהגעת עד התשלום ולא סיימת. זה קורה - אולי קפצה שיחה, אולי רצית לחשוב עוד רגע.', '36px 44px 0' )
-				. mk_note( 'שאלה לפני שמזמינים?', 'על הברכה, המידה או המשלוח - כותבים לנו ' . $wa . ', או עונים למייל הזה. עונים אנשים, לא בוט.' );
+			$rows    = mk2_open( 'ההזמנה שלך שמורה', 'נשאר רק', 'צעד אחד', $hi . 'התכשיט והברכה שבחרת שמורים לך, בדיוק כמו שהשארת.' )
+				. mk2_cart( $order )
+				. mk2_button( 'להשלמת ההזמנה', $pay, $safe )
+				. mk2_checklist( 'מה מגיע<br>בקופסה', $box, MIKRA_SITE . '/scene/box-card.jpg', 'הקופסה המרופדת וכרטיס הברכה' )
+				. mk2_button( 'להשלמת ההזמנה', $pay )
+				. mk2_help( $order );
 			$subject = 'פרסומת: נשאר רק צעד אחד - הברכה שלך מחכה';
 			$pre     = 'return' === $kind ? 'נשאר רק לאשר את התשלום.' : 'התכשיט והברכה שבחרת שמורים לך.';
 			break;
 
 		case 3:
-			$rows    = mk_photo_hero( 'hero-abandon-3.jpg', '', 'עדיין מתלבטים?<br>הנה מה שתקבלו.', 'צילום אמיתי של השבב, ואיך התכשיט נעשה.', 'להשלמת ההזמנה', $go )
-				. mk_lens_block( 'צילום אמיתי, במיקרוסקופ', 'כל מילה בברכה,<br>על שבב של <span dir="ltr">5</span> מ״מ.', 'כל אות בגובה של כחצי עובי שערה. חורטים את השבב לפי ההזמנה, ובודקים אות אחרי אות מול המקור.' )
-				. mk_sq3( 'מה שמגיע אליך' )
-				. mk_fact_boxes( array( array( 'עד 5', 'תשלומים' ), array( '2-4', 'ימי עסקים, מבוטח' ), array( '30 יום', 'להחזרה' ) ) )
-				. mk_cart( $order, 'מה שמחכה לך' )
-				. mk_button( 'להשלמת ההזמנה', $go );
+			$rows    = mk2_open( 'צילום אמיתי, במיקרוסקופ', 'ככה נראית', 'הברכה מבפנים', $hi . 'כל מילה בברכה, על שבב של <span dir="ltr">5</span> מ״מ. כל אות בגובה של כחצי עובי שערה.' )
+				. mk2_photo( MIKRA_IMG . 'chip-macro.jpg', 'השבב של אשת חיל, מתחת למיקרוסקופ', 'השבב של "אשת חיל", מתחת למיקרוסקופ' )
+				. mk2_cart( $order )
+				. mk2_button( 'להשלמת ההזמנה', $go, $safe )
+				. mk2_steps( 'מה קורה אחרי שמזמינים', array(
+					array( 'חורטים את הברכה', 'על שבב קטן, לפי ההזמנה שלך.' ),
+					array( 'בודקים אות אחרי אות', 'מול הטקסט המקורי, לפני שהשבב נכנס לתכשיט.' ),
+					array( 'אורזים בקופסה מרופדת', 'עם כרטיס שעליו הברכה המלאה.' ),
+					array( 'שולחים אליך', 'משלוח מבוטח, 2-4 ימי עסקים.' ),
+				) )
+				. mk2_button( 'להשלמת ההזמנה', $go )
+				. mk2_guarantee();
 			$subject = 'פרסומת: ככה נראית ברכה על שבב של 5 מ״מ';
 			$pre     = 'צילום אמיתי מהמיקרוסקופ, לפני שמחליטים.';
 			break;
 
 		case 2:
 			if ( $code ) {
-				$sub  = $promo ? 'קוד ההצטרפות שלך עוד לא נוצל. הוא נכנס להזמנה בלחיצה אחת.' : 'רצינו לתת לך סיבה טובה לסיים. ההנחה נכנסת להזמנה בלחיצה אחת.';
-				$rows = mk_photo_hero( 'hero-abandon-2.jpg', '', $pct_h . ' על ההזמנה<br>שכמעט סיימת', $sub, 'להשלמת ההזמנה עם ההנחה', $go )
-					. mk_ticket( array( 'code' => $code, 'percent' => $pct ), $promo ? 'קוד ההצטרפות שלך' : 'הקוד שלך', 'נכנס להזמנה בלחיצה על הכפתור' . ( $until ? ' · ' . $until : '' ), 'על ההזמנה' )
-					. mk_cart( $order )
-					. mk_button( 'להשלמת ההזמנה עם ההנחה', $go );
+				$lead = $promo ? 'קוד ההצטרפות שלך עוד לא נוצל' : 'על ההזמנה שכמעט סיימת';
+				$rows = mk2_open( '', 'ההזמנה שלך,', 'עם הנחה', $hi . ( $promo ? 'הקוד שקיבלת כשנרשמת נכנס להזמנה בלחיצה אחת.' : 'רצינו לתת לך סיבה טובה לסיים. ההנחה נכנסת להזמנה בלחיצה אחת.' ) )
+					. mk2_offer( $pct, $code, $lead, 'נכנס להזמנה בלחיצה על הכפתור' . ( $until ? ' · ' . $until : '' ) )
+					. mk2_button( 'להשלמת ההזמנה עם ההנחה', $go )
+					. mk2_cart( $order )
+					. mk2_button( 'להשלמת ההזמנה עם ההנחה', $go, $safe )
+					. mk2_rabbinate();
 				$subject = 'פרסומת: ההזמנה שלך, עם ' . $pct . '% הנחה';
 				$pre     = 'ההנחה נכנסת בלחיצה אחת' . ( $until ? ', ' . $until : '' ) . '.';
 			} else {
 				// כבר יש הנחה על ההזמנה (קוד ההצטרפות) - לא מוסיפים עוד
-				$rows    = mk_photo_hero( 'hero-abandon-2.jpg', '', 'ההנחה שלך<br>כבר על ההזמנה', 'הקוד שהזנת שמור בהזמנה. נשאר רק לשלם.', 'להשלמת ההזמנה', $pay )
-					. mk_para( $hi . 'אפשר לשלם בכרטיס אשראי, bit, Apple Pay או Google Pay, עד 5 תשלומים.', '36px 44px 0' )
-					. mk_cart( $order )
-					. mk_button( 'להשלמת ההזמנה', $pay );
+				$rows    = mk2_open( 'ההנחה כבר בפנים', 'ההנחה שלך', 'כבר על ההזמנה', $hi . 'הקוד שהזנת שמור בהזמנה. נשאר רק לשלם - בכרטיס אשראי, bit, Apple Pay או Google Pay.' )
+					. mk2_cart( $order )
+					. mk2_button( 'להשלמת ההזמנה', $pay, $safe )
+					. mk2_rabbinate();
 				$subject = 'פרסומת: ההזמנה שלך, עם ההנחה, עדיין שמורה';
 				$pre     = 'נשאר רק לשלם.';
 			}
@@ -691,7 +705,7 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 
 		case 4:
 			// מכתב קצר, קישור אחד בתוך הטקסט, ושאלה אחת בסוף
-			$link = '<a href="' . esc_url( $go ) . '" style="color:#96661c;text-decoration:underline;">ההזמנה שמורה כאן</a>';
+			$link = '<a href="' . esc_url( $go ) . '" style="color:#3B2418;font-weight:700;text-decoration:underline;">ההזמנה שמורה כאן</a>';
 			$wa_t = 'בוואטסאפ <span dir="ltr">' . esc_html( MIKRA_PHONE ) . '</span>';
 			if ( 'return' === $kind ) {
 				$subject = 'פרסומת: תודה, ומילה אחרונה מאיתנו';
@@ -719,7 +733,7 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 		default:
 			return null;
 	}
-	return array( $subject, mk_wrap( $subject, $pre, $rows . $foot ) );
+	return array( $subject, mk2_wrap( $subject, $pre, $rows . $foot ) );
 }
 
 /* ------------------------------------------------------------------
