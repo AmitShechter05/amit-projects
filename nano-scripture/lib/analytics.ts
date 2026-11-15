@@ -35,6 +35,15 @@ export const PIXEL_ID = process.env.NEXT_PUBLIC_FB_PIXEL_ID || '';
  */
 export const CLARITY_ID = 'z79ud4jwa2';
 
+/**
+ * Google Ads (חשבון 922-283-3899, 15.11.2026). נטען על אותו gtag.js של
+ * אנליטיקס, ולכן כל אירוע שנורה ב-gtag (purchase, add_to_cart,
+ * begin_checkout, view_item) מגיע גם לשם - ושם הוא נספר כהמרה לפי השם.
+ * בלי זה Google Ads לא יודע על אף מכירה מקמפיין השופינג. ציבורי כמו
+ * המזהה של Clarity, ומאחורי אותו שער הסכמה.
+ */
+export const ADS_ID = 'AW-18577198702';
+
 /** נדלק רק כשיש מה להפעיל. בלי מזהים האתר מתנהג כאילו הקובץ לא קיים */
 export const analyticsOn = Boolean(GA_ID || PIXEL_ID || CLARITY_ID);
 

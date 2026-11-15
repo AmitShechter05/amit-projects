@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Script from 'next/script';
-import { CLARITY_ID, GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
+import { ADS_ID, CLARITY_ID, GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
 import { hasConsent } from '@/lib/consent';
 
 /**
@@ -24,6 +24,11 @@ export default function Analytics() {
    * של מטא, בתוך קוד האתחול. בלי הדילוג הזה כל כניסה נספרת פעמיים.
    */
   const counted = useRef(false);
+  /**
+   * הפיקסל נטען בדרך כלל כבר בראש העמוד (<PixelEarly>), יחד עם ה-PageView
+   * הראשון. כאן הוא נטען רק אם זה לא קרה - מי שסירב בעבר ומסכים עכשיו.
+   */
+  const [pixelHere, setPixelHere] = useState(false);
 
   useEffect(() => {
     if (!analyticsOn) return;
@@ -34,8 +39,10 @@ export default function Analytics() {
         clarity?: (...a: unknown[]) => void;
       };
       if (GA_ID) w[`ga-disable-${GA_ID}`] = !ok;
+      if (GA_ID) w[`ga-disable-${ADS_ID}`] = !ok;
       if (w.fbq) w.fbq('consent', ok ? 'grant' : 'revoke');
       if (w.clarity) w.clarity(ok ? 'start' : 'stop');
+      setPixelHere(!w.__mikraPixel);
       setGranted(ok);
     };
     sync();
@@ -69,7 +76,8 @@ export default function Analytics() {
 function gtag(){dataLayer.push(arguments)}
 window.gtag=gtag;
 gtag('js',new Date());
-gtag('config','${GA_ID}');`}
+gtag('config','${GA_ID}');
+gtag('config','${ADS_ID}');`}
           </Script>
         </>
       )}
@@ -85,7 +93,7 @@ y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
         </Script>
       )}
 
-      {PIXEL_ID && (
+      {PIXEL_ID && pixelHere && (
         <Script id="fb-pixel" strategy="afterInteractive">
           {`!function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
