@@ -6,6 +6,7 @@ import { POLICY, SHIPPING, shippingCost } from '@/lib/policy';
 import { productTitle } from '@/lib/seo';
 import { syncPrices } from '@/lib/livePrices';
 import { jpegImage } from '@/lib/jpegImage';
+import { RABBINATE } from '@/lib/rabbinate';
 
 /**
  * פיד מוצרים — /feed.xml
@@ -88,7 +89,29 @@ function description(p: Product) {
     names.length > 1
       ? `את הברכה שחרוטה על השבב בוחרים בהזמנה: ${names.join(' / ')}.`
       : `על השבב חרוטה הברכה: ${names[0]}.`;
-  return `${p.short}. ${p.story} ${chip}`;
+  /**
+   * חומר וצבע במילים (15.11.2026). Merchant Center סימן 10 שרשראות
+   * ב"להוסיף לתיאור: חומר" - השדה g:material לבד לא מספיק, גוגל רוצה
+   * את זה גם בטקסט שהלקוח קורא.
+   */
+  const made = `חומר: ${MATERIALS[p.material].note} צבע: ${FINISHES[p.finish]}.`;
+  return `${p.short}. ${p.story} ${chip} ${made}`;
+}
+
+/**
+ * הפרטים העיקריים (g:product_highlight) - עד 10 שורות קצרות שגוגל מציג
+ * ליד המוצר. רק עובדות שכבר כתובות באתר: החומר, השבב, אישור הרבנות,
+ * האריזה (CartDrawer: "קופסה מרופדת, וכרטיס עם הברכה המלאה"), המשלוח
+ * וההחזרה מ-POLICY.
+ */
+function highlights(p: Product) {
+  return [
+    MATERIALS[p.material].note,
+    'הברכה המלאה מהתנ"ך חרוטה על שבב קטן בתוך התכשיט',
+    RABBINATE.short,
+    'מגיע בקופסה מרופדת, עם כרטיס שעליו הברכה המלאה',
+    `משלוח ${POLICY.deliveryMinDays}-${POLICY.deliveryMaxDays} ימי עסקים · החזרה תוך ${POLICY.returnDays} יום`,
+  ].map((h) => h.slice(0, 150));
 }
 
 function item(p: Product) {
@@ -133,6 +156,7 @@ function item(p: Product) {
     ['g:gender', GENDER[p.audience]],
     ['g:age_group', p.ageGroup ?? 'adult'],
     ...(group ? [['g:item_group_id', group]] : []),
+    ...highlights(p).map((h) => ['g:product_highlight', h]),
   ];
 
   const extras = (p.scenes ?? [])
@@ -156,6 +180,10 @@ ${extras}
         <g:country>IL</g:country>
         <g:service>${esc(delivery?.label ?? 'משלוח')}</g:service>
         <g:price>${shipping.toFixed(2)} ILS</g:price>
+        <g:min_handling_time>0</g:min_handling_time>
+        <g:max_handling_time>1</g:max_handling_time>
+        <g:min_transit_time>${POLICY.deliveryMinDays}</g:min_transit_time>
+        <g:max_transit_time>${POLICY.deliveryMaxDays}</g:max_transit_time>
       </g:shipping>${threshold}
     </item>`;
 }
