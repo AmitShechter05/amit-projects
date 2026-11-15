@@ -645,7 +645,8 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 			if ( $service ) {
 				// מייל שירות: בלי "פרסומת", בלי הנחה ובלי שכנוע - ההזמנה שמורה ואיך משלמים
 				$keep    = (int) $order->get_meta( '_mikra_ab_until' );
-				$rows    = mk2_open( 'הזמנה #' . $order->get_order_number(), 'ההזמנה שלך', 'ממתינה לתשלום', $hi . 'ההזמנה עוד לא שולמה, והיא שמורה' . ( $keep ? ' עד ' . esc_html( mikra_he_day( $keep ) ) : '' ) . '. אם כבר שילמת - אפשר להתעלם מהמייל הזה.' )
+				$rows    = mk2_hero( MIKRA_SITE . '/scene/tipat-or-box-card.jpg', 'תכשיט בקופסה המרופדת, ליד כרטיס הברכה' )
+					. mk2_open( 'הזמנה #' . $order->get_order_number(), 'ההזמנה שלך', 'ממתינה לתשלום', $hi . 'ההזמנה עוד לא שולמה, והיא שמורה' . ( $keep ? ' עד ' . esc_html( mikra_he_day( $keep ) ) : '' ) . '. אם כבר שילמת - אפשר להתעלם מהמייל הזה.' )
 					. mk2_cart( $order, 'פרטי ההזמנה' )
 					. mk2_button( 'לתשלום', $pay, $safe )
 					. mk2_help( $order, 'שאלה על ההזמנה?' );
@@ -654,7 +655,8 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 				$foot    = mk2_footer( '', '', 'קיבלת את המייל כי התחלת הזמנה באתר, הזמנה #' . $order->get_order_number() . '.' );
 				break;
 			}
-			$rows    = mk2_open( 'ההזמנה שלך שמורה', 'נשאר רק', 'צעד אחד', $hi . 'התכשיט והברכה שבחרת שמורים לך, בדיוק כמו שהשארת.' )
+			$rows    = mk2_hero( MIKRA_IMG . 'hero-couple.jpg', 'זוג עונד תכשיטים של מקרא' )
+				. mk2_open( 'ההזמנה שלך שמורה', 'נשאר רק', 'צעד אחד', $hi . 'התכשיט והברכה שבחרת שמורים לך, בדיוק כמו שהשארת.' )
 				. mk2_cart( $order )
 				. mk2_button( 'להשלמת ההזמנה', $pay, $safe )
 				. mk2_checklist( 'מה מגיע<br>בקופסה', $box, MIKRA_SITE . '/scene/box-card.jpg', 'הקופסה המרופדת וכרטיס הברכה' )
@@ -665,8 +667,8 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 			break;
 
 		case 3:
-			$rows    = mk2_open( 'צילום אמיתי, במיקרוסקופ', 'ככה נראית', 'הברכה מבפנים', $hi . 'כל מילה בברכה, על שבב של <span dir="ltr">5</span> מ״מ. כל אות בגובה של כחצי עובי שערה.' )
-				. mk2_photo( MIKRA_IMG . 'chip-macro.jpg', 'השבב של אשת חיל, מתחת למיקרוסקופ', 'השבב של "אשת חיל", מתחת למיקרוסקופ' )
+			$rows    = mk2_hero( MIKRA_IMG . 'chip-macro.jpg', 'השבב של אשת חיל, מתחת למיקרוסקופ' )
+				. mk2_open( 'צילום אמיתי, במיקרוסקופ', 'ככה נראית', 'הברכה מבפנים', $hi . 'כל מילה בברכה, על שבב של <span dir="ltr">5</span> מ״מ. כל אות בגובה של כחצי עובי שערה.' )
 				. mk2_cart( $order )
 				. mk2_button( 'להשלמת ההזמנה', $go, $safe )
 				. mk2_steps( 'מה קורה אחרי שמזמינים', array(
@@ -684,7 +686,8 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 		case 2:
 			if ( $code ) {
 				$lead = $promo ? 'קוד ההצטרפות שלך עוד לא נוצל' : 'על ההזמנה שכמעט סיימת';
-				$rows = mk2_open( '', 'ההזמנה שלך,', 'עם הנחה', $hi . ( $promo ? 'הקוד שקיבלת כשנרשמת נכנס להזמנה בלחיצה אחת.' : 'רצינו לתת לך סיבה טובה לסיים. ההנחה נכנסת להזמנה בלחיצה אחת.' ) )
+				$rows = mk2_hero( MIKRA_SITE . '/scene/pair-trio.jpg', 'שלוש שרשראות של מקרא' )
+					. mk2_open( '', 'ההזמנה שלך,', 'עם הנחה', $hi . ( $promo ? 'הקוד שקיבלת כשנרשמת נכנס להזמנה בלחיצה אחת.' : 'רצינו לתת לך סיבה טובה לסיים. ההנחה נכנסת להזמנה בלחיצה אחת.' ) )
 					. mk2_offer( $pct, $code, $lead, 'נכנס להזמנה בלחיצה על הכפתור' . ( $until ? ' · ' . $until : '' ) )
 					. mk2_button( 'להשלמת ההזמנה עם ההנחה', $go )
 					. mk2_cart( $order )
@@ -694,7 +697,8 @@ function mikra_abandon_email( $step, $order, $unsub, $service = false ) {
 				$pre     = 'ההנחה נכנסת בלחיצה אחת' . ( $until ? ', ' . $until : '' ) . '.';
 			} else {
 				// כבר יש הנחה על ההזמנה (קוד ההצטרפות) - לא מוסיפים עוד
-				$rows    = mk2_open( 'ההנחה כבר בפנים', 'ההנחה שלך', 'כבר על ההזמנה', $hi . 'הקוד שהזנת שמור בהזמנה. נשאר רק לשלם - בכרטיס אשראי, bit, Apple Pay או Google Pay.' )
+				$rows    = mk2_hero( MIKRA_SITE . '/scene/pair-trio.jpg', 'שלוש שרשראות של מקרא' )
+					. mk2_open( 'ההנחה כבר בפנים', 'ההנחה שלך', 'כבר על ההזמנה', $hi . 'הקוד שהזנת שמור בהזמנה. נשאר רק לשלם - בכרטיס אשראי, bit, Apple Pay או Google Pay.' )
 					. mk2_cart( $order )
 					. mk2_button( 'להשלמת ההזמנה', $pay, $safe )
 					. mk2_rabbinate();

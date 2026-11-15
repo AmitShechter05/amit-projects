@@ -45,6 +45,11 @@ function mk2_wrap( $title, $preheader, $rows ) {
 		. $rows . '</table></td></tr></table></div></body></html>';
 }
 
+/** תמונת פתיחה מתחת ללוגו (עמית, 16.11.2026: "חסר איזשהו הירו") - צילום אמיתי, <img> רגיל */
+function mk2_hero( $img, $alt ) {
+	return '<tr><td class="mk2-pad" style="padding:14px 28px 0;"><img src="' . esc_url( $img ) . '" width="544" alt="' . esc_attr( $alt ) . '" style="display:block;width:100%;height:auto;border:0;border-radius:24px;"></td></tr>';
+}
+
 /** פתיחה: תגית, כותרת בשתי שורות (השנייה מסומנת), ושורה אחת */
 function mk2_open( $pill, $line1, $mark, $sub_html ) {
 	return '<tr><td class="mk2-pad" align="center" style="padding:26px 44px 0;text-align:center;">'
