@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from 'next/server';
+import { SRC_COOKIE, parseAttribution } from '@/lib/attribution';
 import { validate, normalizePhone, type Customer } from '@/lib/checkout';
 import { createOrder, orderTotal, type OrderLine } from '@/lib/wcOrder';
 import { wcReady } from '@/lib/wc';
@@ -174,6 +175,7 @@ export async function POST(req: NextRequest) {
         gaCid: /^\d+\.\d+$/.test(gaCid) ? gaCid : undefined,
         ip: (req.headers.get('x-forwarded-for') ?? '').split(',')[0].trim() || undefined,
         ua: req.headers.get('user-agent') ?? undefined,
+        src: parseAttribution(req.cookies.get(SRC_COOKIE)?.value),
       },
       lines,
       gift,

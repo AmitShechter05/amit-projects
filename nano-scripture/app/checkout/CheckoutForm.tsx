@@ -14,7 +14,7 @@ import { PROMO } from '@/lib/promo';
 import { SHIPPING, shippingMethod, shippingCost, giftBoxFee } from '@/lib/policy';
 import { readJoin, clearJoin, type JoinCtx } from '@/lib/join';
 import { COMPANY, waHref } from '@/lib/company';
-import { trackBeginCheckout } from '@/lib/analytics';
+import { trackAddPaymentInfo, trackBeginCheckout } from '@/lib/analytics';
 import { saveOrderDone } from '@/lib/orderDone';
 import PaymentMarks from '@/components/PaymentMarks';
 import { deliveryWindow, formatWindow } from '@/lib/delivery';
@@ -231,6 +231,8 @@ export default function CheckoutForm({ paymentReady = false }: { paymentReady?: 
         setFailed(data.error ?? 'משהו השתבש');
         return;
       }
+      // ההזמנה נוצרה והלקוח יוצא לתשלום - "הוספת פרטי תשלום" במטא
+      trackAddPaymentInfo(lines, Number(data.total ?? total) || total);
       /**
        * הסיכום נשמר לפני כל הפניה, ולשני המסלולים.
        *

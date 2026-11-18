@@ -74,6 +74,7 @@ const NAMES: Record<string, { ga: string; fb: string; custom?: boolean }> = {
   addToCart: { ga: 'add_to_cart', fb: 'AddToCart' },
   viewCart: { ga: 'view_cart', fb: 'ViewCart', custom: true },
   beginCheckout: { ga: 'begin_checkout', fb: 'InitiateCheckout' },
+  addPaymentInfo: { ga: 'add_payment_info', fb: 'AddPaymentInfo' },
   purchase: { ga: 'purchase', fb: 'Purchase' },
   lead: { ga: 'generate_lead', fb: 'CompleteRegistration' },
 };
@@ -131,6 +132,8 @@ function enqueue(vendor: Vendor, fire: () => void) {
  * רכישה נורית פעמיים - למשל לקוח שמרענן את עמוד התודה, או שחוזר
  * אליו מההיסטוריה. בלעדיו ה-ROAS שמטא מציגה גבוה מהאמת.
  */
+const SERVER_TOO = new Set(['AddToCart', 'InitiateCheckout', 'AddPaymentInfo']);
+
 function send(
   key: keyof typeof NAMES,
   ga: Params,
@@ -139,6 +142,22 @@ function send(
 ) {
   if (!allowed()) return;
   const name = NAMES[key];
+
+  // אירועי הדרך לרכישה יוצאים גם מהשרת (app/api/track), עם אותו מזהה -
+  // כך מטא מקבלת אותם גם כשהדפדפן חוסם את הפיקסל, ולא סופרת פעמיים
+  if (PIXEL_ID && SERVER_TOO.has(name.fb)) {
+    eventId ??= `${name.fb}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    try {
+      void fetch('/api/track', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name.fb, id: eventId, data: fb }),
+        keepalive: true,
+      }).catch(() => {});
+    } catch {
+      /* בלי רשת - הדפדפן לבדו */
+    }
+  }
 
   if (GA_ID) enqueue('gtag', () => window.gtag!('event', name.ga, ga));
 
@@ -243,6 +262,30 @@ export function trackBeginCheckout(lines: CartLine[]) {
       contents: c.contents,
       currency: CURRENCY,
       value: c.value,
+      num_items: c.items.length,
+    },
+  );
+}
+
+/**
+ * מילוי פרטים ומעבר לתשלום - "הוספת פרטי תשלום" במטא.
+ *
+ * נורה כשההזמנה נוצרה והלקוח יוצא לחלון התשלום של Grow. פרטי הכרטיס
+ * עצמם מוקלדים אצל Grow ולא באתר, ולכן זה הרגע הכי קרוב שאפשר למדוד.
+ * עד 18.11.2026 האירוע לא היה קיים בכלל - ולכן העמודה במטא תמיד הייתה ריקה.
+ */
+export function trackAddPaymentInfo(lines: CartLine[], value: number) {
+  const c = fromLines(lines);
+  if (!c.items.length) return;
+  send(
+    'addPaymentInfo',
+    { currency: CURRENCY, value, payment_type: 'grow', items: c.items },
+    {
+      content_type: 'product',
+      content_ids: c.ids,
+      contents: c.contents,
+      currency: CURRENCY,
+      value,
       num_items: c.items.length,
     },
   );

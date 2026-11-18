@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import Script from 'next/script';
 import { ADS_ID, CLARITY_ID, GA_ID, PIXEL_ID, analyticsOn, trackPageView } from '@/lib/analytics';
 import { hasConsent } from '@/lib/consent';
+import { captureAttribution } from '@/lib/attribution';
 
 /**
  * טעינת סקריפטי המדידה - מהכניסה, אלא אם הגולש אמר "לא, תודה"
@@ -46,6 +47,8 @@ export default function Analytics() {
       setGranted(ok);
     };
     sync();
+    // מקור הכניסה (UTM / fbclid / הפניה) - נשמר לעוגייה ונכנס להזמנה
+    captureAttribution();
     window.addEventListener('mikra:consent', sync);
     return () => window.removeEventListener('mikra:consent', sync);
   }, []);

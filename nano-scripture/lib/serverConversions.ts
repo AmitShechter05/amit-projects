@@ -172,3 +172,68 @@ export async function reportPurchase(o: PaidOrder) {
   }
   return { done, errors, test };
 }
+
+/* ============================================================
+   אירועי הדרך לרכישה - גם מהשרת.
+   ============================================================ */
+
+/**
+ * הוספה לעגלה, תחילת קופה ומילוי פרטים - נשלחים למטא גם מהשרת.
+ *
+ * ------------------------------------------------------------------
+ * למה (עמית, 18.11.2026): מטא הראתה רכישה (#104) בלי הוספה לעגלה לפניה,
+ * ו"הוספת פרטי תשלום" לא נספרה אף פעם. הרכישה הגיעה מהשרת; שאר
+ * האירועים נשלחו רק מהדפדפן, ובאייפון (ספארי, דפדפן אינסטגרם עם
+ * הגנות) או עם חוסם פרסומות הבקשה ל-facebook.com לא יוצאת.
+ * ------------------------------------------------------------------
+ *
+ * הדפדפן שולח את אותו אירוע עם eventID זהה (lib/analytics.ts), ומטא
+ * מאחדת אותם - כך שאין ספירה כפולה כשגם הפיקסל עבר.
+ */
+export const BROWSER_EVENTS = ['AddToCart', 'InitiateCheckout', 'AddPaymentInfo'] as const;
+export type BrowserEvent = (typeof BROWSER_EVENTS)[number];
+
+export async function sendMetaFunnelEvent(e: {
+  name: BrowserEvent;
+  id: string;
+  url: string;
+  ip?: string;
+  ua?: string;
+  fbp?: string;
+  fbc?: string;
+  custom: Record<string, unknown>;
+}) {
+  if (!metaCapiOn) return 'off';
+  const user: Record<string, unknown> = {
+    client_ip_address: e.ip,
+    client_user_agent: e.ua,
+    fbp: e.fbp,
+    fbc: e.fbc,
+  };
+  for (const k of Object.keys(user)) if (!user[k]) delete user[k];
+  // בלי אף מזהה מטא לא יכולה לשייך את האירוע לאף אחד - אין טעם לשלוח
+  if (!user.client_ip_address && !user.fbp) return 'no-user';
+
+  const body = {
+    data: [
+      {
+        event_name: e.name,
+        event_time: Math.floor(Date.now() / 1000),
+        event_id: e.id,
+        action_source: 'website',
+        event_source_url: e.url,
+        user_data: user,
+        custom_data: e.custom,
+      },
+    ],
+  };
+  const res = await fetch(`${GRAPH}/${PIXEL_ID}/events?access_token=${encodeURIComponent(META_TOKEN)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    cache: 'no-store',
+    signal: AbortSignal.timeout(10_000),
+  });
+  if (!res.ok) throw new Error(`Meta CAPI ${res.status}: ${(await res.text()).slice(0, 200)}`);
+  return 'ok';
+}

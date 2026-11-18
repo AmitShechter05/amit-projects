@@ -4,6 +4,7 @@ import { getBlessing, isBlessingId, type BlessingId } from './blessings';
 import { GIFT_BOX } from './extras';
 import { shippingMethod, shippingCost, giftBoxFee, giftBoxFree } from './policy';
 import { PROMO, isPromoCode, codeDiscount, normalizeCode } from './promo';
+import type { Attribution } from './attribution';
 
 /**
  * בניית הזמנה בווקומרס מתוך העגלה.
@@ -71,7 +72,7 @@ export type OrderInput = {
    * הפיקסל וגוגל, כתובת IP ודפדפן. נשמרים בהזמנה כדי שכשהיא תשולם -
    * אפילו בלי שהלקוח חזר לאתר - מטא תוכל לשייך את הרכישה למודעה.
    */
-  tracking?: { fbp?: string; fbc?: string; gaCid?: string; ip?: string; ua?: string };
+  tracking?: { fbp?: string; fbc?: string; gaCid?: string; ip?: string; ua?: string; src?: Attribution };
   /**
    * הזמנה שמצטרפת לחבילה של הזמנה קודמת (lib/join.ts), אחרי שהשרת בדק
    * אותה (lib/joinServer.ts). בלי דמי משלוח, ובאותן כתובות בדיוק - כך
@@ -241,8 +242,36 @@ export function buildOrderPayload(input: OrderInput, ids: Map<string, number>) {
       })
         .filter(([, v]) => typeof v === 'string' && v)
         .map(([key, value]) => ({ key, value: String(value).slice(0, 400) })),
+      ...attributionMeta(input.tracking?.src, input.tracking?.ua),
     ],
   };
+}
+
+/**
+ * מאיפה הגיע הלקוח (lib/attribution.ts) - בשתי צורות:
+ *  - שורה אחת קריאה, "מקור הגעה", שמופיעה בפרטי ההזמנה;
+ *  - מפתחות הייחוס של ווקומרס עצמו (`_wc_order_attribution_*`), שממלאים
+ *    את התיבה "ייחוס הזמנה" בעמוד ההזמנה ואת עמודת "מקור" ברשימת ההזמנות.
+ * הזמנה בלי עוגייה (סירב לעוגיות, דפדפן חוסם) - "לא ידוע", ולא ניחוש.
+ */
+function attributionMeta(src: Attribution | undefined, ua: string | undefined) {
+  if (!src) return [{ key: 'מקור הגעה', value: 'לא ידוע (אין עוגיית מקור)' }];
+  const line = [src.source, src.medium, src.campaign, src.content, src.term].filter(Boolean).join(' / ');
+  const wc = (k: string, v: string | undefined) => (v ? [{ key: `_wc_order_attribution_${k}`, value: v }] : []);
+  const device = ua ? (/iPad|Tablet/i.test(ua) ? 'Tablet' : /Mobi|iPhone|Android/i.test(ua) ? 'Mobile' : 'Desktop') : undefined;
+  return [
+    { key: 'מקור הגעה', value: `${line}${src.landing ? ` · נכנס ב-${src.landing}` : ''}` },
+    ...wc('source_type', src.type),
+    ...wc('utm_source', src.source),
+    ...wc('utm_medium', src.medium),
+    ...wc('utm_campaign', src.campaign),
+    ...wc('utm_content', src.content),
+    ...wc('utm_term', src.term),
+    ...wc('referrer', src.ref ? `https://${src.ref}/` : undefined),
+    ...wc('session_entry', src.landing ? `https://mikra.shop${src.landing}` : undefined),
+    ...wc('session_start_time', src.at),
+    ...wc('device_type', device),
+  ];
 }
 
 /** יוצר את ההזמנה בפועל. נזרק אם משהו חסר - ולא יוצר הזמנה חלקית */
