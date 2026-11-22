@@ -123,6 +123,10 @@ export async function klaviyoStartedCheckout(input: {
       OrderId: input.orderId,
       OrderNumber: input.orderNumber,
       CheckoutURL: checkoutUrl,
+      // מייל ההנחה מוסיף &c=<קוד אישי>; הקוד נכנס להזמנה ב-/checkout/apply
+      ApplyURL: input.orderKey
+        ? `${SITE_URL}/checkout/apply?o=${input.orderId}&k=${encodeURIComponent(input.orderKey)}`
+        : checkoutUrl,
       ItemNames: list.map((i) => i.ProductName),
       Items: list,
       ImageURL: list[0]?.ImageURL,
