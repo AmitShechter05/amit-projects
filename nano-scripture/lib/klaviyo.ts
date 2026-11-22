@@ -1,6 +1,6 @@
 import 'server-only';
-import { getProduct, FINISHES } from './catalog';
-import { getBlessing } from './blessings';
+import { getProduct, getProductBySku, FINISHES } from './catalog';
+import { getBlessing, isBlessingId } from './blessings';
 import { distinctName } from './seo';
 import { jpegImage } from './jpegImage';
 import { SITE_URL } from './site';
@@ -56,7 +56,9 @@ async function send(metric: string, profile: Profile, properties: Record<string,
               ...(e164(profile.phone) ? { phone_number: e164(profile.phone) } : {}),
               // ההסכמה האחרונה שנתן בקופה. הזרימה מתפצלת לפיה: מי שלא הסכים
               // מקבל תזכורת שירות בלי קוד הנחה (חוק הספאם)
-              properties: { 'Mikra Marketing Consent': Boolean(profile.marketing) },
+              ...(profile.marketing === undefined
+                ? {}
+                : { properties: { 'Mikra Marketing Consent': Boolean(profile.marketing) } }),
             },
           },
         },
@@ -138,5 +140,75 @@ export async function klaviyoStartedCheckout(input: {
     },
     input.total,
     `checkout-${input.orderId}`,
+  );
+}
+
+/* ------------------------------------------------------------------
+ * אחרי התשלום ואחרי המשלוח - מהוובהוק של ווקומרס (/api/wc/order-event).
+ *
+ * למה לא מהתוסף של Klaviyo: הסנכרון שלו לא עבר (22.11 - 0% אחרי שעה,
+ * ואף הזמנה לא נרשמה), ואין בו את מה שהמיילים צריכים: מפתח ההזמנה
+ * לקישור הביקורת, הברכה, והתמונה על לבן. כאן הכל מגיע מההזמנה עצמה.
+ *
+ * "Mikra Paid Order" גם מוציא מזרימת הנטישה (סינון הזרימה: לא קרה
+ * מאז שנכנס). "Mikra Order Shipped" מתחיל את מיילי אחרי המשלוח.
+ * ------------------------------------------------------------------ */
+type WcOrderForKlaviyo = {
+  id: number;
+  number: string;
+  order_key?: string;
+  total: string;
+  billing?: { first_name?: string; last_name?: string; email?: string; phone?: string };
+  line_items?: { sku?: string; name: string; quantity: number; total: string; meta_data?: { key: string; value: unknown }[] }[];
+  meta_data?: { key: string; value: unknown }[];
+};
+
+function orderProps(o: WcOrderForKlaviyo) {
+  const lines = o.line_items ?? [];
+  const items = lines.map((li) => {
+    const p = li.sku ? getProductBySku(li.sku) : undefined;
+    const bid = String(li.meta_data?.find((m) => m.key === '_mikra_blessing_id')?.value ?? '');
+    const blessing = isBlessingId(bid) ? getBlessing(bid).plain : String(li.meta_data?.find((m) => m.key === 'הברכה')?.value ?? '');
+    return {
+      SKU: li.sku ?? '',
+      ProductName: p ? distinctName(p) : li.name,
+      Color: p ? FINISHES[p.finish] : undefined,
+      BlessingID: isBlessingId(bid) ? bid : undefined,
+      Blessing: blessing || undefined,
+      Quantity: li.quantity,
+      RowTotal: Number(li.total),
+      ImageURL: p ? `${SITE_URL}${jpegImage(p)}` : undefined,
+      ProductURL: p ? `${SITE_URL}/products/${p.slug}` : undefined,
+    };
+  });
+  const first = items.find((i) => i.BlessingID);
+  const key = o.order_key ? encodeURIComponent(o.order_key) : '';
+  return {
+    OrderId: o.id,
+    OrderNumber: o.number,
+    ItemNames: items.map((i) => i.ProductName),
+    Items: items,
+    ImageURL: items[0]?.ImageURL,
+    Blessing: first?.Blessing,
+    BlessingURL: first?.BlessingID ? `${SITE_URL}/blessings/${first.BlessingID}` : `${SITE_URL}/blessings`,
+    // הכוכבים במייל מוסיפים &s=1..5; העמוד בודק שההזמנה שולמה
+    ReviewURL: key ? `${SITE_URL}/review?o=${o.id}&k=${key}` : `${SITE_URL}/review`,
+    // כרטיס מתנה לא נשלח בדואר - אין "לפני שעונדים" ואין ביקורת עליו
+    GiftCardOnly: items.length > 0 && items.every((i) => /^GIFT/i.test(i.SKU)),
+    Source: 'mikra.shop',
+  };
+}
+
+export async function klaviyoOrderEvent(kind: 'paid' | 'shipped', o: WcOrderForKlaviyo) {
+  const b = o.billing ?? {};
+  if (!b.email) return 'no-email';
+  const props = orderProps(o);
+  const name = kind === 'paid' ? 'Mikra Paid Order' : 'Mikra Order Shipped';
+  return send(
+    name,
+    { email: b.email, firstName: b.first_name, lastName: b.last_name, phone: b.phone, marketing: undefined },
+    { $event_id: `${kind}-${o.id}`, $value: Number(o.total), ...props },
+    Number(o.total),
+    `${kind}-${o.id}`,
   );
 }

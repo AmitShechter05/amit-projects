@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import { revalidateTag } from 'next/cache';
 import { PRICES_TAG } from '@/lib/livePrices';
 import { wcGet, wcPost, wcPut, wcReady } from '@/lib/wc';
 import { reportPurchase, metaCapiOn, ga4MpOn, type PaidOrder } from '@/lib/serverConversions';
+import { klaviyoOrderEvent } from '@/lib/klaviyo';
 
 /**
  * ווקומרס קורא לכאן בכל עדכון של הזמנה (וובהוק order.updated, הוגדר
@@ -36,10 +37,15 @@ export async function POST(req: NextRequest) {
       console.error('revalidate prices/stock failed', e);
     }
   }
-  if (!id || !wcReady || !(metaCapiOn || ga4MpOn)) return NextResponse.json({ ok: true, skipped: true });
+  if (!id || !wcReady) return NextResponse.json({ ok: true, skipped: true });
 
   try {
-    const order = await wcGet<PaidOrder & { status: string }>(`/orders/${id}`);
+    const order = await wcGet<KOrder>(`/orders/${id}`);
+    // Klaviyo אחרי מטא ולא לפני: הסימון של Klaviyo מעדכן את ההזמנה ומפעיל
+    // את הוובהוק שוב, וקריאה כפולה לפני שמטא סומן הייתה מדווחת רכישה פעמיים.
+    // כפילות אצל Klaviyo לא מזיקה - האירוע נושא unique_id לפי ההזמנה
+    after(() => klaviyoSync(order));
+    if (!(metaCapiOn || ga4MpOn)) return NextResponse.json({ ok: true, skipped: true });
     const sent = order.meta_data?.some((m) => m.key === FLAG && m.value);
     if (!PAID.includes(order.status) || sent) return NextResponse.json({ ok: true, skipped: true });
 
@@ -62,5 +68,32 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     console.error('order-event failed', id, e);
     return NextResponse.json({ ok: false }, { status: 500 });
+  }
+}
+
+/**
+ * Klaviyo: "שולם" פעם אחת לכל הזמנה, ו"נשלח" פעם אחת כשהיא הושלמה.
+ * כל אחד מסומן בהזמנה לפני השליחה - כמו הדיווח למטא - כי העדכון עצמו
+ * מפעיל את הוובהוק שוב. תקלה ב-Klaviyo נרשמת ולא עוצרת את הדיווח למטא.
+ */
+const K_PAID = 'mikra_klaviyo_paid';
+const K_SHIPPED = 'mikra_klaviyo_shipped';
+type KOrder = PaidOrder & { status: string; order_key?: string; date_completed_gmt?: string | null };
+// הזמנות ישנות שמתעדכנות היום (הערה, החזר) לא נכנסות לזרימות באיחור של שבועות
+const fresh = (gmt?: string | null) => Boolean(gmt) && Date.now() - Date.parse(`${gmt}Z`) < 3 * 86400_000;
+async function klaviyoSync(order: KOrder) {
+  if (!process.env.KLAVIYO_PRIVATE_KEY) return;
+  const has = (k: string) => order.meta_data?.some((m) => m.key === k && m.value);
+  const todo: ('paid' | 'shipped')[] = [];
+  if (PAID.includes(order.status) && !has(K_PAID) && fresh(order.date_paid_gmt)) todo.push('paid');
+  if (order.status === 'completed' && !has(K_SHIPPED) && fresh(order.date_completed_gmt)) todo.push('shipped');
+  if (!todo.length) return;
+  try {
+    await wcPut(`/orders/${order.id}`, {
+      meta_data: todo.map((t) => ({ key: t === 'paid' ? K_PAID : K_SHIPPED, value: new Date().toISOString() })),
+    });
+    for (const t of todo) await klaviyoOrderEvent(t, order);
+  } catch (e) {
+    console.error('klaviyo order event failed', order.id, todo, e);
   }
 }
