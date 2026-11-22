@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import { mikraPost, wcReady } from '@/lib/wc';
 import { getProduct } from '@/lib/catalog';
 import { syncPrices } from '@/lib/livePrices';
 import { BLESSING_BY_ID, isBlessingId } from '@/lib/blessings';
+import { klaviyoCart } from '@/lib/klaviyo';
 
 export const dynamic = 'force-dynamic';
 
@@ -43,6 +44,12 @@ export async function POST(req: NextRequest) {
       },
     ];
   });
+  // Klaviyo: עגלה נטושה לפני הקופה. נשלח גם אם התוסף נכשל
+  after(() =>
+    klaviyoCart({ email, name: String(body.name ?? '').slice(0, 60), lines }).catch((e) =>
+      console.error('klaviyo cart failed', e),
+    ),
+  );
   try {
     await mikraPost('/cart', { email, name: String(body.name ?? '').slice(0, 60), lines });
     return NextResponse.json({ ok: true });

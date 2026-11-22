@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { syncViewed } from '@/lib/viewed';
 import { rememberShopper } from '@/lib/shopper';
 import { usePathname } from 'next/navigation';
 import { useCart } from '@/lib/cart';
@@ -58,6 +59,24 @@ export default function SignupPopup() {
   const [code, setCode] = useState<string | null>(null);
   const [failed, setFailed] = useState('');
   const [copied, setCopied] = useState(false);
+  // יום הולדת - שלב רשות אחרי ההרשמה (22.11.2026). יום וחודש בלבד
+  const [bday, setBday] = useState({ d: '', m: '' });
+  const [bdayState, setBdayState] = useState<'idle' | 'busy' | 'saved' | 'error'>('idle');
+
+  async function saveBirthday() {
+    if (!bday.d || !bday.m) return;
+    setBdayState('busy');
+    try {
+      const res = await fetch('/api/birthday', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: lead.email, day: Number(bday.d), month: Number(bday.m) }),
+      });
+      setBdayState(res.ok ? 'saved' : 'error');
+    } catch {
+      setBdayState('error');
+    }
+  }
 
   const panel = useRef<HTMLDivElement>(null);
   const firstField = useRef<HTMLInputElement>(null);
@@ -193,6 +212,8 @@ export default function SignupPopup() {
       }
       setCode(data.code);
       rememberShopper({ email: lead.email, name: lead.name.split(' ')[0] });
+      // מה שראה לפני שנרשם - כדי שכבר מייל הפתיחה יציג את התכשיטים שלו
+      syncViewed();
       trackLead();
       try {
         localStorage.setItem(SEEN, '1');
@@ -328,6 +349,84 @@ export default function SignupPopup() {
             >
               {copied ? 'הועתק' : 'לחצו כדי להעתיק'}
             </p>
+
+            <div
+              className="mt-5"
+              style={{ borderTop: '1px solid var(--line)', paddingTop: '1rem' }}
+            >
+              {bdayState === 'saved' ? (
+                <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink-2)' }} aria-live="polite">
+                  נשמר. ביום ההולדת תקבלו מאיתנו מתנה קטנה.
+                </p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 'var(--fs-sm)', color: 'var(--ink)', fontWeight: 600 }}>
+                    רוצים מתנה ביום ההולדת? (לא חובה)
+                  </p>
+                  <div className="mt-2 flex gap-2">
+                    <select
+                      aria-label="יום"
+                      value={bday.d}
+                      onChange={(e) => setBday((b) => ({ ...b, d: e.target.value }))}
+                      className="flex-1 px-2"
+                      style={{
+                        height: 44,
+                        fontSize: 'var(--fs-base)',
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid var(--line-strong)',
+                        background: 'var(--surface)',
+                        color: 'var(--ink)',
+                      }}
+                    >
+                      <option value="">יום</option>
+                      {Array.from({ length: 31 }, (_, i) => (
+                        <option key={i + 1} value={i + 1}>
+                          {i + 1}
+                        </option>
+                      ))}
+                    </select>
+                    <select
+                      aria-label="חודש"
+                      value={bday.m}
+                      onChange={(e) => setBday((b) => ({ ...b, m: e.target.value }))}
+                      className="flex-1 px-2"
+                      style={{
+                        height: 44,
+                        fontSize: 'var(--fs-base)',
+                        borderRadius: 'var(--radius)',
+                        border: '1px solid var(--line-strong)',
+                        background: 'var(--surface)',
+                        color: 'var(--ink)',
+                      }}
+                    >
+                      <option value="">חודש</option>
+                      {['ינואר', 'פברואר', 'מרץ', 'אפריל', 'מאי', 'יוני', 'יולי', 'אוגוסט', 'ספטמבר', 'אוקטובר', 'נובמבר', 'דצמבר'].map(
+                        (m, i) => (
+                          <option key={m} value={i + 1}>
+                            {m}
+                          </option>
+                        ),
+                      )}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={saveBirthday}
+                      disabled={!bday.d || !bday.m || bdayState === 'busy'}
+                      className="btn"
+                      style={{ height: 44, paddingInline: '1rem' }}
+                    >
+                      שמירה
+                    </button>
+                  </div>
+                  {bdayState === 'error' && (
+                    <p className="mt-1" style={{ fontSize: 'var(--fs-2xs)', color: 'var(--sale)' }} aria-live="polite">
+                      לא נשמר. נסו שוב.
+                    </p>
+                  )}
+                </>
+              )}
+            </div>
+
             <button type="button" onClick={dismiss} className="btn btn-solid mt-5 w-full">
               חזרה לאתר
             </button>

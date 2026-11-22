@@ -1,5 +1,5 @@
 import 'server-only';
-import { getProduct, getProductBySku, FINISHES } from './catalog';
+import { getProduct, getProductBySku, blessingStock, FINISHES } from './catalog';
 import { getBlessing, isBlessingId } from './blessings';
 import { distinctName } from './seo';
 import { jpegImage } from './jpegImage';
@@ -32,7 +32,15 @@ function e164(phone: string | undefined) {
   return /^05\d{8}$/.test(d) ? `+972${d.slice(1)}` : undefined;
 }
 
-type Profile = { email: string; firstName?: string; lastName?: string; phone?: string; marketing?: boolean };
+type Profile = {
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+  marketing?: boolean;
+  /** שדות נוספים על הפרופיל (מקור, יום הולדת) */
+  extra?: Record<string, unknown>;
+};
 
 async function send(metric: string, profile: Profile, properties: Record<string, unknown>, value: number, uniqueId: string) {
   if (!KEY || !profile.email) return 'off';
@@ -56,9 +64,14 @@ async function send(metric: string, profile: Profile, properties: Record<string,
               ...(e164(profile.phone) ? { phone_number: e164(profile.phone) } : {}),
               // ההסכמה האחרונה שנתן בקופה. הזרימה מתפצלת לפיה: מי שלא הסכים
               // מקבל תזכורת שירות בלי קוד הנחה (חוק הספאם)
-              ...(profile.marketing === undefined
+              ...(profile.marketing === undefined && !profile.extra
                 ? {}
-                : { properties: { 'Mikra Marketing Consent': Boolean(profile.marketing) } }),
+                : {
+                    properties: {
+                      ...(profile.marketing === undefined ? {} : { 'Mikra Marketing Consent': Boolean(profile.marketing) }),
+                      ...(profile.extra ?? {}),
+                    },
+                  }),
             },
           },
         },
@@ -210,5 +223,152 @@ export async function klaviyoOrderEvent(kind: 'paid' | 'shipped', o: WcOrderForK
     { $event_id: `${kind}-${o.id}`, $value: Number(o.total), ...props },
     Number(o.total),
     `${kind}-${o.id}`,
+  );
+}
+
+/* ------------------------------------------------------------------
+ * הרשמה, עגלה ויום הולדת (22.11.2026) - לזרימות "ברוכים הבאים" ו"עגלה
+ * נטושה לפני הקופה" ב-Klaviyo, במקום התוסף (marketing.php, cart.php).
+ * ------------------------------------------------------------------ */
+
+/** פופאפ המועדון או הפוטר. מתחיל את זרימת "ברוכים הבאים" */
+export async function klaviyoSignup(input: { email: string; name?: string; phone?: string; source: 'popup' | 'footer'; code?: string; percent?: number }) {
+  const [first, ...rest] = (input.name ?? '').trim().split(/\s+/);
+  const day = new Date().toISOString().slice(0, 10);
+  return send(
+    'Mikra Signed Up',
+    {
+      email: input.email,
+      firstName: first || undefined,
+      lastName: rest.join(' ') || undefined,
+      phone: input.phone,
+      marketing: true,
+      extra: { 'Mikra Source': input.source === 'popup' ? 'פופאפ מועדון' : 'מכתב הבית - פוטר' },
+    },
+    { Source: input.source, Code: input.code, Percent: input.percent, $event_id: `signup-${input.email}-${day}` },
+    0,
+    `signup-${input.email}-${day}`,
+  );
+}
+
+/**
+ * יום הולדת מהפופאפ: יום וחודש בלבד, בלי שנה. נשמר כתאריך בשנת 2000 -
+ * זרימה לפי תאריך ב-Klaviyo רצה כל שנה לפי היום והחודש
+ */
+export async function klaviyoBirthday(input: { email: string; day: number; month: number }) {
+  const mm = String(input.month).padStart(2, '0');
+  const dd = String(input.day).padStart(2, '0');
+  return send(
+    'Mikra Birthday Set',
+    { email: input.email, extra: { Birthday: `2000-${mm}-${dd}` } },
+    { Birthday: `${dd}.${mm}` },
+    0,
+    `birthday-${input.email}-${mm}${dd}`,
+  );
+}
+
+type CartLineIn = { slug: string; blessing: string; qty: number };
+
+/** עד 5 יחידות = מלאי נמוך. null (לא נספר) - לא מציגים כלום */
+function lowStock(left: number | null) {
+  return left !== null && left <= 5 ? { Left: left, LowStock: true } : { LowStock: false };
+}
+
+/** עגלה של גולש מזוהה. עגלה ריקה - לא נשלח כלום (הזרימה לא מתחילה) */
+export async function klaviyoCart(input: { email: string; name?: string; lines: CartLineIn[] }) {
+  const items = input.lines.flatMap((l) => {
+    const p = getProduct(l.slug);
+    if (!p || !isBlessingId(l.blessing)) return [];
+    return [
+      {
+        SKU: p.sku,
+        ProductName: distinctName(p),
+        Color: FINISHES[p.finish],
+        Blessing: getBlessing(l.blessing).plain,
+        Quantity: l.qty,
+        RowTotal: p.price * l.qty,
+        ImageURL: `${SITE_URL}${jpegImage(p)}`,
+        ProductURL: `${SITE_URL}/products/${p.slug}`,
+        // מלאי אמיתי לפי ברכה - מייל הדחיפות מציג אותו רק כשהוא באמת נמוך
+        ...lowStock(blessingStock(p, l.blessing)),
+      },
+    ];
+  });
+  if (!items.length) return 'empty';
+  const total = items.reduce((sum, i) => sum + i.RowTotal, 0);
+  const restore = input.lines.map((l) => `${l.slug}:${l.blessing}:${l.qty}`).join('~');
+  const sig = restore.replace(/[^a-z0-9~:-]/gi, '').slice(0, 120);
+  return send(
+    'Mikra Cart Updated',
+    { email: input.email, firstName: input.name || undefined },
+    {
+      $value: total,
+      Items: items,
+      ItemNames: items.map((i) => i.ProductName),
+      ImageURL: items[0].ImageURL,
+      AnyLowStock: items.some((i) => i.LowStock),
+      // הקישור ממלא את העגלה בחזרה (components/CartSync.tsx)
+      CartURL: `${SITE_URL}/?restore=${encodeURIComponent(restore)}`,
+    },
+    total,
+    `cart-${input.email}-${sig}`,
+  );
+}
+
+/**
+ * מה שגולש מזוהה ראה לאחרונה (/api/viewed). שני דברים:
+ * - אירוע "Mikra Viewed Product" על הדגם האחרון (טריגר לזרימת "צפה ולא קנה")
+ * - שדה "Mikra Recently Viewed" בפרופיל: עד 3 תכשיטים, לבלוק "התכשיטים
+ *   שראית" בכל מייל. בלי צפיות - המייל מציג את המובילים במקום
+ */
+export async function klaviyoViewed(input: { email: string; name?: string; slugs: string[] }) {
+  const items = input.slugs.flatMap((s) => {
+    const p = getProduct(s);
+    if (!p) return [];
+    return [
+      {
+        ProductName: distinctName(p),
+        Color: FINISHES[p.finish],
+        Price: p.price,
+        ImageURL: `${SITE_URL}${jpegImage(p)}`,
+        ProductURL: `${SITE_URL}/products/${p.slug}`,
+        Blessings: p.blessings.map((b) => getBlessing(b).plain),
+      },
+    ];
+  });
+  if (!items.length) return 'empty';
+  const top = items[0];
+  const hour = new Date().toISOString().slice(0, 13);
+  return send(
+    'Mikra Viewed Product',
+    { email: input.email, firstName: input.name, extra: { 'Mikra Recently Viewed': items } },
+    { ...top, $event_id: `viewed-${input.email}-${input.slugs[0]}-${hour}` },
+    top.Price,
+    `viewed-${input.email}-${input.slugs[0]}-${hour}`,
+  );
+}
+
+/**
+ * ביקורת שנשלחה מעמוד הביקורת (/api/review). מתחיל את זרימת "תודה על
+ * הביקורת" ב-Klaviyo, שבה הלקוח מקבל קוד אישי של 15% להזמנה הבאה.
+ *
+ * ההטבה על עצם הכתיבה, לא על הציון: גם ביקורת של כוכב אחד מקבלת אותה.
+ * פעם אחת לכל הזמנה (unique_id לפי ההזמנה).
+ */
+export async function klaviyoReview(input: { email: string; name: string; orderId: number; sku: string; rating: number }) {
+  const p = getProductBySku(input.sku);
+  return send(
+    'Mikra Review Submitted',
+    { email: input.email, firstName: input.name.split(/\s+/)[0] || undefined },
+    {
+      $event_id: `review-${input.orderId}`,
+      Rating: input.rating,
+      SKU: input.sku,
+      ProductName: p ? distinctName(p) : input.sku,
+      ImageURL: p ? `${SITE_URL}${jpegImage(p)}` : undefined,
+      OrderId: input.orderId,
+    },
+    0,
+    `review-${input.orderId}`,
   );
 }

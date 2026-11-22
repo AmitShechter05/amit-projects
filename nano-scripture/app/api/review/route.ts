@@ -1,6 +1,7 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import { wcPost, wcReady, skuToId } from '@/lib/wc';
 import { findOrder } from '@/lib/paySummary';
+import { klaviyoReview } from '@/lib/klaviyo';
 
 export const dynamic = 'force-dynamic';
 
@@ -35,6 +36,13 @@ export async function POST(req: NextRequest) {
   const productId = (await skuToId()).get(sku);
   if (!productId) return NextResponse.json({ ok: false, error: 'התכשיט לא נמצא.' }, { status: 400 });
   const email = (order as unknown as { billing?: { email?: string } }).billing?.email ?? '';
+  // Klaviyo: מייל תודה עם 15% להזמנה הבאה. רק אחרי שהביקורת נשמרה, ופעם אחת לכל הזמנה
+  const reward = () =>
+    email
+      ? after(() =>
+          klaviyoReview({ email, name, orderId: order.id, sku, rating }).catch((e) => console.error('klaviyo review failed', e)),
+        )
+      : undefined;
   try {
     await wcPost('/products/reviews', {
       product_id: productId,
@@ -44,6 +52,7 @@ export async function POST(req: NextRequest) {
       rating,
       status: 'hold',
     });
+    reward();
     return NextResponse.json({ ok: true });
   } catch (e) {
     // אותה ביקורת פעמיים (לחיצה כפולה) - ווקומרס דוחה כפילות; מבחינת הלקוח זה נשמר

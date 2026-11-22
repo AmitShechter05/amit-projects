@@ -55,7 +55,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
     <section className="pb-32 pt-32 md:pt-40">
       <div className="shell max-w-xl">
         <h1 className="display t-2">איך התכשיט?</h1>
-        <p className="lede mt-3">שתי דקות שלכם יעזרו למישהו אחר להחליט. כתבו בכנות - אנחנו לא מסננים לפי ציון.</p>
+        <p className="lede mt-3">שתי דקות שלכם יעזרו למישהו אחר להחליט. כתבו בכנות - אנחנו לא מסננים לפי ציון. על כל ביקורת, בכל ציון, תקבלו במייל קוד של 15% הנחה להזמנה הבאה.</p>
         <ReviewForm o={String(order.id)} k={sp.k ?? ''} items={items} defaultName={defaultName} defaultStars={stars} />
       </div>
     </section>

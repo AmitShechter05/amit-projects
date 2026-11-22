@@ -1,8 +1,9 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import { validateLead, splitName, type Lead } from '@/lib/subscribe';
 import { normalizePhone } from '@/lib/checkout';
 import { wcGet, wcPost, wcPut, wcReady } from '@/lib/wc';
 import { PROMO, promoOn } from '@/lib/promo';
+import { klaviyoSignup } from '@/lib/klaviyo';
 
 export const dynamic = 'force-dynamic';
 
@@ -80,6 +81,19 @@ export async function POST(req: NextRequest) {
         billing: { first_name: first, last_name: last, phone: lead.phone, email: lead.email },
       };
   const reply = emailOnly ? { ok: true } : { code: PROMO.code, percent: PROMO.percent };
+
+  // Klaviyo: זרימת "ברוכים הבאים". אחרי התשובה ולא תלוי בווקומרס. מי
+  // שנרשם פעמיים באותו יום נספר פעם אחת (unique_id לפי יום)
+  after(() =>
+    klaviyoSignup({
+      email: lead.email,
+      name: emailOnly ? undefined : lead.name,
+      phone: emailOnly ? undefined : lead.phone,
+      source: emailOnly ? 'footer' : 'popup',
+      code: emailOnly ? undefined : PROMO.code,
+      percent: emailOnly ? undefined : PROMO.percent,
+    }).catch((e) => console.error('klaviyo signup failed', e)),
+  );
 
   try {
     const existing = await wcGet<WcCustomer[]>('/customers', {

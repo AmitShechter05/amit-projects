@@ -3,7 +3,9 @@ import ProductReviews from '@/components/ProductReviews';
 import { getReviews } from '@/lib/reviews';
 import { notFound } from 'next/navigation';
 import ProductView from '@/components/ProductView';
+import ViewedSync from '@/components/ViewedSync';
 import ProductCard from '@/components/ProductCard';
+import Customers from '@/components/home/Customers';
 import { PRODUCTS, getProduct, productsByCategory, CATEGORIES, isHiddenProduct } from '@/lib/catalog';
 import { getBlessing } from '@/lib/blessings';
 import { productFaq } from '@/lib/faq';
@@ -77,6 +79,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         ]}
       />
       <ProductView product={product} />
+      <ViewedSync slug={product.slug} />
 
       <ProductReviews summary={reviews[product.name]} />
 
@@ -95,6 +98,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </div>
         </section>
       )}
+
+      <Customers first={product.slug} />
     </>
   );
 }
