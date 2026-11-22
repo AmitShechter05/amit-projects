@@ -2,7 +2,7 @@
 /**
  * Plugin Name: Mikra Store
  * Description: מיילים מעוצבים ללקוחות, סדרת הצטרפות, זרימות נטישה / אחרי הזמנה / חזרה, והפניית החנות הישנה (wp.mikra.shop) אל mikra.shop.
- * Version: 1.7.0
+ * Version: 1.8.0
  * Author: Mikra
  * Requires PHP: 7.4
  * Text Domain: mikra-store
@@ -24,6 +24,13 @@ define( 'MIKRA_SITE', 'https://mikra.shop' );
 define( 'MIKRA_WHATSAPP', '972506128288' );
 define( 'MIKRA_PHONE', '050-612-8288' );
 define( 'MIKRA_EMAIL', 'mikrajewelry@gmail.com' );
+// מ-1.8.0 (23.11.2026) Klaviyo שולח את סדרת ההצטרפות, את העגלה הנטושה לפני
+// הקופה ואת בקשת הביקורת. כאן הם כבויים, כדי שלקוח לא יקבל כל מייל פעמיים.
+// נשארים בתוסף: נטישה בקופה (+ השמירה של ההזמנה 5 ימים), שני המיילים הראשונים
+// אחרי משלוח, מכתב התודה ללקוח חוזר, וזרימת החזרה. false = הכל חוזר לתוסף.
+if ( ! defined( 'MIKRA_KLAVIYO' ) ) {
+	define( 'MIKRA_KLAVIYO', true );
+}
 
 // סדרת ההצטרפות (שיווק) והבלוקים של העיצוב החדש
 require_once MIKRA_STORE_DIR . 'includes/marketing.php';

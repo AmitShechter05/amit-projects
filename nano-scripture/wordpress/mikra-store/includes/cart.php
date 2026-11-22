@@ -107,6 +107,9 @@ add_action( 'mikra_flow', function ( $flow, $key, $step ) {
 }, 10, 3 );
 
 function mikra_cart_run( $k, $step ) {
+	if ( MIKRA_KLAVIYO ) {
+		return; // Klaviyo: זרימת העגלה הנטושה לפני הקופה
+	}
 	$carts = mikra_carts();
 	if ( empty( $carts[ $k ] ) || ! empty( $carts[ $k ]['sent'][ $step ] ) ) {
 		return;

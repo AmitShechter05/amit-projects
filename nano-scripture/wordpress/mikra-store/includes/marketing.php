@@ -646,6 +646,9 @@ function mikra_series_allowed( $user ) {
 
 add_action( 'woocommerce_new_customer', 'mikra_series_start', 20, 1 );
 function mikra_series_start( $user_id ) {
+	if ( MIKRA_KLAVIYO ) {
+		return; // Klaviyo: זרימת "ברוכים הבאים"
+	}
 	// המקור וההסכמה נכתבים באותה בקשה; הבדיקה עצמה רצה בזמן השליחה
 	if ( ! wp_next_scheduled( 'mikra_store_series', array( (int) $user_id, 1 ) ) ) {
 		wp_schedule_single_event( time() + 90, 'mikra_store_series', array( (int) $user_id, 1 ) );
@@ -654,6 +657,10 @@ function mikra_series_start( $user_id ) {
 
 add_action( 'mikra_store_series', 'mikra_series_run', 10, 2 );
 function mikra_series_run( $user_id, $step ) {
+	// גם מי שכבר באמצע הסדרה מכאן - נעצר, Klaviyo ממשיך
+	if ( MIKRA_KLAVIYO ) {
+		return;
+	}
 	$user = get_userdata( $user_id );
 	if ( ! mikra_series_allowed( $user ) || get_user_meta( $user_id, 'mikra_series_' . $step, true ) ) {
 		return;

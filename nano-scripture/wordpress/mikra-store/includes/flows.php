@@ -805,6 +805,11 @@ function mikra_post_run( $order_id, $step ) {
 		$stop( mikra_no_consent_reason( $email ) );
 		return;
 	}
+	// בקשת הביקורת (מייל 3) יוצאת מ-Klaviyo, עם 15% על כל ביקורת
+	if ( 3 === (int) $step && MIKRA_KLAVIYO ) {
+		$stop( 'בקשת הביקורת נשלחת מ-Klaviyo' );
+		return;
+	}
 	if ( mikra_flow_defer( 'post', $order_id, $step, $email ) ) {
 		return;
 	}
