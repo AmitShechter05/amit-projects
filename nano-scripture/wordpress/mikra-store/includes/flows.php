@@ -467,16 +467,19 @@ function mikra_abandon_run( $order_id, $step ) {
 		mikra_flow_schedule( 'abandon', $order_id, 9, (int) $order->get_meta( '_mikra_ab_until' ) );
 		return;
 	}
+	// מ-1.9.0: מי שאישר דיוור מקבל את מיילי הנטישה מ-Klaviyo. כאן רק שומרים את
+	// ההזמנה ומתזמנים את הביטול בסוף - בלי מייל
+	$klaviyo = MIKRA_KLAVIYO && $consent;
 	// התזכורת הראשונה לא מחכה למייל אחר באותו יום
-	if ( mikra_flow_defer( 'abandon', $order_id, $step, $email, 1 !== $step ) ) {
+	if ( ! $klaviyo && mikra_flow_defer( 'abandon', $order_id, $step, $email, 1 !== $step ) ) {
 		return;
 	}
 
-	if ( 2 === $step && 'new' === $kind ) {
+	if ( ! $klaviyo && 2 === $step && 'new' === $kind ) {
 		mikra_abandon_coupon( $order );
 	}
 	$unsub = $consent ? mikra_unsub_email_url( $email ) : '';
-	$mail  = mikra_abandon_email( $step, $order, $unsub, ! $consent );
+	$mail  = $klaviyo ? null : mikra_abandon_email( $step, $order, $unsub, ! $consent );
 	if ( $mail && mikra_send_html( $email, $mail[0], $mail[1], $unsub ) ) {
 		$order->update_meta_data( '_mikra_ab_sent_' . $step, time() );
 		$order->add_order_note( 'נשלח מייל נטישה: ' . $mail[0] );
@@ -805,9 +808,9 @@ function mikra_post_run( $order_id, $step ) {
 		$stop( mikra_no_consent_reason( $email ) );
 		return;
 	}
-	// בקשת הביקורת (מייל 3) יוצאת מ-Klaviyo, עם 15% על כל ביקורת
-	if ( 3 === (int) $step && MIKRA_KLAVIYO ) {
-		$stop( 'בקשת הביקורת נשלחת מ-Klaviyo' );
+	// מיילים 1-3 אחרי משלוח יוצאים מ-Klaviyo (1.8.0 הביקורת, 1.9.0 גם השניים הראשונים)
+	if ( in_array( (int) $step, array( 1, 2, 3 ), true ) && MIKRA_KLAVIYO ) {
+		$stop( 'המיילים אחרי משלוח נשלחים מ-Klaviyo' );
 		return;
 	}
 	if ( mikra_flow_defer( 'post', $order_id, $step, $email ) ) {
@@ -958,6 +961,10 @@ function mikra_winback_scan() {
 		$last = mikra_paid_orders( $email );
 		if ( ! $last || (int) $last[0]->get_id() !== (int) $o->get_id() || ! mikra_consent( $email ) ) {
 			continue; // קנה מאז, או בלי הסכמה
+		}
+		// הזמנה שדווחה ל-Klaviyo (1.9.0): זרימת החזרה שם מטפלת בה
+		if ( MIKRA_KLAVIYO && $o->get_meta( 'mikra_klaviyo_paid' ) ) {
+			continue;
 		}
 		$state[ $k ] = array( 't' => time(), 'name' => (string) $o->get_billing_first_name(), 'sent' => array(), 'e' => $email );
 		mikra_log( 'enter', 'winback', $email, $o->get_id(), MIKRA_WINBACK_DAYS . ' ימים בלי קנייה' );
