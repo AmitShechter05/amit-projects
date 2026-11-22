@@ -1,4 +1,4 @@
-import { NextResponse, type NextRequest } from 'next/server';
+import { NextResponse, after, type NextRequest } from 'next/server';
 import { SRC_COOKIE, parseAttribution } from '@/lib/attribution';
 import { validate, normalizePhone, type Customer } from '@/lib/checkout';
 import { createOrder, orderTotal, type OrderLine } from '@/lib/wcOrder';
@@ -12,6 +12,7 @@ import { checkCoupon } from '@/lib/coupons';
 import { isPromoCode } from '@/lib/promo';
 import { findJoinable } from '@/lib/joinServer';
 import { wcPost } from '@/lib/wc';
+import { klaviyoStartedCheckout } from '@/lib/klaviyo';
 
 export const dynamic = 'force-dynamic';
 
@@ -196,6 +197,23 @@ export async function POST(req: NextRequest) {
       wcPost(`/orders/${joined.id}/notes`, {
         note: `נוצרה הזמנה #${order.number} לצירוף לאותה חבילה (בדקו שהיא שולמה לפני האריזה).`,
       }).catch((e) => console.error('join note failed', e));
+    }
+
+    // Klaviyo: הזמנה שממתינה לתשלום = קופה שהתחילה. אחרי התשובה ללקוח
+    // (after), כדי שתקלה או איטיות אצלם לא יעכבו את המעבר לתשלום
+    if (onlinePayment) {
+      after(() =>
+        klaviyoStartedCheckout({
+          orderId: order.id,
+          orderNumber: order.number,
+          orderKey: order.order_key,
+          total: totals.total,
+          lines,
+          gift,
+          code,
+          customer,
+        }).catch((e) => console.error('klaviyo started checkout failed', e)),
+      );
     }
 
     // שני החישובים אמורים להסכים. אם לא - יש מחיר, משלוח או קופון שהאתר
