@@ -9,7 +9,7 @@
   "pre-game-sleep":          {"topics": ["שינה לפני משחק", "תחרות"], "alt": "שחקן כדורגל שוכב ער במיטה בלילה שלפני משחק, חולצת המשחק תלויה ברקע", "used_by": "sleep-before-competition"},
   "scrolling-in-bed":        {"topics": ["גלילה במיטה", "גלילה לפני השינה"], "alt": "זוג במיטה בלילה, הפנים מוארות מהטלפונים", "used_by": "scrolling-in-bed"},
   "digital-eye-strain":      {"topics": ["עייפות עיניים"], "alt": "תקריב של עין עייפה שמשתקף בה מסך מחשב", "used_by": "digital-eye-strain"},
-  "deep-sleep-vs-rem":       {"topics": ["שינה עמוקה", "REM"], "alt": "גבר ישן עמוק בחדר חשוך וקריר, צמיד כושר על היד", "used_by": null},
+  "deep-sleep-vs-rem":       {"topics": ["שינה עמוקה", "REM"], "alt": "גבר ישן עמוק בחדר חשוך וקריר, צמיד כושר על היד", "used_by": "deep-sleep-vs-rem"},
   "tv-before-bed":           {"topics": ["טלוויזיה לפני השינה"], "alt": "זוג על הספה בלילה, אור כחול מהטלוויזיה שוטף את הסלון", "used_by": null},
   "caffeine-and-sleep":      {"topics": ["קפאין"], "alt": "אספרסו על שולחן בית קפה באור שקיעה, שעון יד מראה 17:10", "used_by": null},
   "jet-lag-athletes":        {"topics": ["ג'ט לג", "חופשה", "אזור זמן"], "alt": "ספורטאי בטרנינג בשער בשדה תעופה בלילה, אורות המסלול ברקע", "used_by": null}
