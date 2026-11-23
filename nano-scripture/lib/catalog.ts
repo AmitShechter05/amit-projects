@@ -210,7 +210,8 @@ const ALL_PRODUCTS: Product[] = [
   {
     sku: 'OYANN012S',
     slug: 'al-kapayim',
-    scenes: ['/scene/al-kapayim-linen.jpg'],
+    // השני: צילום אמיתי מסבב המפעל (20.9.2026), באישור עמית 23.11
+    scenes: ['/scene/al-kapayim-linen.jpg', '/scene/al-kapayim-flat.jpg'],
     name: 'עַל כַּפַּיִם',
     nameLatin: 'AL KAPAYIM',
     source: { phrase: 'הֵן עַל־כַּפַּיִם חַקֹּתִיךְ', ref: 'ישעיהו מ״ט, ט״ז' },
@@ -960,6 +961,7 @@ const SCENE_FOCUS: Record<string, string> = {
   '/scene/toldot-3.jpg': '50% 67%',
   '/scene/lo-yanum-3.jpg': '49% 65%',
   '/scene/shiviti-gold-plant.jpg': '49% 53%',
+  '/scene/al-kapayim-flat.jpg': '60% 57%',
 };
 
 /**
