@@ -501,6 +501,8 @@ const ALL_PRODUCTS: Product[] = [
   {
     sku: 'CHIPN01S',
     slug: 'shiviti',
+    // צילום אמיתי מ-2.10.26 (IMG_1940), צבע ותאורה ב-GPT Image 2.6 - 23.11.2026
+    scenes: ['/scene/shiviti-pair-marble.jpg'],
     name: 'שִׁוִּיתִי',
     nameLatin: 'SHIVITI',
     source: { phrase: 'שִׁוִּיתִי ה׳ לְנֶגְדִּי תָמִיד', ref: 'תהילים ט״ז, ח׳' },
@@ -523,6 +525,8 @@ const ALL_PRODUCTS: Product[] = [
   {
     sku: 'CHIPN01G',
     slug: 'shiviti-gold',
+    // צילומים אמיתיים מ-2.10.26 (IMG_1951, IMG_1940), צבע ותאורה ב-GPT Image 2.6 - 23.11.2026
+    scenes: ['/scene/shiviti-gold-plant.jpg', '/scene/shiviti-pair-marble.jpg'],
     name: 'שִׁוִּיתִי',
     nameLatin: 'SHIVITI',
     source: { phrase: 'שִׁוִּיתִי ה׳ לְנֶגְדִּי תָמִיד', ref: 'תהילים ט״ז, ח׳' },
@@ -955,6 +959,7 @@ export function photoFor(
 const SCENE_FOCUS: Record<string, string> = {
   '/scene/toldot-3.jpg': '50% 67%',
   '/scene/lo-yanum-3.jpg': '49% 65%',
+  '/scene/shiviti-gold-plant.jpg': '49% 53%',
 };
 
 /**
@@ -970,6 +975,9 @@ const SCENE_FOCUS_BY_PRODUCT: Record<string, string> = {
   'beseter|/scene/beseter-pair.jpg': '55% 77%',
   'beseter-gold|/scene/beseter-pair-marble.jpg': '40% 70%',
   'beseter|/scene/beseter-pair-marble.jpg': '55% 77%',
+  // שִׁוִּיתִי על שיש: הזהב ב-43%/63%, הכסף ב-60%/60%
+  'shiviti-gold|/scene/shiviti-pair-marble.jpg': '43% 63%',
+  'shiviti|/scene/shiviti-pair-marble.jpg': '60% 60%',
 };
 
 export function sceneFocus(src: string, slug?: string) {
