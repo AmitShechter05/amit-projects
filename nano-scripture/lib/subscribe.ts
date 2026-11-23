@@ -15,18 +15,20 @@ export type LeadErrors = Partial<Record<keyof Lead, string>>;
 
 /**
  * emailOnly - המסלול של טופס הפוטר: כתובת והסכמה, בלי שם ובלי טלפון.
- * הפופאפ נותן קוד הנחה בתמורה לפרטים מלאים; הפוטר מבטיח רק דואר.
+ *
+ * הפופאפ (מ-23.11.2026): אימייל חובה, שם פרטי רשות, בלי טלפון. שלושה
+ * שדות חובה הבריחו - מתוך כ-300 מבקרים אמיתיים בשבוע נרשם אחד, ובטלפון
+ * אף אחד לא משתמש. שם וטלפון נבדקים רק אם מולאו.
  */
 export function validateLead(l: Lead, { emailOnly = false } = {}): LeadErrors {
   const e: LeadErrors = {};
   const t = (s: string) => (s || '').trim();
 
   if (!emailOnly) {
-    // שם מלא בשדה אחד: מי שממלא פופאפ לא רוצה שני שדות לשם
-    if (t(l.name).length < 2) e.name = 'שם מלא';
+    if (t(l.name) && t(l.name).length < 2) e.name = 'שם פרטי';
 
     const phone = normalizePhone(l.phone);
-    if (!/^0(5\d|[2-4,8-9])\d{7}$/.test(phone)) e.phone = 'מספר טלפון ישראלי';
+    if (t(l.phone) && !/^0(5\d|[2-4,8-9])\d{7}$/.test(phone)) e.phone = 'מספר טלפון ישראלי';
   }
 
   if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(t(l.email))) e.email = 'כתובת אימייל תקינה';

@@ -255,12 +255,12 @@ export async function klaviyoSignup(input: { email: string; name?: string; phone
  * יום הולדת מהפופאפ: יום וחודש בלבד, בלי שנה. נשמר כתאריך בשנת 2000 -
  * זרימה לפי תאריך ב-Klaviyo רצה כל שנה לפי היום והחודש
  */
-export async function klaviyoBirthday(input: { email: string; day: number; month: number }) {
+export async function klaviyoBirthday(input: { email: string; day: number; month: number; name?: string }) {
   const mm = String(input.month).padStart(2, '0');
   const dd = String(input.day).padStart(2, '0');
   return send(
     'Mikra Birthday Set',
-    { email: input.email, extra: { Birthday: `2000-${mm}-${dd}` } },
+    { email: input.email, firstName: input.name || undefined, extra: { Birthday: `2000-${mm}-${dd}` } },
     { Birthday: `${dd}.${mm}` },
     0,
     `birthday-${input.email}-${mm}${dd}`,
@@ -370,5 +370,20 @@ export async function klaviyoReview(input: { email: string; name: string; orderI
     },
     0,
     `review-${input.orderId}`,
+  );
+}
+
+/**
+ * שם פרטי שנמסר במסך השני של הפופאפ בלי יום הולדת (23.11.2026). במסך
+ * הראשון נשאל רק האימייל - שדה אחד במסך - והשם מגיע אחרי שהקוד כבר הופיע.
+ */
+export async function klaviyoName(input: { email: string; name: string }) {
+  const day = new Date().toISOString().slice(0, 10);
+  return send(
+    'Mikra Profile Updated',
+    { email: input.email, firstName: input.name },
+    { Field: 'first_name', $event_id: `name-${input.email}-${day}` },
+    0,
+    `name-${input.email}-${day}`,
   );
 }

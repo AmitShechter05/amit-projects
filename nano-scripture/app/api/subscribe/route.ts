@@ -69,16 +69,21 @@ export async function POST(req: NextRequest) {
     // יצרה לקוח שהמקור שלו נעלם
     { key: 'מקור', value: emailOnly ? 'מכתב הבית - פוטר' : 'פופאפ מועדון' },
     { key: 'הסכמה לדיוור', value: `כן · ${stamp}` },
-    ...(emailOnly ? [] : [{ key: 'טלפון', value: lead.phone }]),
+    ...(emailOnly || !lead.phone ? [] : [{ key: 'טלפון', value: lead.phone }]),
   ];
   // בפוטר אין שם ואין טלפון. השדות האלה לא נשלחים בכלל, כדי שלקוח
   // קיים שנרשם גם מהפוטר לא יאבד את השם שמילא בפופאפ
+  // מ-23.11 גם בפופאפ השם רשות והטלפון לא נשאל. שדה ריק לא נשלח - כדי
+  // לא למחוק שם או טלפון שלקוח קיים כבר מסר
   const person = emailOnly
     ? {}
     : {
-        first_name: first,
-        last_name: last,
-        billing: { first_name: first, last_name: last, phone: lead.phone, email: lead.email },
+        ...(first ? { first_name: first, last_name: last } : {}),
+        billing: {
+          email: lead.email,
+          ...(first ? { first_name: first, last_name: last } : {}),
+          ...(lead.phone ? { phone: lead.phone } : {}),
+        },
       };
   const reply = emailOnly ? { ok: true } : { code: PROMO.code, percent: PROMO.percent };
 
@@ -87,8 +92,8 @@ export async function POST(req: NextRequest) {
   after(() =>
     klaviyoSignup({
       email: lead.email,
-      name: emailOnly ? undefined : lead.name,
-      phone: emailOnly ? undefined : lead.phone,
+      name: emailOnly || !lead.name ? undefined : lead.name,
+      phone: emailOnly || !lead.phone ? undefined : lead.phone,
       source: emailOnly ? 'footer' : 'popup',
       code: emailOnly ? undefined : PROMO.code,
       percent: emailOnly ? undefined : PROMO.percent,
